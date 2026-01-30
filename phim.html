@@ -1,118 +1,232 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Danh sách phim | HH3D</title>
+
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#e5e7eb}
-    header{background:#020617;padding:16px;text-align:center;font-size:22px;font-weight:800}
-    .container{max-width:1100px;margin:0 auto;padding:18px}
-    a{color:inherit;text-decoration:none}
-    .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
-    .card{background:#020617;border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
-    .poster{width:100%;aspect-ratio:2/3;border-radius:10px;background-size: cover;
-background-position: center;
-display:flex;align-items:center;justify-content:center;font-weight:800;color:#94a3b8}
-    .card h3{font-size:14px;margin:10px 0 0;line-height:1.2}
-    .pager{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
-    .pager button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background-image: url("images/anh-tien-nghich.jpg");
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
-;color:#cbd5e1;padding:8px 10px;border-radius:10px}
-    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent;font-weight:800}
-    .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .hint{color:#94a3b8;font-size:13px}
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#0f172a;
+      color:#e5e7eb;
+    }
+    header{
+      background:#020617;
+      padding:16px;
+      text-align:center;
+      font-size:20px;
+      font-weight:800;
+      letter-spacing:.3px;
+    }
+    .container{
+      max-width:1100px;
+      margin:0 auto;
+      padding:18px;
+    }
+    a{ color:inherit; text-decoration:none; }
+
+    .toprow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:10px 0 14px;
+    }
+    .back{
+      display:inline-block;
+      margin:6px 0 14px;
+      color:#22c55e;
+      font-weight:700;
+    }
+    .hint{
+      color:#94a3b8;
+      font-size:13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
+      gap:14px;
+    }
+
+    .card{
+      background:#020617;
+      border-radius:14px;
+      padding:12px;
+      text-align:center;
+      border:1px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .poster{
+      width:100%;
+      aspect-ratio:2/3;
+      border-radius:12px;
+      overflow:hidden;
+      background:#0b1020;
+      display:block;
+      margin-bottom:10px;
+    }
+    .poster img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .title{
+      font-weight:800;
+      margin:6px 0 2px;
+      font-size:14px;
+      line-height:1.2;
+    }
+
+    /* PHÂN TRANG */
+    .pager{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:18px 0;
+      justify-content:flex-start;
+    }
+
+    /* QUAN TRỌNG: CHẶN ẢNH NỀN DÍNH VÀO NÚT */
+    .pager button{
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.12);
+      background:#0b1020;
+      background-image:none !important; /* fix lỗi hình dính vào nút */
+      color:#cbd5e1;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:800;
+      min-width:38px;
+    }
+    .pager button.active{
+      background:#22c55e;
+      color:#062a16;
+      border-color:transparent;
+    }
   </style>
 </head>
+
 <body>
+  <header>📁 Danh sách phim HH3D</header>
 
-<header>📂 Danh sách phim HH3D</header>
+  <div class="container">
+    <div class="toprow">
+      <a class="back" href="index.html">← Quay về trang chủ</a>
+      <div class="hint">20 trang • 10 phim / trang</div>
+    </div>
 
-<div class="container">
-  <div class="toprow">
-    <a class="back" href="index.html">← Quay về trang chủ</a>
-    <div class="hint">20 trang • 10 phim / trang</div>
+    <div id="grid" class="grid"></div>
+    <div id="pager" class="pager"></div>
   </div>
 
-  <div id="grid" class="grid"></div>
+  <script>
+    // ====== CẤU HÌNH ======
+    const TOTAL_PAGES = 20;
+    const PER_PAGE = 10;
 
-  <div class="pager" id="pager"></div>
-</div>
+    // ====== DATA PHIM (demo) ======
+    // Em thay dần tên + ảnh ở đây. Ảnh để trong /images/
+    // Ví dụ em có file: images/anh-tien-nghich.jpg
+    const films = [
+      { id: 1, title: "Tiên Nghịch", image: "images/anh-tien-nghich.jpg" },
+      { id: 2, title: "Đấu Phá Thương Khung", image: "images/dptk.jpg" },
+      { id: 3, title: "Thế Giới Hoàn Mỹ", image: "images/tghm.jpg" },
+      { id: 4, title: "HH3D 4", image: "images/placeholder.jpg" },
+      { id: 5, title: "HH3D 5", image: "images/placeholder.jpg" },
+      { id: 6, title: "HH3D 6", image: "images/placeholder.jpg" },
+      { id: 7, title: "HH3D 7", image: "images/placeholder.jpg" },
+      { id: 8, title: "HH3D 8", image: "images/placeholder.jpg" },
+      { id: 9, title: "HH3D 9", image: "images/placeholder.jpg" },
+      { id: 10, title: "HH3D 10", image: "images/placeholder.jpg" },
 
-<script>
-  // ====== CÀI SẴN 20 TRANG, MỖI TRANG 10 PHIM ======
-  const TOTAL_PAGES = 20;
-  const PER_PAGE = 10;
+      // Nếu em muốn đủ 200 phim thì cứ thêm tiếp (id tăng dần)
+      // { id: 11, title: "...", image: "images/....jpg" },
+    ];
 
-  // Tạo 200 phim demo (sau này Toàn đổi tên/phoster thật)
-  const films = [
-  {
-    id: 1,
-    title: "Tiên Nghịch",
-    image: "https://i.postimg.cc/ph96c30p/487538283-1091941059615599-4998609845969231110-n.jpg"
-  },
-  {
-    id: 2,
-    title: "Đấu Phá Thương Khung",
-    image: "https://i.postimg.cc/XXXX/dptk.jpg"
-  },
-  {
-    id: 3,
-    title: "Thế Giới Hoàn Mỹ",
-    image: "https://i.postimg.cc/XXXX/tghm.jpg"
-  }
-];
+    // Nếu em CHƯA có đủ 200 phim, anh tự tạo thêm phim demo cho đủ trang
+    // để phân trang không bị trống.
+    (function fillDemoIfNeeded(){
+      const need = TOTAL_PAGES * PER_PAGE;
+      if (films.length >= need) return;
+      const start = films.length + 1;
+      for(let i = start; i <= need; i++){
+        films.push({
+          id: i,
+          title: "HH3D " + i,
+          image: "images/placeholder.jpg"
+        });
+      }
+    })();
 
-
-  function getPageFromURL(){
-    const p = parseInt(new URLSearchParams(location.search).get("page") || "1", 10);
-    if (Number.isNaN(p) || p < 1) return 1;
-    if (p > TOTAL_PAGES) return TOTAL_PAGES;
-    return p;
-  }
-
-  function render(page){
-    // render grid
-    const start = (page - 1) * PER_PAGE;
-    const items = films.slice(start, start + PER_PAGE);
-
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
-
-    items.forEach((f) => {
-      const card = document.createElement("a");
-      card.className = "card";
-      card.href = "#"; // bước sau mình sẽ đổi sang trang phim riêng
-
-      card.innerHTML = `
-  <div class="poster" style="background-image:url('images/anh-tien-nghich.jpg')"></div>
-  <div class="title">Tiên Nghịch</div>
-`;
-
-      grid.appendChild(card);
-    });
-
-    // render pager 1..20
-    const pager = document.getElementById("pager");
-    pager.innerHTML = "";
-
-    for(let p=1;p<=TOTAL_PAGES;p++){
-      const btn = document.createElement("button");
-      btn.textContent = p;
-      if (p === page) btn.classList.add("active");
-      btn.onclick = () => {
-        // đổi URL để share link trang dễ
-        location.href = "phim.html?page=" + p;
-      };
-      pager.appendChild(btn);
+    // ====== HÀM LẤY PAGE TỪ URL ======
+    function getPageFromURL(){
+      const params = new URLSearchParams(location.search);
+      const p = parseInt(params.get("page") || "1", 10);
+      if (Number.isNaN(p) || p < 1) return 1;
+      if (p > TOTAL_PAGES) return TOTAL_PAGES;
+      return p;
     }
-  }
 
-  render(getPageFromURL());
-</script>
+    // ====== RENDER ======
+    function render(page){
+      const grid = document.getElementById("grid");
+      const pager = document.getElementById("pager");
+      grid.innerHTML = "";
+      pager.innerHTML = "";
 
+      const start = (page - 1) * PER_PAGE;
+      const items = films.slice(start, start + PER_PAGE);
+
+      items.forEach(film => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        // poster
+        const poster = document.createElement("a");
+        poster.className = "poster";
+        poster.href = "#"; // sau này em muốn bấm vào phim thì đổi link ở đây
+
+        const img = document.createElement("img");
+        img.src = film.image;
+        img.alt = film.title;
+
+        // nếu ảnh lỗi -> dùng placeholder
+        img.onerror = () => { img.src = "images/placeholder.jpg"; };
+
+        poster.appendChild(img);
+
+        // title
+        const title = document.createElement("div");
+        title.className = "title";
+        title.textContent = film.title;
+
+        card.appendChild(poster);
+        card.appendChild(title);
+        grid.appendChild(card);
+      });
+
+      // phân trang
+      for(let p = 1; p <= TOTAL_PAGES; p++){
+        const btn = document.createElement("button");
+        btn.textContent = p;
+        if (p === page) btn.classList.add("active");
+
+        btn.onclick = () => {
+          location.href = "phim.html?page=" + p;
+        };
+
+        pager.appendChild(btn);
+      }
+    }
+
+    render(getPageFromURL());
+  </script>
 </body>
 </html>
