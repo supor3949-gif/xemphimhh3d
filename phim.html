@@ -12,11 +12,11 @@
     .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
     .card{background:#020617;border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
-    {width:100%;aspect-ratio:2/3;border-radius:10px;background:#0b1020;display:flex;align-items:center;justify-content:center;font-weight:800;color:#94a3b8}
+    .poster{width:100%;aspect-ratio:2/3;border-radius:10px;background:#0b1020;display:flex;align-items:center;justify-content:center;font-weight:800;color:#94a3b8}
     .card h3{font-size:14px;margin:10px 0 0;line-height:1.2}
     .pager{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
     .pager button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#cbd5e1;padding:8px 10px;border-radius:10px}
-    .pager button.active{background:#.poster22c55e;color:#062a16;border-color:transparent;font-weight:800}
+    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent;font-weight:800}
     .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .hint{color:#94a3b8;font-size:13px}
   </style>
@@ -42,24 +42,14 @@
   const PER_PAGE = 10;
 
   // Tạo 200 phim demo (sau này Toàn đổi tên/phoster thật)
-  const films = [
-  {
-    id: 1,
-    title: "Tiên Nghịch",
-    image: "https://i.postimg.cc/ph96C30p/487538283-1091941059615599-4998609845969231110-n.jpg"
-  },
-  {
-    id: 2,
-    title: "Đấu Phá Thương Khung",
-    image: "https://i.imgur.com/9ZQZ4ZC.jpg"
-  },
-  {
-    id: 3,
-    title: "Thế Giới Hoàn Mỹ",
-    image: "https://i.imgur.com/rZQZ4ZC.jpg"
-  }
-];
-
+  const films = Array.from({length: TOTAL_PAGES * PER_PAGE}, (_, i) => {
+    const n = i + 1;
+    return {
+      title: "Phim HH3D số " + n,
+      // Poster demo (đỡ phải up ảnh)
+      posterText: "HH3D " + n
+    };
+  });
 
   function getPageFromURL(){
     const p = parseInt(new URLSearchParams(location.search).get("page") || "1", 10);
@@ -82,11 +72,8 @@
       card.href = "#"; // bước sau mình sẽ đổi sang trang phim riêng
 
       card.innerHTML = `
-        card.innerHTML = `
-  <img class="poster" src="${f.image}" alt="${f.title}">
-  <h3>${f.title}</h3>
-`;
-
+        <div class="poster">${f.posterText}</div>
+        <h3>${f.title}</h3>
       `;
       grid.appendChild(card);
     });
