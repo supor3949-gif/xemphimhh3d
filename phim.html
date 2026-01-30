@@ -12,11 +12,11 @@
     .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
     .card{background:#020617;border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
-    .poster{width:100%;aspect-ratio:2/3;border-radius:10px;background:#0b1020;display:flex;align-items:center;justify-content:center;font-weight:800;color:#94a3b8}
+    {width:100%;aspect-ratio:2/3;border-radius:10px;background:#0b1020;display:flex;align-items:center;justify-content:center;font-weight:800;color:#94a3b8}
     .card h3{font-size:14px;margin:10px 0 0;line-height:1.2}
     .pager{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
     .pager button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#cbd5e1;padding:8px 10px;border-radius:10px}
-    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent;font-weight:800}
+    .pager button.active{background:#.poster22c55e;color:#062a16;border-color:transparent;font-weight:800}
     .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .hint{color:#94a3b8;font-size:13px}
   </style>
@@ -82,8 +82,11 @@
       card.href = "#"; // bước sau mình sẽ đổi sang trang phim riêng
 
       card.innerHTML = `
-        <div class="poster">${f.posterText}</div>
-        <h3>${f.title}</h3>
+        card.innerHTML = `
+  <img class="poster" src="${f.image}" alt="${f.title}">
+  <h3>${f.title}</h3>
+`;
+
       `;
       grid.appendChild(card);
     });
