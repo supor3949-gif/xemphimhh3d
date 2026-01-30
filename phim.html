@@ -65,11 +65,37 @@
     // ✅ Danh sách phim thật (hiện tại bạn mới có 3 phim)
     // poster: để ảnh trong thư mục /images rồi trỏ như "images/ten-anh.jpg"
     // episodesCount: số tập (vd Tiên Nghịch 126)
-    const films = [
-      { id: 1, slug: "tien-nghich", title: "Tiên Nghịch", poster: "images/anh-tien-nghich.jpg", episodesCount: 126 },
-      { id: 2, slug: "dau-pha-thuong-khung", title: "Đấu Phá Thương Khung", poster: "", episodesCount: 0 },
-      { id: 3, slug: "the-gioi-hoan-my", title: "Thế Giới Hoàn Mỹ", poster: "", episodesCount: 0 },
-    ];
+    // ===== TẠO SẴN 200 PHIM (10 PHIM / TRANG × 20 TRANG) =====
+const films = Array.from({ length: 200 }, (_, i) => ({
+  id: i + 1,
+  title: "",
+  poster: "",
+  slug: `film-${i + 1}`,
+  episodesCount: 0
+}));
+
+// ===== PHIM 1 – TIÊN NGHỊCH (GIỮ NGUYÊN) =====
+films[0].title = "Tiên Nghịch";
+films[0].poster = "images/anh-tien-nghich.jpg";
+films[0].slug = "tien-nghich";
+films[0].episodesCount = 126;
+
+// ===== PHIM 2 =====
+films[1].title = "Đấu Phá Thương Khung";
+films[1].slug = "dau-pha-thuong-khung";
+
+// ===== PHIM 3 =====
+films[2].title = "Thế Giới Hoàn Mỹ";
+films[2].slug = "the-gioi-hoan-my";
+
+// ===== PHIM 4 – MỤC THẦN KÍ =====
+films[3].title = "Mục Thần Kí";
+films[3].poster = "images/muc-than-ki.jpg";
+films[3].slug = "muc-than-ki";
+
+// 👉 TỪ films[4] → films[199]
+// EM TỰ ĐIỀN TÊN + ẢNH + SLUG
+
 
     // ✅ Nếu muốn vẫn đủ 200 phim demo để phân trang đẹp: tạo phim giả (không mở xem)
     // (Phần này giúp bạn vẫn có 20 trang * 10 phim)
