@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Xem phim | HH3D</title>
+
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#e5e7eb}
+    header{background:#020617;padding:16px;text-align:center;font-size:22px;font-weight:800}
+    .container{max-width:1100px;margin:0 auto;padding:18px}
+    a{color:inherit;text-decoration:none}
+    .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
+
+    .playerWrap{
+      background:#020617;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,.35);
+    }
+    .playerTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+    .badge{color:#94a3b8;font-size:13px}
+    video{
+      width:100%;max-height:520px;background:#000;border-radius:12px;
+      outline:none;
+    }
+
+    .episodes{
+      margin-top:14px;background:#020617;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;padding:12px;
+    }
+    .epHead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .epGrid{
+      margin-top:10px;
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+      gap:8px;
+    }
+    .epBtn{
+      cursor:pointer;border:1px solid rgba(255,255,255,.12);
+      background:#0b1020;color:#cbd5e1;
+      padding:10px 8px;border-radius:12px;font-weight:800;
+      transition:.15s; text-align:center;
+    }
+    .epBtn:hover{transform:translateY(-1px)}
+    .epBtn.active{background:#22c55e;color:#062a16;border-color:transparent}
+    .note{color:#94a3b8;font-size:13px;margin-top:8px;line-height:1.4}
+    .err{color:#fca5a5;font-size:13px;margin-top:8px;display:none}
+  </style>
+</head>
+<body>
+  <header>🎬 Xem phim HH3D</header>
+
+  <div class="container">
+    <a class="back" href="phim.html">← Quay về danh sách phim</a>
+
+    <div class="playerWrap">
+      <div class="playerTitle">
+        <div>
+          <div id="filmName" style="font-size:20px;font-weight:900">Tiên Nghịch</div>
+          <div class="badge" id="nowPlaying">Chọn tập để xem</div>
+        </div>
+        <div class="badge">HLS (m3u8)</div>
+      </div>
+
+      <video id="video" controls playsinline></video>
+      <div id="err" class="err"></div>
+    </div>
+
+    <div class="episodes">
+      <div class="epHead">
+        <div style="font-size:16px;font-weight:900">Danh sách tập</div>
+        <div class="badge" id="countInfo">126 tập</div>
+      </div>
+
+      <div id="epGrid" class="epGrid"></div>
+
+      <div class="note">
+        ✅ Em chỉ cần dán link m3u8 của em vào mảng <b>EP_URLS</b> bên dưới (126 dòng).<br/>
+        Nếu tập nào chưa có link thì để trống "" (bấm sẽ báo lỗi).
+      </div>
+    </div>
+  </div>
+
+  <!-- hls.js để chạy m3u8 trên Chrome/Edge/Firefox -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <script>
+    // ====== (1) LẤY TÊN PHIM TỪ URL (tùy chọn) ======
+    // Ví dụ: xem.html?name=Tiên%20Nghịch
+    const params = new URLSearchParams(location.search);
+    const filmName = params.get("name") || "Tiên Nghịch";
+    document.getElementById("filmName").textContent = filmName;
+
+    // ====== (2) CHỖ EM DÁN 126 LINK M3U8 CỦA EM VÀO ĐÂY ======
+    // Lưu ý: đủ 126 phần tử. Tập 1 nằm ở index 0.
+    const EP_URLS = [
+      "", // Tập 01
+      "", // Tập 02
+      "", // Tập 03
+      "", // Tập 04
+      "", // Tập 05
+      "", // Tập 06
+      "", // Tập 07
+      "", // Tập 08
+      "", // Tập 09
+      "", // Tập 10
+      "", // Tập 11
+      "", // Tập 12
+      "", // Tập 13
+      "", // Tập 14
+      "", // Tập 15
+      "", // Tập 16
+      "", // Tập 17
+      "", // Tập 18
+      "", // Tập 19
+      "", // Tập 20
+      "", // Tập 21
+      "", // Tập 22
+      "", // Tập 23
+      "", // Tập 24
+      "", // Tập 25
+      "", // Tập 26
+      "", // Tập 27
+      "", // Tập 28
+      "", // Tập 29
+      "", // Tập 30
+      "", // Tập 31
+      "", // Tập 32
+      "", // Tập 33
+      "", // Tập 34
+      "", // Tập 35
+      "", // Tập 36
+      "", // Tập 37
+      "", // Tập 38
+      "", // Tập 39
+      "", // Tập 40
+      "", // Tập 41
+      "", // Tập 42
+      "", // Tập 43
+      "", // Tập 44
+      "", // Tập 45
+      "", // Tập 46
+      "", // Tập 47
+      "", // Tập 48
+      "", // Tập 49
+      "", // Tập 50
+      "", // Tập 51
+      "", // Tập 52
+      "", // Tập 53
+      "", // Tập 54
+      "", // Tập 55
+      "", // Tập 56
+      "", // Tập 57
+      "", // Tập 58
+      "", // Tập 59
+      "", // Tập 60
+      "", // Tập 61
+      "", // Tập 62
+      "", // Tập 63
+      "", // Tập 64
+      "", // Tập 65
+      "", // Tập 66
+      "", // Tập 67
+      "", // Tập 68
+      "", // Tập 69
+      "", // Tập 70
+      "", // Tập 71
+      "", // Tập 72
+      "", // Tập 73
+      "", // Tập 74
+      "", // Tập 75
+      "", // Tập 76
+      "", // Tập 77
+      "", // Tập 78
+      "", // Tập 79
+      "", // Tập 80
+      "", // Tập 81
+      "", // Tập 82
+      "", // Tập 83
+      "", // Tập 84
+      "", // Tập 85
+      "", // Tập 86
+      "", // Tập 87
+      "", // Tập 88
+      "", // Tập 89
+      "", // Tập 90
+      "", // Tập 91
+      "", // Tập 92
+      "", // Tập 93
+      "", // Tập 94
+      "", // Tập 95
+      "", // Tập 96
+      "", // Tập 97
+      "", // Tập 98
+      "", // Tập 99
+      "", // Tập 100
+      "", // Tập 101
+      "", // Tập 102
+      "", // Tập 103
+      "", // Tập 104
+      "", // Tập 105
+      "", // Tập 106
+      "", // Tập 107
+      "", // Tập 108
+      "", // Tập 109
+      "", // Tập 110
+      "", // Tập 111
+      "", // Tập 112
+      "", // Tập 113
+      "", // Tập 114
+      "", // Tập 115
+      "", // Tập 116
+      "", // Tập 117
+      "", // Tập 118
+      "", // Tập 119
+      "", // Tập 120
+      "", // Tập 121
+      "", // Tập 122
+      "", // Tập 123
+      "", // Tập 124
+      "", // Tập 125
+      ""  // Tập 126
+    ];
+
+    // ====== (3) RENDER NÚT TẬP ======
+    const epGrid = document.getElementById("epGrid");
+    const countInfo = document.getElementById("countInfo");
+    countInfo.textContent = EP_URLS.length + " tập";
+
+    for (let i = 1; i <= EP_URLS.length; i++) {
+      const btn = document.createElement("button");
+      btn.className = "epBtn";
+      btn.textContent = "Tập " + String(i).padStart(2, "0");
+      btn.onclick = () => playEpisode(i);
+      epGrid.appendChild(btn);
+    }
+
+    // ====== (4) PLAYER HLS ======
+    const video = document.getElementById("video");
+    const nowPlaying = document.getElementById("nowPlaying");
+    const errBox = document.getElementById("err");
+    let hls;
+
+    function setActiveEp(ep) {
+      [...document.querySelectorAll(".epBtn")].forEach((b, idx) => {
+        b.classList.toggle("active", idx === ep - 1);
+      });
+    }
+
+    function showError(msg) {
+      errBox.style.display = "block";
+      errBox.textContent = msg;
+    }
+
+    function clearError() {
+      errBox.style.display = "none";
+      errBox.textContent = "";
+    }
+
+    function loadHls(url) {
+      clearError();
+
+      // Safari iOS/macOS có HLS native
+      if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+        video.play().catch(()=>{});
+        return;
+      }
+
+      // Chrome/Edge/Firefox dùng hls.js
+      if (window.Hls && Hls.isSupported()) {
+        if (hls) hls.destroy();
+        hls = new Hls({
+          // Có thể chỉnh sau nếu cần
+          enableWorker: true
+        });
+        hls.loadSource(url);
+        hls.attachMedia(video);
+
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          // hay gặp nhất là CORS / token / forbidden
+          showError("Không phát được link này (có thể do CORS/forbidden). Hãy thử link khác hoặc cấu hình nguồn m3u8.");
+        });
+
+        video.play().catch(()=>{});
+      } else {
+        showError("Trình duyệt không hỗ trợ HLS.");
+      }
+    }
+
+    function playEpisode(ep) {
+      const url = EP_URLS[ep - 1];
+      setActiveEp(ep);
+
+      if (!url || !url.trim()) {
+        nowPlaying.textContent = `${filmName} • Tập ${String(ep).padStart(2,"0")} (chưa có link)`;
+        showError("Tập này chưa có link m3u8. Em dán link vào EP_URLS rồi thử lại.");
+        video.removeAttribute("src");
+        video.load();
+        return;
+      }
+
+      nowPlaying.textContent = `${filmName} • Tập ${String(ep).padStart(2,"0")}`;
+      loadHls(url.trim());
+    }
+
+    // Tự chọn tập từ URL: xem.html?ep=1
+    const epFromUrl = parseInt(params.get("ep") || "0", 10);
+    if (epFromUrl >= 1 && epFromUrl <= EP_URLS.length) playEpisode(epFromUrl);
+  </script>
+</body>
+</html>
