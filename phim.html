@@ -132,11 +132,21 @@ films[3].slug = "muc-than-ki";
 
         // ✅ Chỉ cho bấm mở xem khi phim có episodesCount > 0
         card.onclick = () => {
-          if (!film.episodesCount || film.episodesCount <= 0) {
-            alert("Phim này chưa có tập. Bạn cập nhật episodesCount trước nha!");
-            return;
-          }
-          location.href = `xem.html?film=${encodeURIComponent(film.slug)}`;
+  if (!film.episodesCount || film.episodesCount <= 0) {
+    alert("Phim này chưa có tập. Bạn cập nhật episodesCount trước nha!");
+    return;
+  }
+
+  // 👉 Mục Thần Kí dùng file riêng
+  if (film.slug === "muc-than-ki") {
+    location.href = "muc-than-ki.html";
+    return;
+  }
+
+  // 👉 Các phim khác dùng xem.html
+  location.href = `xem.html?film=${encodeURIComponent(film.slug)}`;
+};
+;
         };
 
         const posterHTML = film.poster
