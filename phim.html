@@ -42,14 +42,24 @@
   const PER_PAGE = 10;
 
   // Tạo 200 phim demo (sau này Toàn đổi tên/phoster thật)
-  const films = Array.from({length: TOTAL_PAGES * PER_PAGE}, (_, i) => {
-    const n = i + 1;
-    return {
-      title: "Phim HH3D số " + n,
-      // Poster demo (đỡ phải up ảnh)
-      posterText: "HH3D " + n
-    };
-  });
+  const films = [
+  {
+    id: 1,
+    title: "Tiên Nghịch",
+    image: "https://i.postimg.cc/ph96c30p/487538283-1091941059615599-4998609845969231110-n.jpg"
+  },
+  {
+    id: 2,
+    title: "Đấu Phá Thương Khung",
+    image: "https://i.postimg.cc/XXXX/dptk.jpg"
+  },
+  {
+    id: 3,
+    title: "Thế Giới Hoàn Mỹ",
+    image: "https://i.postimg.cc/XXXX/tghm.jpg"
+  }
+];
+
 
   function getPageFromURL(){
     const p = parseInt(new URLSearchParams(location.search).get("page") || "1", 10);
