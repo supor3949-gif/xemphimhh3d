@@ -292,7 +292,7 @@
 
       if (!url || !url.trim()) {
         nowPlaying.textContent = `${filmName} • Tập ${String(ep).padStart(2,"0")} (chưa có link)`;
-        showError("Tập này chưa có link m3u8. Em dán link vào EP_URLS rồi thử lại.");
+        showError("");
         video.removeAttribute("src");
         video.load();
         return;
