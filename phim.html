@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Danh sách phim | HH3D</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    header {
+      background: #020617;
+      padding: 16px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+    .card h3 {
+      font-size: 16px;
+      margin: 10px 0 0;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .back {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #22c55e;
+    }
+  </style>
+</head>
+<body>
+
+<header>📂 Danh sách phim HH3D</header>
+
+<div class="container">
+  <a class="back" href="index.html">← Quay về trang chủ</a>
+
+  <div class="grid">
+    <a class="card" href="#">
+      <img src="https://via.placeholder.com/300x450?text=Phim+1">
+      <h3>Tiên Nghịch</h3>
+    </a>
+
+    <a class="card" href="#">
+      <img src="https://via.placeholder.com/300x450?text=Phim+2">
+      <h3>Đấu Phá Thương Khung</h3>
+    </a>
+
+    <a class="card" href="#">
+      <img src="https://via.placeholder.com/300x450?text=Phim+3">
+      <h3>Thế Giới Hoàn Mỹ</h3>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>
