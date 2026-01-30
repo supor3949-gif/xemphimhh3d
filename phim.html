@@ -1,147 +1,144 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Danh sách phim HH3D</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Danh sách phim | HH3D</title>
+  <style>
+    body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#e5e7eb}
+    header{background:#020617;padding:16px;text-align:center;font-size:22px;font-weight:800}
+    .container{max-width:1100px;margin:0 auto;padding:18px}
+    a{color:inherit;text-decoration:none}
+    .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
+    .hint{color:#94a3b8;font-size:13px}
 
-<style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#0f172a;
-  color:#e5e7eb;
-}
-header{
-  background:#020617;
-  padding:16px;
-  text-align:center;
-  font-size:20px;
-  font-weight:700;
-}
-.container{max-width:1100px;margin:auto;padding:18px}
-.back{color:#22c55e;text-decoration:none}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:16px;
-}
-.card{
-  background:#020617;
-  border-radius:14px;
-  padding:12px;
-  cursor:pointer;
-  transition:.2s;
-}
-.card:hover{transform:scale(1.03)}
-.poster{
-  width:100%;
-  aspect-ratio:2/3;
-  border-radius:10px;
-  background-size:cover;
-  background-position:center;
-}
-.card h3{
-  margin:10px 0 0;
-  text-align:center;
-  font-size:14px;
-}
-.pager{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  margin-top:18px;
-}
-.pager button{
-  background:#020617;
-  color:#cbd5e1;
-  border:1px solid rgba(255,255,255,.15);
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
-}
-.pager button.active{
-  background:#22c55e;
-  color:#000;
-}
-</style>
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+    .card{
+      background:#020617;border-radius:12px;padding:12px;
+      border:1px solid rgba(255,255,255,.06);
+      cursor:pointer; transition:.15s transform;
+    }
+    .card:hover{transform:translateY(-2px)}
+    .poster{
+      width:100%; aspect-ratio:2/3; border-radius:10px;
+      background:#0b1020; overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .poster img{width:100%;height:100%;object-fit:cover;display:block}
+    .poster .ph{color:#94a3b8;font-weight:800;font-size:14px}
+    .card h3{font-size:14px;margin:10px 0 0;line-height:1.2;text-align:center}
+
+    .pager{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .pager button{
+      cursor:pointer;border:1px solid rgba(255,255,255,.12);
+      background:#0b1020;color:#cbd5e1;padding:8px 10px;border-radius:10px;
+      font-weight:800
+    }
+    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent}
+  </style>
 </head>
-
 <body>
+  <header>📁 Danh sách phim HH3D</header>
 
-<header>📁 Danh sách phim HH3D</header>
+  <div class="container">
+    <div class="toprow">
+      <a class="back" href="index.html">← Quay về trang chủ</a>
+      <div class="hint" id="hint"></div>
+    </div>
 
-<div class="container">
-  <a class="back" href="index.html">← Quay về trang chủ</a>
-  <br><br>
+    <div id="grid" class="grid"></div>
+    <div id="pager" class="pager"></div>
+  </div>
 
-  <div id="grid" class="grid"></div>
-  <div id="pager" class="pager"></div>
-</div>
+  <script>
+    const TOTAL_PAGES = 20;
+    const PER_PAGE = 10;
 
-<script>
-// =================== DỮ LIỆU PHIM ===================
-const films = [
-  {
-    title: "Tiên Nghịch",
-    image: "images/anh-tien-nghich.jpg",
-    episodes: 126
-  },
-  {
-    title: "Đấu Phá Thương Khung",
-    image: "",
-    episodes: 0
-  },
-  {
-    title: "Thế Giới Hoàn Mỹ",
-    image: "",
-    episodes: 0
-  }
-];
+    // ✅ Danh sách phim: bạn chỉnh title/poster/episodesCount ở đây.
+    // poster dùng ảnh local: "images/ten-anh.jpg"
+    // episodesCount là số tập (vd Tiên Nghịch 126)
+    const films = Array.from({ length: TOTAL_PAGES * PER_PAGE }, (_, i) => {
+      const id = i + 1;
+      return {
+        id,
+        title: `HH3D ${id}`,
+        poster: "",          // để trống = hiện nền placeholder
+        episodesCount: 0     // 0 = chưa set
+      };
+    });
 
-// =================== PHÂN TRANG ===================
-const PER_PAGE = 10;
-let currentPage = 1;
+    // ✅ Gán 3 phim thật của bạn (đổi theo ý)
+    films[0] = { id: 1, title: "Tiên Nghịch", poster: "images/anh-tien-nghich.jpg", episodesCount: 126 };
+    films[1] = { id: 2, title: "Đấu Phá Thương Khung", poster: "", episodesCount: 0 };
+    films[2] = { id: 3, title: "Thế Giới Hoàn Mỹ", poster: "", episodesCount: 0 };
 
-function render(page){
-  currentPage = page;
-  const grid = document.getElementById("grid");
-  const pager = document.getElementById("pager");
-  grid.innerHTML = "";
-  pager.innerHTML = "";
+    function getPageFromURL() {
+      const p = parseInt(new URLSearchParams(location.search).get("page") || "1", 10);
+      if (Number.isNaN(p) || p < 1) return 1;
+      if (p > TOTAL_PAGES) return TOTAL_PAGES;
+      return p;
+    }
 
-  const start = (page-1)*PER_PAGE;
-  const list = films.slice(start,start+PER_PAGE);
+    function openFilm(film) {
+      // Mở trang xem tập (xem.html) và truyền id + title
+      // Trang xem sẽ tự tạo danh sách tập theo episodesCount và có ô để bạn dán link
+      const url = `xem.html?id=${encodeURIComponent(film.id)}&name=${encodeURIComponent(film.title)}&eps=${encodeURIComponent(film.episodesCount || 0)}`;
+      location.href = url;
+    }
 
-  list.forEach(film=>{
-    const card = document.createElement("div");
-    card.className = "card";
+    function render(page) {
+      const grid = document.getElementById("grid");
+      const pager = document.getElementById("pager");
+      const hint = document.getElementById("hint");
 
-    card.innerHTML = `
-      <div class="poster" style="background-image:url('${film.image || ""}')"></div>
-      <h3>${film.title}</h3>
-    `;
+      hint.textContent = `${TOTAL_PAGES} trang • ${PER_PAGE} phim / trang`;
 
-    // 👉 CLICK PHIM → QUA TRANG TẬP
-    card.onclick = ()=>{
-      location.href = "xem.html?name=" + encodeURIComponent(film.title);
-    };
+      grid.innerHTML = "";
+      pager.innerHTML = "";
 
-    grid.appendChild(card);
-  });
+      const start = (page - 1) * PER_PAGE;
+      const pageFilms = films.slice(start, start + PER_PAGE);
 
-  const totalPages = Math.ceil(films.length / PER_PAGE);
-  for(let i=1;i<=totalPages;i++){
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    if(i===page) btn.classList.add("active");
-    btn.onclick = ()=>render(i);
-    pager.appendChild(btn);
-  }
-}
+      pageFilms.forEach(film => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.onclick = () => openFilm(film);
 
-render(1);
-</script>
+        const poster = document.createElement("div");
+        poster.className = "poster";
 
+        if (film.poster) {
+          const img = document.createElement("img");
+          img.src = film.poster;
+          img.alt = film.title;
+          img.loading = "lazy";
+          img.onerror = () => { poster.innerHTML = `<div class="ph">NO IMAGE</div>`; };
+          poster.appendChild(img);
+        } else {
+          poster.innerHTML = `<div class="ph">NO IMAGE</div>`;
+        }
+
+        const h3 = document.createElement("h3");
+        h3.textContent = film.title;
+
+        card.appendChild(poster);
+        card.appendChild(h3);
+        grid.appendChild(card);
+      });
+
+      // pager 1..20
+      for (let p = 1; p <= TOTAL_PAGES; p++) {
+        const btn = document.createElement("button");
+        btn.textContent = p;
+        if (p === page) btn.classList.add("active");
+        btn.onclick = () => location.href = `phim.html?page=${p}`;
+        pager.appendChild(btn);
+      }
+    }
+
+    render(getPageFromURL());
+  </script>
 </body>
 </html>
