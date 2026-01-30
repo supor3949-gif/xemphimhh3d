@@ -2,54 +2,23 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Danh sách phim | HH3D</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-    }
-    header {
-      background: #020617;
-      padding: 16px;
-      font-size: 22px;
-      font-weight: bold;
-      text-align: center;
-    }
-    .container {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 16px;
-    }
-    .card {
-      background: #020617;
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-    }
-    .card img {
-      width: 100%;
-      border-radius: 8px;
-    }
-    .card h3 {
-      font-size: 16px;
-      margin: 10px 0 0;
-    }
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-    .back {
-      display: inline-block;
-      margin-bottom: 20px;
-      color: #22c55e;
-    }
+    body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#e5e7eb}
+    header{background:#020617;padding:16px;text-align:center;font-size:22px;font-weight:800}
+    .container{max-width:1100px;margin:0 auto;padding:18px}
+    a{color:inherit;text-decoration:none}
+    .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+    .card{background:#020617;border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+    .poster{width:100%;aspect-ratio:2/3;border-radius:10px;background:#0b1020;display:flex;align-items:center;justify-content:center;font-weight:800;color:#94a3b8}
+    .card h3{font-size:14px;margin:10px 0 0;line-height:1.2}
+    .pager{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    .pager button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#cbd5e1;padding:8px 10px;border-radius:10px}
+    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent;font-weight:800}
+    .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .hint{color:#94a3b8;font-size:13px}
   </style>
 </head>
 <body>
@@ -57,25 +26,76 @@
 <header>📂 Danh sách phim HH3D</header>
 
 <div class="container">
-  <a class="back" href="index.html">← Quay về trang chủ</a>
-
-  <div class="grid">
-    <a class="card" href="#">
-      <img src="https://via.placeholder.com/300x450?text=Phim+1">
-      <h3>Tiên Nghịch</h3>
-    </a>
-
-    <a class="card" href="#">
-      <img src="https://via.placeholder.com/300x450?text=Phim+2">
-      <h3>Đấu Phá Thương Khung</h3>
-    </a>
-
-    <a class="card" href="#">
-      <img src="https://via.placeholder.com/300x450?text=Phim+3">
-      <h3>Thế Giới Hoàn Mỹ</h3>
-    </a>
+  <div class="toprow">
+    <a class="back" href="index.html">← Quay về trang chủ</a>
+    <div class="hint">20 trang • 10 phim / trang</div>
   </div>
+
+  <div id="grid" class="grid"></div>
+
+  <div class="pager" id="pager"></div>
 </div>
+
+<script>
+  // ====== CÀI SẴN 20 TRANG, MỖI TRANG 10 PHIM ======
+  const TOTAL_PAGES = 20;
+  const PER_PAGE = 10;
+
+  // Tạo 200 phim demo (sau này Toàn đổi tên/phoster thật)
+  const films = Array.from({length: TOTAL_PAGES * PER_PAGE}, (_, i) => {
+    const n = i + 1;
+    return {
+      title: "Phim HH3D số " + n,
+      // Poster demo (đỡ phải up ảnh)
+      posterText: "HH3D " + n
+    };
+  });
+
+  function getPageFromURL(){
+    const p = parseInt(new URLSearchParams(location.search).get("page") || "1", 10);
+    if (Number.isNaN(p) || p < 1) return 1;
+    if (p > TOTAL_PAGES) return TOTAL_PAGES;
+    return p;
+  }
+
+  function render(page){
+    // render grid
+    const start = (page - 1) * PER_PAGE;
+    const items = films.slice(start, start + PER_PAGE);
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    items.forEach((f) => {
+      const card = document.createElement("a");
+      card.className = "card";
+      card.href = "#"; // bước sau mình sẽ đổi sang trang phim riêng
+
+      card.innerHTML = `
+        <div class="poster">${f.posterText}</div>
+        <h3>${f.title}</h3>
+      `;
+      grid.appendChild(card);
+    });
+
+    // render pager 1..20
+    const pager = document.getElementById("pager");
+    pager.innerHTML = "";
+
+    for(let p=1;p<=TOTAL_PAGES;p++){
+      const btn = document.createElement("button");
+      btn.textContent = p;
+      if (p === page) btn.classList.add("active");
+      btn.onclick = () => {
+        // đổi URL để share link trang dễ
+        location.href = "phim.html?page=" + p;
+      };
+      pager.appendChild(btn);
+    }
+  }
+
+  render(getPageFromURL());
+</script>
 
 </body>
 </html>
