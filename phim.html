@@ -12,31 +12,37 @@
     .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .back{display:inline-block;margin:6px 0 14px;color:#22c55e}
     .hint{color:#94a3b8;font-size:13px}
-
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
-    .card{
-      background:#020617;border-radius:12px;padding:12px;
-      border:1px solid rgba(255,255,255,.06);
-      cursor:pointer; transition:.15s transform;
-    }
-    .card:hover{transform:translateY(-2px)}
+    .card{background:#020617;border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(255,255,255,.06);cursor:pointer}
+    .card:hover{border-color:rgba(34,197,94,.35)}
     .poster{
-      width:100%; aspect-ratio:2/3; border-radius:10px;
-      background:#0b1020; overflow:hidden;
-      display:flex; align-items:center; justify-content:center;
-      border:1px solid rgba(255,255,255,.06);
+      width:100%;
+      aspect-ratio:2/3;
+      border-radius:10px;
+      background:#0b1020;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
     }
-    .poster img{width:100%;height:100%;object-fit:cover;display:block}
-    .poster .ph{color:#94a3b8;font-weight:800;font-size:14px}
-    .card h3{font-size:14px;margin:10px 0 0;line-height:1.2;text-align:center}
-
+    .poster img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .poster .noimg{
+      position:absolute;
+      color:#94a3b8;
+      font-weight:800;
+      letter-spacing:.5px;
+      font-size:12px;
+    }
+    .card h3{font-size:14px;margin:10px 0 0;line-height:1.2}
     .pager{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
-    .pager button{
-      cursor:pointer;border:1px solid rgba(255,255,255,.12);
-      background:#0b1020;color:#cbd5e1;padding:8px 10px;border-radius:10px;
-      font-weight:800
-    }
-    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent}
+    .pager button{cursor:pointer;border:1px solid rgba(255,255,255,.12);background:#0b1020;color:#cbd5e1;padding:8px 10px;border-radius:10px}
+    .pager button.active{background:#22c55e;color:#062a16;border-color:transparent;font-weight:800}
   </style>
 </head>
 <body>
@@ -45,7 +51,7 @@
   <div class="container">
     <div class="toprow">
       <a class="back" href="index.html">← Quay về trang chủ</a>
-      <div class="hint" id="hint"></div>
+      <div class="hint" id="hint">20 trang • 10 phim / trang</div>
     </div>
 
     <div id="grid" class="grid"></div>
@@ -56,84 +62,73 @@
     const TOTAL_PAGES = 20;
     const PER_PAGE = 10;
 
-    // ✅ Danh sách phim: bạn chỉnh title/poster/episodesCount ở đây.
-    // poster dùng ảnh local: "images/ten-anh.jpg"
-    // episodesCount là số tập (vd Tiên Nghịch 126)
-    const films = Array.from({ length: TOTAL_PAGES * PER_PAGE }, (_, i) => {
-      const id = i + 1;
-      return {
-        id,
-        title: `HH3D ${id}`,
-        poster: "",          // để trống = hiện nền placeholder
-        episodesCount: 0     // 0 = chưa set
-      };
-    });
+    // ✅ Danh sách phim thật (hiện tại bạn mới có 3 phim)
+    // poster: để ảnh trong thư mục /images rồi trỏ như "images/ten-anh.jpg"
+    // episodesCount: số tập (vd Tiên Nghịch 126)
+    const films = [
+      { id: 1, slug: "tien-nghich", title: "Tiên Nghịch", poster: "images/anh-tien-nghich.jpg", episodesCount: 126 },
+      { id: 2, slug: "dau-pha-thuong-khung", title: "Đấu Phá Thương Khung", poster: "", episodesCount: 0 },
+      { id: 3, slug: "the-gioi-hoan-my", title: "Thế Giới Hoàn Mỹ", poster: "", episodesCount: 0 },
+    ];
 
-    // ✅ Gán 3 phim thật của bạn (đổi theo ý)
-    films[0] = { id: 1, title: "Tiên Nghịch", poster: "images/anh-tien-nghich.jpg", episodesCount: 126 };
-    films[1] = { id: 2, title: "Đấu Phá Thương Khung", poster: "", episodesCount: 0 };
-    films[2] = { id: 3, title: "Thế Giới Hoàn Mỹ", poster: "", episodesCount: 0 };
-
-    function getPageFromURL() {
-      const p = parseInt(new URLSearchParams(location.search).get("page") || "1", 10);
-      if (Number.isNaN(p) || p < 1) return 1;
-      if (p > TOTAL_PAGES) return TOTAL_PAGES;
-      return p;
+    // ✅ Nếu muốn vẫn đủ 200 phim demo để phân trang đẹp: tạo phim giả (không mở xem)
+    // (Phần này giúp bạn vẫn có 20 trang * 10 phim)
+    while (films.length < TOTAL_PAGES * PER_PAGE) {
+      const n = films.length + 1;
+      films.push({ id: n, slug: "hh3d-" + n, title: "HH3D " + n, poster: "", episodesCount: 0 });
     }
 
-    function openFilm(film) {
-      // Mở trang xem tập (xem.html) và truyền id + title
-      // Trang xem sẽ tự tạo danh sách tập theo episodesCount và có ô để bạn dán link
-      const url = `xem.html?id=${encodeURIComponent(film.id)}&name=${encodeURIComponent(film.title)}&eps=${encodeURIComponent(film.episodesCount || 0)}`;
-      location.href = url;
+    function getPageFromURL(){
+      const u = new URL(location.href);
+      const p = parseInt(u.searchParams.get("page") || "1", 10);
+      return Math.min(Math.max(p, 1), TOTAL_PAGES);
     }
 
-    function render(page) {
+    function goPage(p){
+      const u = new URL(location.href);
+      u.searchParams.set("page", String(p));
+      location.href = u.toString();
+    }
+
+    function render(page){
       const grid = document.getElementById("grid");
       const pager = document.getElementById("pager");
-      const hint = document.getElementById("hint");
-
-      hint.textContent = `${TOTAL_PAGES} trang • ${PER_PAGE} phim / trang`;
-
-      grid.innerHTML = "";
-      pager.innerHTML = "";
 
       const start = (page - 1) * PER_PAGE;
-      const pageFilms = films.slice(start, start + PER_PAGE);
+      const items = films.slice(start, start + PER_PAGE);
 
-      pageFilms.forEach(film => {
+      grid.innerHTML = "";
+      items.forEach(film => {
         const card = document.createElement("div");
         card.className = "card";
-        card.onclick = () => openFilm(film);
 
-        const poster = document.createElement("div");
-        poster.className = "poster";
+        // ✅ Chỉ cho bấm mở xem khi phim có episodesCount > 0
+        card.onclick = () => {
+          if (!film.episodesCount || film.episodesCount <= 0) {
+            alert("Phim này chưa có tập. Bạn cập nhật episodesCount trước nha!");
+            return;
+          }
+          location.href = `xem.html?film=${encodeURIComponent(film.slug)}`;
+        };
 
-        if (film.poster) {
-          const img = document.createElement("img");
-          img.src = film.poster;
-          img.alt = film.title;
-          img.loading = "lazy";
-          img.onerror = () => { poster.innerHTML = `<div class="ph">NO IMAGE</div>`; };
-          poster.appendChild(img);
-        } else {
-          poster.innerHTML = `<div class="ph">NO IMAGE</div>`;
-        }
+        const posterHTML = film.poster
+          ? `<img src="${film.poster}" alt="${film.title}" loading="lazy">`
+          : `<div class="noimg">NO IMAGE</div>`;
 
-        const h3 = document.createElement("h3");
-        h3.textContent = film.title;
-
-        card.appendChild(poster);
-        card.appendChild(h3);
+        card.innerHTML = `
+          <div class="poster">${posterHTML}</div>
+          <h3>${film.title}</h3>
+        `;
         grid.appendChild(card);
       });
 
-      // pager 1..20
-      for (let p = 1; p <= TOTAL_PAGES; p++) {
+      // pager
+      pager.innerHTML = "";
+      for (let p = 1; p <= TOTAL_PAGES; p++){
         const btn = document.createElement("button");
         btn.textContent = p;
         if (p === page) btn.classList.add("active");
-        btn.onclick = () => location.href = `phim.html?page=${p}`;
+        btn.onclick = () => goPage(p);
         pager.appendChild(btn);
       }
     }
