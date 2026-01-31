@@ -566,6 +566,74 @@
     // (Tuỳ chọn) AFF (nếu muốn)
     const AFF_TIKTOK = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
     const AFF_SHOPEE = ""; // em điền sau
+// ======================== AFF (APP MOBILE / WEB PC) ========================
+// ✅ TikTok link em đưa (universal link) — trên mobile thường tự bật app
+const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
+
+// ✅ Shopee: em tự điền sau
+const SHOPEE_WEB = "";        // ví dụ: "https://shopee.vn/....(link aff)"
+const SHOPEE_APP = "";        // ví dụ deep link app (nếu có): "shopee://..."
+
+function isMobileDevice(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// ✅ mở app trước, nếu không được thì fallback sang web
+function openMobileWithFallback(appUrl, webUrl){
+  const hasWeb = !!(webUrl && webUrl.trim());
+  const hasApp = !!(appUrl && appUrl.trim());
+
+  // nếu không có appUrl thì mở web luôn
+  if (!hasApp){
+    if (hasWeb) window.location.href = webUrl;
+    return;
+  }
+
+  // thử mở app (chỉ hoạt động tốt khi được gọi từ click)
+  window.location.href = appUrl;
+
+  // fallback sang web sau 900ms nếu app không mở / bị chặn
+  setTimeout(() => {
+    if (hasWeb) window.location.href = webUrl;
+  }, 900);
+}
+
+function openAFFRandom(){
+  // danh sách nguồn aff (có thể chỉ có 1 cái)
+  const sources = [];
+
+  // TikTok: trên mobile cứ dùng WEB link cũng thường bật app (universal link)
+  sources.push({
+    name: "tiktok",
+    mobileApp: "",            // TikTok không cần deep link riêng (để trống)
+    mobileWeb: TIKTOK_WEB,
+    pcWeb: TIKTOK_WEB
+  });
+
+  // Shopee: em điền sau
+  if (SHOPEE_WEB || SHOPEE_APP){
+    sources.push({
+      name: "shopee",
+      mobileApp: SHOPEE_APP,  // em điền nếu có, không có thì để ""
+      mobileWeb: SHOPEE_WEB,
+      pcWeb: SHOPEE_WEB
+    });
+  }
+
+  if (!sources.length) return;
+
+  const pick = sources[Math.floor(Math.random() * sources.length)];
+  const isMobile = isMobileDevice();
+
+  if (isMobile){
+    // Ưu tiên app (nếu có), fallback web
+    openMobileWithFallback(pick.mobileApp, pick.mobileWeb || pick.pcWeb);
+  } else {
+    // PC: mở web (mở tab mới cho đỡ mất trang đang xem)
+    const url = pick.pcWeb || pick.mobileWeb;
+    if (url) window.open(url, "_blank");
+  }
+}
 
     /* ================== UI ================== */
     document.getElementById("movieInfo").textContent = `${MOVIE_TITLE} • ${TOTAL_EP} tập`;
