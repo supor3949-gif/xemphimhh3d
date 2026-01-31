@@ -10,7 +10,6 @@
       --bg:#0f172a;
       --panel:#0b1224;
       --panel2:#0b1020;
-      --panel3:#111827;
       --text:#e5e7eb;
       --muted:#94a3b8;
       --border:rgba(255,255,255,.12);
@@ -21,14 +20,14 @@
       --orange:#fb923c;
       --shadow:0 12px 28px rgba(0,0,0,.35);
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family: Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.10), transparent 60%),
-                  radial-gradient(1000px 500px at 20% 0%, rgba(34,197,94,.10), transparent 55%),
-                  var(--bg);
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.10), transparent 60%),
+        radial-gradient(1000px 500px at 20% 0%, rgba(34,197,94,.10), transparent 55%),
+        var(--bg);
       color:var(--text);
     }
     a{color:inherit;text-decoration:none}
@@ -86,7 +85,6 @@
       max-width:520px;
       width:44vw;
     }
-    .searchWrap span{opacity:.9}
     .search{
       background:none;border:none;outline:none;
       color:var(--text);
@@ -145,40 +143,17 @@
     }
 
     /* ================= TABS (THỨ) ================= */
-    /* ================= TABS (THỨ) – FIX CLICK ================= */
-.tabs{
-  display:flex;
-  gap:8px;
-  padding:12px 12px 10px;
-  flex-wrap:wrap;
-  position:relative;
-  z-index:5;              /* ✅ nổi lên trên */
-}
-
-.tab{
-  flex:1 1 120px;         /* ✅ tự co giãn, không bị lệch click */
-  min-width:110px;
-  background: rgba(11,16,32,.75);
-  border:1px solid var(--border2);
-  border-radius:12px;
-  padding:10px 8px;
-  text-align:center;
-  cursor:pointer;
-  user-select:none;
-  transition:.15s ease;
-  pointer-events:auto;    /* ✅ đảm bảo click */
-}
-
-.tab:hover{border-color:rgba(56,189,248,.35)}
-.tab .vn{font-weight:900;font-size:13px}
-.tab .en{color:var(--muted);font-size:11px;margin-top:3px}
-
-.tab.active{
-  background: rgba(56,189,248,.18);
-  border-color: rgba(56,189,248,.55);
-  box-shadow: 0 10px 18px rgba(56,189,248,.10);
-}
-
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding:12px 12px 10px;
+      flex-wrap:wrap;
+      position:relative;
+      z-index:5;
+    }
+    .tab{
+      flex:1 1 120px;
+      min-width:110px;
       background: rgba(11,16,32,.75);
       border:1px solid var(--border2);
       border-radius:12px;
@@ -187,6 +162,7 @@
       cursor:pointer;
       user-select:none;
       transition:.15s ease;
+      pointer-events:auto;
     }
     .tab:hover{border-color:rgba(56,189,248,.35)}
     .tab .vn{font-weight:900;font-size:13px}
@@ -232,7 +208,7 @@
       object-fit:cover;
       display:block;
     }
-    .noimg{
+    .placeholder{
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
       color:rgba(148,163,184,.95);
@@ -264,6 +240,7 @@
       border-radius:10px;
       box-shadow: 0 10px 18px rgba(0,0,0,.35);
     }
+
     .playOverlay{
       position:absolute;
       inset:0;
@@ -301,10 +278,9 @@
       min-height:32px;
     }
 
-    /* card "đang cập nhật" */
     .card.updating{
       cursor:not-allowed;
-      opacity:.75;
+      opacity:.8;
     }
     .card.updating:hover{transform:none;border-color:var(--border2)}
     .card.updating .playBtn{background:#334155;color:#cbd5e1}
@@ -340,9 +316,10 @@
       overflow:hidden;
       background: rgba(11,16,32,.85);
       border:1px solid rgba(255,255,255,.08);
+      position:relative;
     }
     .rankPoster img{width:100%;height:100%;object-fit:cover;display:block}
-    .rankPoster .noimg{font-size:10px}
+    .rankPoster .placeholder{font-size:10px}
     .rankTitle{font-weight:900;font-size:13px;line-height:1.15}
     .rankMeta{color:var(--muted);font-size:11px;margin-top:3px}
 
@@ -396,24 +373,21 @@
     }
     @media (max-width: 860px){
       .grid{grid-template-columns: repeat(4, 1fr)}
-      .tabs{grid-template-columns: repeat(4, 1fr)}
     }
     @media (max-width: 560px){
       .grid{grid-template-columns: repeat(2, 1fr)}
-      .tabs{grid-template-columns: repeat(3, 1fr)}
       .headerInner{padding:10px 12px}
       .container{padding:12px}
+      .searchWrap{min-width:unset}
     }
   </style>
 </head>
 
 <body>
-  <!-- ================= HEADER (LOGO + SEARCH + FILTER) ================= -->
+  <!-- ================= HEADER ================= -->
   <header class="siteHeader">
     <div class="headerInner">
-      <!-- LOGO (GÓC TRÁI) -->
       <a class="brand" href="index.html" title="HH3D – Kho phim chọn lọc">
-        <!-- Logo SVG (khỏi cần file ảnh) -->
         <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
           <defs>
             <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -432,7 +406,6 @@
         </div>
       </a>
 
-      <!-- TOOLS (GÓC PHẢI) -->
       <div class="tools">
         <div class="searchWrap">
           <span>🔎</span>
@@ -457,26 +430,21 @@
       </div>
     </div>
   </header>
-  <!-- ================= END HEADER ================= -->
 
   <div class="container">
     <div class="layout">
-      <!-- ================= MAIN: LỊCH PHIM + GRID ================= -->
+      <!-- ================= MAIN ================= -->
       <section class="panel">
         <div class="panelHeader">
           <div class="panelTitle">📅 Lịch Phim</div>
-          <!-- ✅ Tự tính theo giờ Việt Nam -->
           <div class="panelSub" id="vnNow">Hôm nay: ...</div>
         </div>
 
-        <!-- Tabs thứ -->
         <div class="tabs" id="tabs"></div>
-
-        <!-- Grid phim -->
         <div class="grid" id="grid"></div>
       </section>
 
-      <!-- ================= ASIDE: BẢNG XẾP HẠNG ================= -->
+      <!-- ================= RANKING ================= -->
       <aside class="panel">
         <div class="panelHeader">
           <div class="panelTitle">🏆 Bảng Xếp Hạng</div>
@@ -487,7 +455,7 @@
     </div>
   </div>
 
-  <!-- ================= MODAL (PHIM CHƯA CÓ FILE) ================= -->
+  <!-- ================= MODAL ================= -->
   <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modalTop">
@@ -503,27 +471,30 @@
 
   <script>
     /* ============================================================
-      ✅ INDEX MỚI (TRANG CHỦ DUY NHẤT)
-      - KHÔNG dùng phim.html
-      - KHÔNG dùng xem.html
-      - Mỗi phim: có title, poster, episodes, genre, file
-      - Nếu file rỗng => bấm vào sẽ hiện "đang cập nhật"
-      - Nếu file có (vd muc-than-ki.html) => bấm vào mở file đó
+      ✅ INDEX CHUẨN – FIX HẾT LỖI EM BÁO
+      - Click tabs luôn ăn
+      - Search bỏ dấu tiếng Việt
+      - Không còn NO IMAGE rác: chỗ không có poster => “Đang cập nhật”
+      - Click phim A luôn đúng phim A
+      - Top 10 click luôn đúng phim
+      - Có file => mở file (vd muc-than-ki.html)
+      - Không file => modal "đang cập nhật"
     ============================================================ */
 
-    /* ==============================
-      1) DATA PHIM THEO NGÀY (EM CHỈ SỬA Ở ĐÂY)
-      - title: tên phim (anh điền theo ảnh em gửi)
-      - poster: đường dẫn ảnh (EM TỰ ĐIỀN) vd: "images/ten-anh.jpg"
-      - episodes: dạng "đang/ tổng" (anh điền theo ảnh mẫu, em có thể sửa)
-      - badge: chữ nhỏ kiểu "TM-VS", "4K TM-VS"... (em có thể sửa)
-      - genre: anh tự phân loại (em có thể đổi lại)
-      - file: tên file tập phim (EM TỰ TẠO sau). Có thì điền, chưa có để ""
-         ví dụ: file: "tien-nghich.html"
-    ============================== */
+    const VN_TZ = "Asia/Ho_Chi_Minh";
+
+    /* ================== DATA THEO NGÀY ==================
+      GHI CHÚ CHO EM:
+      - title: TÊN PHIM (đã điền theo ảnh em gửi)
+      - poster: ẢNH (EM TỰ ĐIỀN) ví dụ: "images/anh-tien-nghich.jpg"
+      - episodes: DÒNG SỐ TẬP (vd "126/128")
+      - badge: tem nhỏ (vd "TM-VS", "4K TM-VS")
+      - genre: thể loại (anh tự đoán, em đổi thoải mái)
+      - file: FILE RIÊNG của phim (vd "muc-than-ki.html"). Chưa có thì để ""
+      - updating:true: ô trống dự phòng
+    ===================================================== */
 
     const schedule = {
-      /* ===== THỨ 2 (MONDAY) ===== */
       mon: [
         { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
         { title:"Nghịch Thiên Chí Tôn", poster:"", episodes:"484/580", badge:"TM-VS", genre:"huyen-huyen", file:"" },
@@ -535,15 +506,12 @@
         { title:"Tiên Đế Trở Về", poster:"", episodes:"16/16", badge:"4K TM-VS", genre:"tien-hiep", file:"" },
         { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"04/12", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
         { title:"Nhất Nhân Chi Hạ (P2)", poster:"", episodes:"", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
-
-        // ✅ chừa thêm khung trống (4–5 khung) => hiện "Đang cập nhật"
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
 
-      /* ===== THỨ 3 (TUESDAY) ===== */
       tue: [
         { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"TM-VS", genre:"hoat-hinh", file:"" },
         { title:"Luyện Khí Mười Vạn Năm", poster:"", episodes:"316/360", badge:"TM-VS", genre:"tien-hiep", file:"" },
@@ -558,14 +526,11 @@
         { title:"Tuyệt Thế Chiến Hồn", poster:"", episodes:"160/…", badge:"TM-VS", genre:"huyen-huyen", file:"" },
         { title:"Tiên Hóa Siêu Phàm", poster:"", episodes:"04/16", badge:"4K", genre:"huyen-huyen", file:"" },
         { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"", badge:"2D", genre:"hoat-hinh", file:"" },
-
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
 
-      /* ===== THỨ 4 (WEDNESDAY) ===== */
       wed: [
         { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"TM-VS", genre:"hoat-hinh", file:"" },
         { title:"Kiếm Lai Phần 2", poster:"", episodes:"08/26", badge:"4K", genre:"kiem-hiep", file:"" },
@@ -575,14 +540,12 @@
         { title:"Dẫn Điểu Cực Dĩ…", poster:"", episodes:"08/08", badge:"2D", genre:"hoat-hinh", file:"" },
         { title:"Đô Thị Cổ Tiên Y", poster:"", episodes:"146/150", badge:"TM-VS", genre:"do-thi", file:"" },
         { title:"Bắt Đầu Với Chí Tôn…", poster:"", episodes:"09/40", badge:"TM-VS", genre:"huyen-huyen", file:"" },
-
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
 
-      /* ===== THỨ 5 (THURSDAY) ===== */
       thu: [
         { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"TM-VS", genre:"hoat-hinh", file:"" },
         { title:"Thế Giới Hoàn Mỹ", poster:"", episodes:"253/286", badge:"4K", genre:"huyen-huyen", file:"" },
@@ -591,14 +554,11 @@
         { title:"Võ Toái Tinh Hà", poster:"", episodes:"51/60", badge:"TM-VS", genre:"huyen-huyen", file:"" },
         { title:"Thần Tài Quyền Đô", poster:"", episodes:"39/60", badge:"TM-VS", genre:"do-thi", file:"" },
         { title:"Vũ Động Càn Khôn", poster:"", episodes:"04/12", badge:"[End]", genre:"huyen-huyen", file:"" },
-
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
 
-      /* ===== THỨ 6 (FRIDAY) ===== */
       fri: [
         { title:"Vĩnh Sinh Phần 5", poster:"", episodes:"09/…", badge:"4K", genre:"huyen-huyen", file:"" },
         { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
@@ -611,14 +571,10 @@
         { title:"Võ Thượng Thần Đế", poster:"", episodes:"565/632", badge:"TM-VS", genre:"huyen-huyen", file:"" },
         { title:"Đại Lục Linh Vũ", poster:"", episodes:"148/…", badge:"TM-VS", genre:"huyen-huyen", file:"" },
         { title:"Tam Tuyển Luân Hồi", poster:"", episodes:"01-02", badge:"Mới", genre:"huyen-huyen", file:"" },
-
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
 
-      /* ===== THỨ 7 (SATURDAY) ===== */
       sat: [
         { title:"Đấu Phá Thương Khung", poster:"", episodes:"184/209", badge:"4K", genre:"huyen-huyen", file:"" },
         { title:"Trạch Thiên Ký", poster:"", episodes:"01-03", badge:"4K Mới", genre:"tien-hiep", file:"" },
@@ -630,19 +586,18 @@
         { title:"Phàm Nhân Tu Tiên…", poster:"", episodes:"176/176", badge:"4K Full", genre:"tien-hiep", file:"" },
         { title:"Bắt Đầu Với Chí Tôn…", poster:"", episodes:"09/40", badge:"TM-VS", genre:"huyen-huyen", file:"" },
         { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
-
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
 
-      /* ===== CHỦ NHẬT (SUNDAY) ===== */
       sun: [
         { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
-        { title:"Quang Âm Chi Ngoại", poster:"", episodes:"Trailer 07/26", badge:"4K TM-VS", genre:"kiem-hiep", file:"" },
-        { title:"Mục Thần Ký", poster:"images/muc-than-ki.jpg", episodes:"Trailer 68/78", badge:"4K TM-VS", genre:"kiem-hiep", file:"muc-than-ki.html" }, // ✅ ví dụ đã có file
-        { title:"Tiên Nghịch", poster:"images/anh-tien-nghich.jpg", episodes:"Trailer 126/128", badge:"4K", genre:"tien-hiep", file:"" },
+        { title:"Quang Âm Chi Ngoại", poster:"", episodes:"07/26", badge:"4K TM-VS", genre:"kiem-hiep", file:"" },
+
+        /* ✅ MỤC THẦN KÝ - FILE RIÊNG (FIX LỖI GỌI FILE) */
+        { title:"Mục Thần Ký", poster:"images/muc-than-ki.jpg", episodes:"68/78", badge:"4K TM-VS", genre:"kiem-hiep", file:"muc-than-ki.html" },
+
+        { title:"Tiên Nghịch", poster:"images/anh-tien-nghich.jpg", episodes:"126/128", badge:"4K", genre:"tien-hiep", file:"" },
         { title:"Võ Toái Tinh Hà", poster:"", episodes:"5/60", badge:"TM-VS", genre:"huyen-huyen", file:"" },
         { title:"Trung Quốc Kỳ Đàm…", poster:"", episodes:"05/09", badge:"2D", genre:"hoat-hinh", file:"" },
         { title:"Đô Thị Cổ Tiên Y", poster:"", episodes:"144/150", badge:"TM-VS", genre:"do-thi", file:"" },
@@ -651,24 +606,21 @@
         { title:"Toàn Năng Cao Thủ", poster:"", episodes:"14/…", badge:"TM-VS", genre:"do-thi", file:"" },
         { title:"Chấm Dao Ca Phần 3", poster:"", episodes:"13/14", badge:"2D", genre:"hoat-hinh", file:"" },
         { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"", badge:"2D", genre:"hoat-hinh", file:"" },
-
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
-        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
         { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
       ],
     };
 
-    /* ==============================
-      2) BẢNG XẾP HẠNG (TOP 10)
-      - Bấm vào cũng giống như phim trong lịch:
-        + có file => mở file
-        + không có file => hiện "đang cập nhật"
-    ============================== */
+    /* ================== TOP 10 ==================
+      GHI CHÚ:
+      - poster nếu có thì điền ảnh
+      - file có thì bấm mở file
+      - không có file => modal cập nhật
+    ============================================= */
     const ranking = [
       { title:"Tiên Nghịch", poster:"images/anh-tien-nghich.jpg", episodes:"126/128", badge:"4K", genre:"tien-hiep", file:"" },
       { title:"Đấu Phá Thương Khung", poster:"", episodes:"184/209", badge:"4K", genre:"huyen-huyen", file:"" },
-      { title:"Mục Thần Ký", poster:"", episodes:"68/78", badge:"4K", genre:"kiem-hiep", file:"muc-than-ki.html" },
+      { title:"Mục Thần Ký", poster:"images/muc-than-ki.jpg", episodes:"68/78", badge:"4K", genre:"kiem-hiep", file:"muc-than-ki.html" },
       { title:"Thế Giới Hoàn Mỹ", poster:"", episodes:"253/286", badge:"4K", genre:"huyen-huyen", file:"" },
       { title:"Phàm Nhân Tu Tiên (Full)", poster:"", episodes:"176/176", badge:"4K", genre:"tien-hiep", file:"" },
       { title:"Đấu La Đại Lục 2", poster:"", episodes:"138/156", badge:"4K", genre:"huyen-huyen", file:"" },
@@ -677,11 +629,6 @@
       { title:"Gia Thiên", poster:"", episodes:"146/156", badge:"4K", genre:"tien-hiep", file:"" },
       { title:"Thần Ẩn Vương Tọa", poster:"", episodes:"196/208", badge:"4K", genre:"huyen-huyen", file:"" },
     ];
-
-    /* ==============================
-      3) UI + LOGIC
-    ============================== */
-    const VN_TZ = "Asia/Ho_Chi_Minh";
 
     const tabsConfig = [
       { key:"mon", vn:"Thứ 2", en:"Monday" },
@@ -702,19 +649,26 @@
         month:"2-digit",
         year:"numeric"
       });
-      return fmt.format(now); // vd: "chủ nhật, 01/02/2026"
+      return fmt.format(now);
     }
 
     function getVNWeekdayKey(){
-      // Lấy thứ theo giờ VN
       const now = new Date();
       const vnWeekday = new Intl.DateTimeFormat("en-US", { timeZone: VN_TZ, weekday:"short" }).format(now);
-      // Sun Mon Tue Wed Thu Fri Sat
       const map = { Mon:"mon", Tue:"tue", Wed:"wed", Thu:"thu", Fri:"fri", Sat:"sat", Sun:"sun" };
-      return map[vnWeekday] || "mon";
+      return map[vnWeekday] || "sun";
     }
 
-    function normalize(s){ return (s||"").toLowerCase().trim(); }
+    /* ===== SEARCH BỎ DẤU TIẾNG VIỆT (FIX: lúc được lúc không) ===== */
+    function stripVN(str=""){
+      return str
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g,"d")
+        .trim();
+    }
+    function normalize(s){ return stripVN(s||""); }
 
     function applyFilters(items){
       const q = normalize(document.getElementById("q").value);
@@ -735,7 +689,6 @@
       } else if (sort === "za"){
         out.sort((a,b) => (b.title||"").localeCompare(a.title||"", "vi"));
       } else if (sort === "eps"){
-        // so sánh theo số "đang" hoặc "tổng" (lấy tổng nếu có)
         const getNum = (x) => {
           const m = String(x||"").match(/(\d+)\s*\/\s*(\d+)/);
           if (!m) return 0;
@@ -745,34 +698,35 @@
         };
         out.sort((a,b) => getNum(b.episodes) - getNum(a.episodes));
       }
-      // "new" giữ nguyên
       return out;
     }
 
-    function openFilm(film){
-      // Nếu có file => mở file
-      if (film.file && film.file.trim()){
-        location.href = film.file.trim();
-        return;
-      }
-
-      // Nếu đang cập nhật / chưa có file
-      showModal(
-        film.title && film.title !== "Đang cập nhật" ? film.title : "Đang cập nhật",
-        "Chúng tôi đang cố gắng cập nhật bộ phim này.",
-        "Bạn quay lại sau nha."
-      );
-    }
-
+    /* ===== MODAL ===== */
     function showModal(title, msg, sub){
       document.getElementById("modalTitle").textContent = title;
       document.getElementById("modalMsg").textContent = msg;
       document.getElementById("modalSub").textContent = sub;
       document.getElementById("modalBack").style.display = "flex";
     }
-
     function hideModal(){
       document.getElementById("modalBack").style.display = "none";
+    }
+
+    /* ===== OPEN FILM (FIX: bấm phim A báo phim B) ===== */
+    function openFilm(film){
+      const isUpdating = !!film.updating || film.title === "Đang cập nhật";
+      if (isUpdating){
+        showModal("Đang cập nhật", "Ô này chưa có phim.", "Bạn quay lại sau nha.");
+        return;
+      }
+
+      const f = (film.file || "").trim();
+      if (f){
+        location.href = f;
+        return;
+      }
+
+      showModal(film.title, "Chúng tôi đang cố gắng cập nhật bộ phim này.", "Bạn quay lại sau nha.");
     }
 
     function renderTabs(activeKey){
@@ -782,9 +736,7 @@
         const el = document.createElement("div");
         el.className = "tab" + (t.key === activeKey ? " active" : "");
         el.innerHTML = `<div class="vn">${t.vn}</div><div class="en">${t.en}</div>`;
-        el.onclick = () => {
-          setActiveDay(t.key);
-        };
+        el.addEventListener("click", () => setActiveDay(t.key));
         tabs.appendChild(el);
       });
     }
@@ -796,42 +748,31 @@
 
       grid.innerHTML = "";
       items.forEach(film => {
+        const isUpdating = !!film.updating || film.title === "Đang cập nhật";
+
         const card = document.createElement("div");
-        const isUpdating = !!film.updating || (film.title === "Đang cập nhật");
         card.className = "card" + (isUpdating ? " updating" : "");
+        card.addEventListener("click", () => openFilm(film));
 
-        card.onclick = () => {
-          if (isUpdating) {
-            showModal("Đang cập nhật", "Ô này chưa có phim.", "Bạn quay lại sau nha.");
-            return;
-          }
-          openFilm(film);
-        };
-
-        const posterHTML = film.poster
-          ? `<img src="${film.poster}" alt="${film.title}" loading="lazy">`
-          : `<div class="noimg">NO IMAGE</div>`;
+        const hasPoster = !!(film.poster && film.poster.trim());
+        const posterHTML = hasPoster
+          ? `<img src="${film.poster.trim()}" alt="${film.title}" loading="lazy">`
+          : `<div class="placeholder">Đang cập nhật</div>`;
 
         const top = film.episodes ? `<div class="badgeTop">${film.episodes}</div>` : "";
         const bottom = film.badge ? `<div class="badgeBottom">${film.badge}</div>` : "";
-
-        // nút xem ngay (hover)
-        const overlay = `
-          <div class="playOverlay">
-            <button class="playBtn" type="button">${film.file ? "Xem ngay" : "Xem"}</button>
-          </div>
-        `;
 
         card.innerHTML = `
           <div class="poster">
             ${posterHTML}
             ${top}
             ${bottom}
-            ${overlay}
+            <div class="playOverlay">
+              <button class="playBtn" type="button">${(film.file && film.file.trim()) ? "Xem ngay" : "Xem"}</button>
+            </div>
           </div>
           <div class="title">${film.title}</div>
         `;
-
         grid.appendChild(card);
       });
     }
@@ -843,44 +784,45 @@
       ranking.forEach((film, idx) => {
         const item = document.createElement("div");
         item.className = "rankItem";
-        item.onclick = () => openFilm(film);
+        item.addEventListener("click", () => openFilm(film));
 
-        const posterHTML = film.poster
-          ? `<img src="${film.poster}" alt="${film.title}" loading="lazy">`
-          : `<div class="noimg">NO IMAGE</div>`;
+        const hasPoster = !!(film.poster && film.poster.trim());
+        const posterHTML = hasPoster
+          ? `<img src="${film.poster.trim()}" alt="${film.title}" loading="lazy">`
+          : `<div class="placeholder">Update</div>`;
 
         item.innerHTML = `
           <div class="rankNum">${idx + 1}</div>
           <div class="rankPoster">${posterHTML}</div>
           <div>
             <div class="rankTitle">${film.title}</div>
-            <div class="rankMeta">${film.episodes ? film.episodes + " • " : ""}${film.badge ? film.badge + " • " : ""}${film.genre || ""}</div>
+            <div class="rankMeta">
+              ${film.episodes ? film.episodes + " • " : ""}
+              ${film.badge ? film.badge + " • " : ""}
+              ${film.genre || ""}
+            </div>
           </div>
         `;
-
         list.appendChild(item);
       });
     }
 
     let ACTIVE_DAY = getVNWeekdayKey();
-
     function setActiveDay(dayKey){
       ACTIVE_DAY = dayKey;
       renderTabs(ACTIVE_DAY);
       renderGrid(ACTIVE_DAY);
     }
 
-    // ===== INIT =====
+    /* ===== INIT ===== */
     document.getElementById("vnNow").textContent = "Hôm nay: " + getVNNow();
     renderRanking();
     setActiveDay(ACTIVE_DAY);
 
-    // rerender khi search/filter/sort
     document.getElementById("q").addEventListener("input", () => renderGrid(ACTIVE_DAY));
     document.getElementById("genre").addEventListener("change", () => renderGrid(ACTIVE_DAY));
     document.getElementById("sort").addEventListener("change", () => renderGrid(ACTIVE_DAY));
 
-    // modal close
     document.getElementById("closeModal").addEventListener("click", hideModal);
     document.getElementById("modalBack").addEventListener("click", (e) => {
       if (e.target.id === "modalBack") hideModal();
