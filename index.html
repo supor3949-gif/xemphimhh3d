@@ -1,17 +1,866 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <title>HH3D</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HH3D – Kho phim chọn lọc</title>
 
-  <!-- TỰ ĐỘNG CHUYỂN SANG PHIM.HTML -->
-  <meta http-equiv="refresh" content="0; url=phim.html">
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:#0b1224;
+      --panel2:#0b1020;
+      --panel3:#111827;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --border:rgba(255,255,255,.12);
+      --border2:rgba(255,255,255,.06);
+      --green:#22c55e;
+      --greenDark:#062a16;
+      --blue:#38bdf8;
+      --orange:#fb923c;
+      --shadow:0 12px 28px rgba(0,0,0,.35);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.10), transparent 60%),
+                  radial-gradient(1000px 500px at 20% 0%, rgba(34,197,94,.10), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* ================= HEADER ================= */
+    .siteHeader{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(2,6,23,.88);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--border2);
+    }
+    .headerInner{
+      max-width:1200px;
+      margin:0 auto;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:220px;
+    }
+    .logo{
+      width:42px;height:42px;
+      border-radius:12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.35);
+      flex:0 0 auto;
+    }
+    .brandText{display:flex;flex-direction:column;line-height:1.1}
+    .brandName{font-size:18px;font-weight:900;letter-spacing:.3px}
+    .brandTag{font-size:12px;color:var(--muted);margin-top:2px}
+
+    .tools{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+      flex:1;
+    }
+    .searchWrap{
+      display:flex;align-items:center;gap:8px;
+      background:rgba(11,16,32,.85);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      min-width:320px;
+      max-width:520px;
+      width:44vw;
+    }
+    .searchWrap span{opacity:.9}
+    .search{
+      background:none;border:none;outline:none;
+      color:var(--text);
+      width:100%;
+      font-size:14px;
+    }
+    .select{
+      background:rgba(11,16,32,.85);
+      color:#cbd5e1;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      outline:none;
+      font-size:13px;
+    }
+
+    /* ================= LAYOUT ================= */
+    .container{
+      max-width:1200px;
+      margin:0 auto;
+      padding:14px 16px 30px;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:14px;
+      align-items:start;
+    }
+
+    /* ================= PANELS ================= */
+    .panel{
+      background: rgba(17,24,39,.55);
+      border:1px solid var(--border2);
+      border-radius:16px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panelHeader{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border2);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background: rgba(2,6,23,.55);
+    }
+    .panelTitle{
+      display:flex;align-items:center;gap:10px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .panelSub{
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    /* ================= TABS (THỨ) ================= */
+    .tabs{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap:8px;
+      padding:12px 12px 10px;
+    }
+    .tab{
+      background: rgba(11,16,32,.75);
+      border:1px solid var(--border2);
+      border-radius:12px;
+      padding:10px 8px;
+      text-align:center;
+      cursor:pointer;
+      user-select:none;
+      transition:.15s ease;
+    }
+    .tab:hover{border-color:rgba(56,189,248,.35)}
+    .tab .vn{font-weight:900;font-size:13px}
+    .tab .en{color:var(--muted);font-size:11px;margin-top:3px}
+    .tab.active{
+      background: rgba(56,189,248,.18);
+      border-color: rgba(56,189,248,.55);
+      box-shadow: 0 10px 18px rgba(56,189,248,.10);
+    }
+
+    /* ================= GRID CARDS ================= */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap:12px;
+      padding:12px;
+    }
+    .card{
+      background: rgba(2,6,23,.55);
+      border:1px solid var(--border2);
+      border-radius:14px;
+      padding:10px;
+      cursor:pointer;
+      transition:.12s ease;
+      position:relative;
+      min-height:220px;
+    }
+    .card:hover{
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.14);
+    }
+
+    .poster{
+      width:100%;
+      aspect-ratio:2/3;
+      border-radius:12px;
+      overflow:hidden;
+      background: rgba(11,16,32,.85);
+      position:relative;
+    }
+    .poster img{
+      width:100%;height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .noimg{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(148,163,184,.95);
+      font-weight:900;
+      letter-spacing:.6px;
+      font-size:12px;
+    }
+
+    /* badge trên poster */
+    .badgeTop{
+      position:absolute;
+      top:8px;left:8px;
+      background: rgba(249,115,22,.95);
+      color:#1f1204;
+      font-size:11px;
+      font-weight:900;
+      padding:4px 6px;
+      border-radius:10px;
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+    }
+    .badgeBottom{
+      position:absolute;
+      bottom:8px;left:8px;
+      background: rgba(34,197,94,.90);
+      color:#062a16;
+      font-size:11px;
+      font-weight:900;
+      padding:4px 6px;
+      border-radius:10px;
+      box-shadow: 0 10px 18px rgba(0,0,0,.35);
+    }
+    .playOverlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(2,6,23,.55);
+      opacity:0;
+      transition:.16s ease;
+    }
+    .playBtn{
+      border:none;
+      background: var(--green);
+      color: var(--greenDark);
+      font-weight:900;
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      transform: translateY(6px);
+      transition:.16s ease;
+    }
+    .card:hover .playOverlay{opacity:1}
+    .card:hover .playBtn{transform: translateY(0)}
+
+    .title{
+      margin-top:8px;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.15;
+      color:#e8eefb;
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height:32px;
+    }
+
+    /* card "đang cập nhật" */
+    .card.updating{
+      cursor:not-allowed;
+      opacity:.75;
+    }
+    .card.updating:hover{transform:none;border-color:var(--border2)}
+    .card.updating .playBtn{background:#334155;color:#cbd5e1}
+
+    /* ================= RANKING ================= */
+    .rankList{
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .rankItem{
+      display:grid;
+      grid-template-columns: 18px 44px 1fr;
+      gap:10px;
+      align-items:center;
+      padding:10px;
+      border-radius:14px;
+      background: rgba(2,6,23,.45);
+      border:1px solid var(--border2);
+      cursor:pointer;
+      transition:.12s ease;
+    }
+    .rankItem:hover{border-color:rgba(56,189,248,.35); transform:translateY(-1px)}
+    .rankNum{
+      color:#93c5fd;
+      font-weight:900;
+      text-align:center;
+      font-size:13px;
+    }
+    .rankPoster{
+      width:44px;height:56px;border-radius:10px;
+      overflow:hidden;
+      background: rgba(11,16,32,.85);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .rankPoster img{width:100%;height:100%;object-fit:cover;display:block}
+    .rankPoster .noimg{font-size:10px}
+    .rankTitle{font-weight:900;font-size:13px;line-height:1.15}
+    .rankMeta{color:var(--muted);font-size:11px;margin-top:3px}
+
+    /* ================= MODAL ================= */
+    .modalBack{
+      position:fixed;inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+      padding:16px;
+    }
+    .modal{
+      width:min(520px, 96vw);
+      background: rgba(2,6,23,.95);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .modalTop{
+      padding:14px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .modalTop b{font-size:14px}
+    .closeBtn{
+      border:none;
+      background: rgba(255,255,255,.08);
+      color:var(--text);
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+    }
+    .modalBody{
+      padding:14px 16px 16px;
+      color:#dbe7ff;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .modalBody .muted{color:var(--muted);font-size:12px;margin-top:6px}
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 1100px){
+      .layout{grid-template-columns: 1fr}
+      .searchWrap{min-width:240px;width:100%}
+      .grid{grid-template-columns: repeat(5, 1fr)}
+    }
+    @media (max-width: 860px){
+      .grid{grid-template-columns: repeat(4, 1fr)}
+      .tabs{grid-template-columns: repeat(4, 1fr)}
+    }
+    @media (max-width: 560px){
+      .grid{grid-template-columns: repeat(2, 1fr)}
+      .tabs{grid-template-columns: repeat(3, 1fr)}
+      .headerInner{padding:10px 12px}
+      .container{padding:12px}
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ================= HEADER (LOGO + SEARCH + FILTER) ================= -->
+  <header class="siteHeader">
+    <div class="headerInner">
+      <!-- LOGO (GÓC TRÁI) -->
+      <a class="brand" href="index.html" title="HH3D – Kho phim chọn lọc">
+        <!-- Logo SVG (khỏi cần file ảnh) -->
+        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#22c55e"/>
+              <stop offset="1" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.22"/>
+          <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
+          <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
+        </svg>
+
+        <div class="brandText">
+          <div class="brandName">HH3D</div>
+          <div class="brandTag">Kho phim chọn lọc</div>
+        </div>
+      </a>
+
+      <!-- TOOLS (GÓC PHẢI) -->
+      <div class="tools">
+        <div class="searchWrap">
+          <span>🔎</span>
+          <input id="q" class="search" placeholder="Tìm tên phim..." />
+        </div>
+
+        <select id="genre" class="select" title="Thể loại">
+          <option value="">Tất cả thể loại</option>
+          <option value="tien-hiep">Tiên hiệp</option>
+          <option value="huyen-huyen">Huyền huyễn</option>
+          <option value="kiem-hiep">Kiếm hiệp</option>
+          <option value="do-thi">Đô thị</option>
+          <option value="hoat-hinh">Hoạt hình</option>
+        </select>
+
+        <select id="sort" class="select" title="Sắp xếp">
+          <option value="new">Mới cập nhật</option>
+          <option value="az">A → Z</option>
+          <option value="za">Z → A</option>
+          <option value="eps">Nhiều tập</option>
+        </select>
+      </div>
+    </div>
+  </header>
+  <!-- ================= END HEADER ================= -->
+
+  <div class="container">
+    <div class="layout">
+      <!-- ================= MAIN: LỊCH PHIM + GRID ================= -->
+      <section class="panel">
+        <div class="panelHeader">
+          <div class="panelTitle">📅 Lịch Phim</div>
+          <!-- ✅ Tự tính theo giờ Việt Nam -->
+          <div class="panelSub" id="vnNow">Hôm nay: ...</div>
+        </div>
+
+        <!-- Tabs thứ -->
+        <div class="tabs" id="tabs"></div>
+
+        <!-- Grid phim -->
+        <div class="grid" id="grid"></div>
+      </section>
+
+      <!-- ================= ASIDE: BẢNG XẾP HẠNG ================= -->
+      <aside class="panel">
+        <div class="panelHeader">
+          <div class="panelTitle">🏆 Bảng Xếp Hạng</div>
+          <div class="panelSub">Top 10 hôm nay</div>
+        </div>
+        <div class="rankList" id="rankList"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ================= MODAL (PHIM CHƯA CÓ FILE) ================= -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modalTop">
+        <b id="modalTitle">Đang cập nhật</b>
+        <button class="closeBtn" id="closeModal">Đóng</button>
+      </div>
+      <div class="modalBody">
+        <div id="modalMsg">Chúng tôi đang cố gắng cập nhật bộ phim này.</div>
+        <div class="muted" id="modalSub">Bạn quay lại sau nha.</div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // dự phòng cho trình duyệt không hỗ trợ meta refresh
-    window.location.replace("phim.html");
+    /* ============================================================
+      ✅ INDEX MỚI (TRANG CHỦ DUY NHẤT)
+      - KHÔNG dùng phim.html
+      - KHÔNG dùng xem.html
+      - Mỗi phim: có title, poster, episodes, genre, file
+      - Nếu file rỗng => bấm vào sẽ hiện "đang cập nhật"
+      - Nếu file có (vd muc-than-ki.html) => bấm vào mở file đó
+    ============================================================ */
+
+    /* ==============================
+      1) DATA PHIM THEO NGÀY (EM CHỈ SỬA Ở ĐÂY)
+      - title: tên phim (anh điền theo ảnh em gửi)
+      - poster: đường dẫn ảnh (EM TỰ ĐIỀN) vd: "images/ten-anh.jpg"
+      - episodes: dạng "đang/ tổng" (anh điền theo ảnh mẫu, em có thể sửa)
+      - badge: chữ nhỏ kiểu "TM-VS", "4K TM-VS"... (em có thể sửa)
+      - genre: anh tự phân loại (em có thể đổi lại)
+      - file: tên file tập phim (EM TỰ TẠO sau). Có thì điền, chưa có để ""
+         ví dụ: file: "tien-nghich.html"
+    ============================== */
+
+    const schedule = {
+      /* ===== THỨ 2 (MONDAY) ===== */
+      mon: [
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Nghịch Thiên Chí Tôn", poster:"", episodes:"484/580", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Võ Thượng Thần Đế", poster:"", episodes:"565/632", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Đại Lục Linh Vũ", poster:"", episodes:"148/…", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Thần Tài Quyền Đô", poster:"", episodes:"39/60", badge:"TM-VS", genre:"do-thi", file:"" },
+        { title:"Thôn Phệ Tinh Không", poster:"", episodes:"208/260", badge:"4K TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Lão Tổ Luyện Thể", poster:"", episodes:"04/40", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Tiên Đế Trở Về", poster:"", episodes:"16/16", badge:"4K TM-VS", genre:"tien-hiep", file:"" },
+        { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"04/12", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Nhất Nhân Chi Hạ (P2)", poster:"", episodes:"", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+
+        // ✅ chừa thêm khung trống (4–5 khung) => hiện "Đang cập nhật"
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+
+      /* ===== THỨ 3 (TUESDAY) ===== */
+      tue: [
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Luyện Khí Mười Vạn Năm", poster:"", episodes:"316/360", badge:"TM-VS", genre:"tien-hiep", file:"" },
+        { title:"Vạn Giới Độc Tôn", poster:"", episodes:"404/498", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Gia Thiên", poster:"", episodes:"146/156", badge:"4K", genre:"tien-hiep", file:"" },
+        { title:"Thiên Tướng", poster:"", episodes:"17/26", badge:"4K", genre:"kiem-hiep", file:"" },
+        { title:"Bách Luyện Thành Thần", poster:"", episodes:"113/…", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Tiên Kiếm Kỳ Hiệp", poster:"", episodes:"07/26", badge:"4K", genre:"kiem-hiep", file:"" },
+        { title:"Ngạo Thế Đan Thần", poster:"", episodes:"11/12", badge:"4K", genre:"tien-hiep", file:"" },
+        { title:"Võ Hồn Đại Lục", poster:"", episodes:"42/48", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Võ Thần Chúa Tể", poster:"", episodes:"620/720", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Tuyệt Thế Chiến Hồn", poster:"", episodes:"160/…", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Tiên Hóa Siêu Phàm", poster:"", episodes:"04/16", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"", badge:"2D", genre:"hoat-hinh", file:"" },
+
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+
+      /* ===== THỨ 4 (WEDNESDAY) ===== */
+      wed: [
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Kiếm Lai Phần 2", poster:"", episodes:"08/26", badge:"4K", genre:"kiem-hiep", file:"" },
+        { title:"Thần Ẩn Vương Tọa", poster:"", episodes:"196/208", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Huyền Giới Chi Môn", poster:"", episodes:"12/18", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Tử Xuyên Phần 2", poster:"", episodes:"30/…", badge:"4K", genre:"kiem-hiep", file:"" },
+        { title:"Dẫn Điểu Cực Dĩ…", poster:"", episodes:"08/08", badge:"2D", genre:"hoat-hinh", file:"" },
+        { title:"Đô Thị Cổ Tiên Y", poster:"", episodes:"146/150", badge:"TM-VS", genre:"do-thi", file:"" },
+        { title:"Bắt Đầu Với Chí Tôn…", poster:"", episodes:"09/40", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+
+      /* ===== THỨ 5 (THURSDAY) ===== */
+      thu: [
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Thế Giới Hoàn Mỹ", poster:"", episodes:"253/286", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Sư Huynh A Sư Huynh", poster:"", episodes:"126/143", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Đại Đường Thua…", poster:"", episodes:"21/26", badge:"4K", genre:"kiem-hiep", file:"" },
+        { title:"Võ Toái Tinh Hà", poster:"", episodes:"51/60", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Thần Tài Quyền Đô", poster:"", episodes:"39/60", badge:"TM-VS", genre:"do-thi", file:"" },
+        { title:"Vũ Động Càn Khôn", poster:"", episodes:"04/12", badge:"[End]", genre:"huyen-huyen", file:"" },
+
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+
+      /* ===== THỨ 6 (FRIDAY) ===== */
+      fri: [
+        { title:"Vĩnh Sinh Phần 5", poster:"", episodes:"09/…", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Mật Mã Sơn Hải Kinh", poster:"", episodes:"07/13", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Đấu La Đại Lục 2", poster:"", episodes:"138/156", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Thần Mộ", poster:"", episodes:"70/85", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Đại Chúa Tể 3D", poster:"", episodes:"58/…", badge:"4K", genre:"tien-hiep", file:"" },
+        { title:"Thẩm Không Bỉ Ngạn", poster:"", episodes:"05/…", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Nghịch Thiên Chí Tôn", poster:"", episodes:"484/580", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Võ Thượng Thần Đế", poster:"", episodes:"565/632", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Đại Lục Linh Vũ", poster:"", episodes:"148/…", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Tam Tuyển Luân Hồi", poster:"", episodes:"01-02", badge:"Mới", genre:"huyen-huyen", file:"" },
+
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+
+      /* ===== THỨ 7 (SATURDAY) ===== */
+      sat: [
+        { title:"Đấu Phá Thương Khung", poster:"", episodes:"184/209", badge:"4K", genre:"huyen-huyen", file:"" },
+        { title:"Trạch Thiên Ký", poster:"", episodes:"01-03", badge:"4K Mới", genre:"tien-hiep", file:"" },
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Tiên Võ Đế Tôn", poster:"", episodes:"152/182", badge:"4K", genre:"tien-hiep", file:"" },
+        { title:"Cửu Dương Võ Thần", poster:"", episodes:"13/20", badge:"4K", genre:"kiem-hiep", file:"" },
+        { title:"Luyện Khí Mười Vạn Năm", poster:"", episodes:"316/360", badge:"TM-VS", genre:"tien-hiep", file:"" },
+        { title:"Vạn Giới Độc Tôn", poster:"", episodes:"404/498", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Phàm Nhân Tu Tiên…", poster:"", episodes:"176/176", badge:"4K Full", genre:"tien-hiep", file:"" },
+        { title:"Bắt Đầu Với Chí Tôn…", poster:"", episodes:"09/40", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+
+      /* ===== CHỦ NHẬT (SUNDAY) ===== */
+      sun: [
+        { title:"Tư Vô Tà", poster:"", episodes:"02/24", badge:"2D TM-VS", genre:"hoat-hinh", file:"" },
+        { title:"Quang Âm Chi Ngoại", poster:"", episodes:"Trailer 07/26", badge:"4K TM-VS", genre:"kiem-hiep", file:"" },
+        { title:"Mục Thần Ký", poster:"", episodes:"Trailer 68/78", badge:"4K TM-VS", genre:"kiem-hiep", file:"muc-than-ki.html" }, // ✅ ví dụ đã có file
+        { title:"Tiên Nghịch", poster:"images/anh-tien-nghich.jpg", episodes:"Trailer 126/128", badge:"4K", genre:"tien-hiep", file:"" },
+        { title:"Võ Toái Tinh Hà", poster:"", episodes:"5/60", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Trung Quốc Kỳ Đàm…", poster:"", episodes:"05/09", badge:"2D", genre:"hoat-hinh", file:"" },
+        { title:"Đô Thị Cổ Tiên Y", poster:"", episodes:"144/150", badge:"TM-VS", genre:"do-thi", file:"" },
+        { title:"Võ Hồn Đại Lục", poster:"", episodes:"42/48", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Võ Thần Chúa Tể", poster:"", episodes:"620/720", badge:"TM-VS", genre:"huyen-huyen", file:"" },
+        { title:"Toàn Năng Cao Thủ", poster:"", episodes:"14/…", badge:"TM-VS", genre:"do-thi", file:"" },
+        { title:"Chấm Dao Ca Phần 3", poster:"", episodes:"13/14", badge:"2D", genre:"hoat-hinh", file:"" },
+        { title:"Nhất Nhân Chi Hạ", poster:"", episodes:"", badge:"2D", genre:"hoat-hinh", file:"" },
+
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+        { title:"Đang cập nhật", poster:"", episodes:"", badge:"", genre:"", file:"", updating:true },
+      ],
+    };
+
+    /* ==============================
+      2) BẢNG XẾP HẠNG (TOP 10)
+      - Bấm vào cũng giống như phim trong lịch:
+        + có file => mở file
+        + không có file => hiện "đang cập nhật"
+    ============================== */
+    const ranking = [
+      { title:"Tiên Nghịch", poster:"images/anh-tien-nghich.jpg", episodes:"126/128", badge:"4K", genre:"tien-hiep", file:"" },
+      { title:"Đấu Phá Thương Khung", poster:"", episodes:"184/209", badge:"4K", genre:"huyen-huyen", file:"" },
+      { title:"Mục Thần Ký", poster:"", episodes:"68/78", badge:"4K", genre:"kiem-hiep", file:"muc-than-ki.html" },
+      { title:"Thế Giới Hoàn Mỹ", poster:"", episodes:"253/286", badge:"4K", genre:"huyen-huyen", file:"" },
+      { title:"Phàm Nhân Tu Tiên (Full)", poster:"", episodes:"176/176", badge:"4K", genre:"tien-hiep", file:"" },
+      { title:"Đấu La Đại Lục 2", poster:"", episodes:"138/156", badge:"4K", genre:"huyen-huyen", file:"" },
+      { title:"Thôn Phệ Tinh Không", poster:"", episodes:"208/260", badge:"4K", genre:"huyen-huyen", file:"" },
+      { title:"Kiếm Lai Phần 2", poster:"", episodes:"08/26", badge:"4K", genre:"kiem-hiep", file:"" },
+      { title:"Gia Thiên", poster:"", episodes:"146/156", badge:"4K", genre:"tien-hiep", file:"" },
+      { title:"Thần Ẩn Vương Tọa", poster:"", episodes:"196/208", badge:"4K", genre:"huyen-huyen", file:"" },
+    ];
+
+    /* ==============================
+      3) UI + LOGIC
+    ============================== */
+    const VN_TZ = "Asia/Ho_Chi_Minh";
+
+    const tabsConfig = [
+      { key:"mon", vn:"Thứ 2", en:"Monday" },
+      { key:"tue", vn:"Thứ 3", en:"Tuesday" },
+      { key:"wed", vn:"Thứ 4", en:"Wednesday" },
+      { key:"thu", vn:"Thứ 5", en:"Thursday" },
+      { key:"fri", vn:"Thứ 6", en:"Friday" },
+      { key:"sat", vn:"Thứ 7", en:"Saturday" },
+      { key:"sun", vn:"Chủ nhật", en:"Sunday" },
+    ];
+
+    function getVNNow(){
+      const now = new Date();
+      const fmt = new Intl.DateTimeFormat("vi-VN", {
+        timeZone: VN_TZ,
+        weekday:"long",
+        day:"2-digit",
+        month:"2-digit",
+        year:"numeric"
+      });
+      return fmt.format(now); // vd: "chủ nhật, 01/02/2026"
+    }
+
+    function getVNWeekdayKey(){
+      // Lấy thứ theo giờ VN
+      const now = new Date();
+      const vnWeekday = new Intl.DateTimeFormat("en-US", { timeZone: VN_TZ, weekday:"short" }).format(now);
+      // Sun Mon Tue Wed Thu Fri Sat
+      const map = { Mon:"mon", Tue:"tue", Wed:"wed", Thu:"thu", Fri:"fri", Sat:"sat", Sun:"sun" };
+      return map[vnWeekday] || "mon";
+    }
+
+    function normalize(s){ return (s||"").toLowerCase().trim(); }
+
+    function applyFilters(items){
+      const q = normalize(document.getElementById("q").value);
+      const g = document.getElementById("genre").value;
+      const sort = document.getElementById("sort").value;
+
+      let out = items.slice();
+
+      if (q){
+        out = out.filter(f => normalize(f.title).includes(q));
+      }
+      if (g){
+        out = out.filter(f => (f.genre||"") === g);
+      }
+
+      if (sort === "az"){
+        out.sort((a,b) => (a.title||"").localeCompare(b.title||"", "vi"));
+      } else if (sort === "za"){
+        out.sort((a,b) => (b.title||"").localeCompare(a.title||"", "vi"));
+      } else if (sort === "eps"){
+        // so sánh theo số "đang" hoặc "tổng" (lấy tổng nếu có)
+        const getNum = (x) => {
+          const m = String(x||"").match(/(\d+)\s*\/\s*(\d+)/);
+          if (!m) return 0;
+          const cur = parseInt(m[1],10);
+          const total = parseInt(m[2],10);
+          return (total || cur || 0);
+        };
+        out.sort((a,b) => getNum(b.episodes) - getNum(a.episodes));
+      }
+      // "new" giữ nguyên
+      return out;
+    }
+
+    function openFilm(film){
+      // Nếu có file => mở file
+      if (film.file && film.file.trim()){
+        location.href = film.file.trim();
+        return;
+      }
+
+      // Nếu đang cập nhật / chưa có file
+      showModal(
+        film.title && film.title !== "Đang cập nhật" ? film.title : "Đang cập nhật",
+        "Chúng tôi đang cố gắng cập nhật bộ phim này.",
+        "Bạn quay lại sau nha."
+      );
+    }
+
+    function showModal(title, msg, sub){
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalMsg").textContent = msg;
+      document.getElementById("modalSub").textContent = sub;
+      document.getElementById("modalBack").style.display = "flex";
+    }
+
+    function hideModal(){
+      document.getElementById("modalBack").style.display = "none";
+    }
+
+    function renderTabs(activeKey){
+      const tabs = document.getElementById("tabs");
+      tabs.innerHTML = "";
+      tabsConfig.forEach(t => {
+        const el = document.createElement("div");
+        el.className = "tab" + (t.key === activeKey ? " active" : "");
+        el.innerHTML = `<div class="vn">${t.vn}</div><div class="en">${t.en}</div>`;
+        el.onclick = () => {
+          setActiveDay(t.key);
+        };
+        tabs.appendChild(el);
+      });
+    }
+
+    function renderGrid(dayKey){
+      const grid = document.getElementById("grid");
+      const raw = schedule[dayKey] || [];
+      const items = applyFilters(raw);
+
+      grid.innerHTML = "";
+      items.forEach(film => {
+        const card = document.createElement("div");
+        const isUpdating = !!film.updating || (film.title === "Đang cập nhật");
+        card.className = "card" + (isUpdating ? " updating" : "");
+
+        card.onclick = () => {
+          if (isUpdating) {
+            showModal("Đang cập nhật", "Ô này chưa có phim.", "Bạn quay lại sau nha.");
+            return;
+          }
+          openFilm(film);
+        };
+
+        const posterHTML = film.poster
+          ? `<img src="${film.poster}" alt="${film.title}" loading="lazy">`
+          : `<div class="noimg">NO IMAGE</div>`;
+
+        const top = film.episodes ? `<div class="badgeTop">${film.episodes}</div>` : "";
+        const bottom = film.badge ? `<div class="badgeBottom">${film.badge}</div>` : "";
+
+        // nút xem ngay (hover)
+        const overlay = `
+          <div class="playOverlay">
+            <button class="playBtn" type="button">${film.file ? "Xem ngay" : "Xem"}</button>
+          </div>
+        `;
+
+        card.innerHTML = `
+          <div class="poster">
+            ${posterHTML}
+            ${top}
+            ${bottom}
+            ${overlay}
+          </div>
+          <div class="title">${film.title}</div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function renderRanking(){
+      const list = document.getElementById("rankList");
+      list.innerHTML = "";
+
+      ranking.forEach((film, idx) => {
+        const item = document.createElement("div");
+        item.className = "rankItem";
+        item.onclick = () => openFilm(film);
+
+        const posterHTML = film.poster
+          ? `<img src="${film.poster}" alt="${film.title}" loading="lazy">`
+          : `<div class="noimg">NO IMAGE</div>`;
+
+        item.innerHTML = `
+          <div class="rankNum">${idx + 1}</div>
+          <div class="rankPoster">${posterHTML}</div>
+          <div>
+            <div class="rankTitle">${film.title}</div>
+            <div class="rankMeta">${film.episodes ? film.episodes + " • " : ""}${film.badge ? film.badge + " • " : ""}${film.genre || ""}</div>
+          </div>
+        `;
+
+        list.appendChild(item);
+      });
+    }
+
+    let ACTIVE_DAY = getVNWeekdayKey();
+
+    function setActiveDay(dayKey){
+      ACTIVE_DAY = dayKey;
+      renderTabs(ACTIVE_DAY);
+      renderGrid(ACTIVE_DAY);
+    }
+
+    // ===== INIT =====
+    document.getElementById("vnNow").textContent = "Hôm nay: " + getVNNow();
+    renderRanking();
+    setActiveDay(ACTIVE_DAY);
+
+    // rerender khi search/filter/sort
+    document.getElementById("q").addEventListener("input", () => renderGrid(ACTIVE_DAY));
+    document.getElementById("genre").addEventListener("change", () => renderGrid(ACTIVE_DAY));
+    document.getElementById("sort").addEventListener("change", () => renderGrid(ACTIVE_DAY));
+
+    // modal close
+    document.getElementById("closeModal").addEventListener("click", hideModal);
+    document.getElementById("modalBack").addEventListener("click", (e) => {
+      if (e.target.id === "modalBack") hideModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hideModal();
+    });
   </script>
-</head>
-<body>
 </body>
 </html>
