@@ -123,51 +123,49 @@
       .search{width:160px}
       .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
     }
-  /* ===== Badge số tập + nút Xem ngay ===== */
-.epBadge{
-  position:absolute;
-  top:10px;
-  right:10px;
-  background:#22c55e;
-  color:#062a16;
-  font-size:11px;
-  font-weight:900;
-  padding:5px 8px;
-  border-radius:10px;
-  box-shadow:0 6px 18px rgba(0,0,0,.35);
-}
 
-.playOverlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:rgba(2,6,23,.55);
-  opacity:0;
-  transition:.18s ease;
-}
+    /* ===== Badge số tập + nút Xem ngay ===== */
+    .epBadge{
+      position:absolute;
+      top:10px;
+      right:10px;
+      background:#22c55e;
+      color:#062a16;
+      font-size:11px;
+      font-weight:900;
+      padding:5px 8px;
+      border-radius:10px;
+      box-shadow:0 6px 18px rgba(0,0,0,.35);
+      z-index:3;
+    }
 
-.playBtn{
-  border:none;
-  background:#22c55e;
-  color:#062a16;
-  font-weight:900;
-  padding:10px 14px;
-  border-radius:14px;
-  cursor:pointer;
-  transform:translateY(6px);
-  transition:.18s ease;
-}
+    .playOverlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(2,6,23,.55);
+      opacity:0;
+      transition:.18s ease;
+      z-index:2;
+    }
 
-.card:hover .playOverlay{
-  opacity:1;
-}
+    .playBtn{
+      border:none;
+      background:#22c55e;
+      color:#062a16;
+      font-weight:900;
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      transform:translateY(6px);
+      transition:.18s ease;
+    }
 
-.card:hover .playBtn{
-  transform:translateY(0);
-}
-</style>
+    .card:hover .playOverlay{opacity:1;}
+    .card:hover .playBtn{transform:translateY(0);}
+  </style>
 </head>
 
 <body>
@@ -186,10 +184,10 @@
               <stop offset="1" stop-color="#60a5fa"/>
             </linearGradient>
           </defs>
-          <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.18"/>
-          <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
-          <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
-        </svg>
+        <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.18"/>
+        <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
+        <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
+      </svg>
 
         <div class="brandText">
           <div class="brandName">HH3D</div>
@@ -258,13 +256,12 @@
     films[0].slug = "tien-nghich";
     films[0].episodesCount = 126;
     films[0].genre = "tien-hiep";
-    // films[0].page = ""; // dùng xem.html
 
     // PHIM 2
     films[1].title = "Đấu Phá Thương Khung";
     films[1].poster = "images/dptk.jpg";
     films[1].slug = "dau-pha-thuong-khung";
-    films[1].episodesCount = 100; // chưa có tập thì để 0
+    films[1].episodesCount = 100;
     films[1].genre = "huyen-huyen";
     films[1].page = "dptk.html";
 
@@ -281,12 +278,9 @@
     films[3].slug = "muc-than-ki";
     films[3].episodesCount = 68;
     films[3].genre = "kiem-hiep";
-    films[3].page = "muc-than-ki.html"; // ✅ file riêng
-
+    films[3].page = "muc-than-ki.html";
     // ====== HẾT SETUP ======
 
-
-    // ====== PAGE PARAMS ======
     function getPageFromURL(){
       const u = new URL(location.href);
       const p = parseInt(u.searchParams.get("page") || "1", 10);
@@ -298,7 +292,6 @@
       location.href = u.toString();
     }
 
-    // ====== FILTER / SORT (CHỈ TRÊN TRANG HIỆN TẠI) ======
     function normalize(s){ return (s || "").toLowerCase().trim(); }
 
     function applyFilters(items){
@@ -315,19 +308,28 @@
         out = out.filter(f => (f.genre || "") === g);
       }
 
-      // sort
       if (sort === "az"){
         out.sort((a,b) => (a.title||"").localeCompare(b.title||"", "vi"));
       } else if (sort === "za"){
         out.sort((a,b) => (b.title||"").localeCompare(a.title||"", "vi"));
       } else if (sort === "eps"){
         out.sort((a,b) => (b.episodesCount||0) - (a.episodesCount||0));
-      } // "new" giữ nguyên thứ tự
-
+      }
       return out;
     }
 
-    // ====== RENDER ======
+    function openFilm(film){
+      if (!film.episodesCount || film.episodesCount <= 0) {
+        alert("Phim này chưa có tập. Bạn cập nhật episodesCount trước nha!");
+        return;
+      }
+      if (film.page){
+        location.href = film.page;
+        return;
+      }
+      location.href = `xem.html?film=${encodeURIComponent(film.slug)}`;
+    }
+
     function render(page){
       const grid = document.getElementById("grid");
       const pager = document.getElementById("pager");
@@ -341,34 +343,43 @@
         const card = document.createElement("div");
         card.className = "card";
 
-        card.onclick = () => {
-          if (!film.episodesCount || film.episodesCount <= 0) {
-            alert("Phim này chưa có tập. Bạn cập nhật episodesCount trước nha!");
-            return;
-          }
-
-          // Nếu phim có file riêng
-          if (film.page){
-            location.href = film.page;
-            return;
-          }
-
-          // Mặc định dùng xem.html
-          location.href = `xem.html?film=${encodeURIComponent(film.slug)}`;
-        };
+        // click cả card
+        card.onclick = () => openFilm(film);
 
         const posterHTML = film.poster
           ? `<img src="${film.poster}" alt="${film.title}" loading="lazy">`
           : `<div class="noimg">NO IMAGE</div>`;
 
+        const badgeHTML = (film.episodesCount && film.episodesCount > 0)
+          ? `<div class="epBadge">${film.episodesCount} tập</div>`
+          : "";
+
+        const playHTML = (film.episodesCount && film.episodesCount > 0)
+          ? `<div class="playOverlay"><button class="playBtn" type="button">▶ Xem ngay</button></div>`
+          : "";
+
         card.innerHTML = `
-          <div class="poster">${posterHTML}</div>
+          <div class="poster">
+            ${posterHTML}
+            ${badgeHTML}
+            ${playHTML}
+          </div>
           <h3>${film.title || ("HH3D " + film.id)}</h3>
         `;
+
+        // click riêng nút "Xem ngay" (không bị đè click card)
+        const playBtn = card.querySelector(".playBtn");
+        if (playBtn){
+          playBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openFilm(film);
+          });
+        }
+
         grid.appendChild(card);
       });
 
-      // pager
       pager.innerHTML = "";
       for (let p = 1; p <= TOTAL_PAGES; p++){
         const btn = document.createElement("button");
@@ -380,7 +391,7 @@
     }
 
     // rerender on search / filter / sort
-    const pageNow = getPageFromURL();
+    let pageNow = getPageFromURL();
     document.getElementById("q").addEventListener("input", () => render(pageNow));
     document.getElementById("genre").addEventListener("change", () => render(pageNow));
     document.getElementById("sort").addEventListener("change", () => render(pageNow));
