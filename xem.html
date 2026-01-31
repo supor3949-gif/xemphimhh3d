@@ -229,7 +229,26 @@
       const btn = document.createElement("button");
       btn.className = "epBtn";
       btn.textContent = "Tập " + String(i).padStart(2, "0");
-      btn.onclick = () => playEpisode(i);
+      btn.onclick = () => {
+  // ▶️ phát tập
+  playEpisode(i);
+
+  // ===== LINK AFF (1 LINK DÙNG CHO TẤT CẢ TẬP) =====
+  const AFF_TIKTOK = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
+  const AFF_SHOPEE = ""; // để trống – sau gắn
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // ⏱ delay 2 giây cho tự nhiên
+  setTimeout(() => {
+    if (isMobile) {
+      location.href = AFF_TIKTOK;     // 📱 mở app TikTok
+    } else {
+      window.open(AFF_TIKTOK, "_blank"); // 💻 mở web
+    }
+  }, 2000);
+};
+
       epGrid.appendChild(btn);
     }
 
