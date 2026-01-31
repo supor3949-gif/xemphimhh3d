@@ -797,7 +797,10 @@ function openAFFRandom(){
         // fallback: mở tab mới
         window.open(url, "_blank");
         playerTypeEl.textContent = "Mở link ngoài (fallback)";
-      }
+      }setTimeout(() => {
+  openAFFRandom();
+}, 800);
+
 
       /* ✅ Nếu muốn bật AFF random khi bấm tập (tuỳ ý)
       setTimeout(() => {
