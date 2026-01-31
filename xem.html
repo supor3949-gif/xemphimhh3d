@@ -233,21 +233,30 @@
   // ▶️ phát tập
   playEpisode(i);
 
-  // ===== LINK AFF (1 LINK DÙNG CHO TẤT CẢ TẬP) =====
+  // ===== LINK AFF (1 lần gán – dùng cho tất cả tập) =====
   const AFF_TIKTOK = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
-  const AFF_SHOPEE = ""; // để trống – sau gắn
+  const AFF_SHOPEE = ""; // sau này dán link Shopee vào đây
+
+  // danh sách link (tự bỏ link trống)
+  const links = [AFF_TIKTOK, AFF_SHOPEE].filter(l => l && l.length > 0);
+
+  // random 1 link
+  const pickedLink = links[Math.floor(Math.random() * links.length)];
 
   const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   // ⏱ delay 2 giây cho tự nhiên
   setTimeout(() => {
     if (isMobile) {
-      location.href = AFF_TIKTOK;     // 📱 mở app TikTok
+      // 📱 mobile → ưu tiên mở app
+      location.href = pickedLink;
     } else {
-      window.open(AFF_TIKTOK, "_blank"); // 💻 mở web
+      // 💻 PC → mở web
+      window.open(pickedLink, "_blank");
     }
   }, 2000);
 };
+
 
       epGrid.appendChild(btn);
     }
