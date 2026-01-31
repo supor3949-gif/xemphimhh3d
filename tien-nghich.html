@@ -4,6 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Tiên Nghịch – HH3D</title>
+
+  <!-- HLS.js để phát m3u8 trên đa số trình duyệt -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js"></script>
+
   <style>
     :root{
       --bg:#0f172a;
@@ -80,7 +84,7 @@
 
     .movieRow{
       display:grid;
-      grid-template-columns: 220px 1fr;
+      grid-template-columns: 260px 1fr;
       gap:14px;
       padding:14px;
       align-items:start;
@@ -107,9 +111,7 @@
       color:rgba(148,163,184,.95);
       font-weight:900;letter-spacing:.6px;font-size:12px;
     }
-    .metaBox{
-      padding:10px 4px 0;
-    }
+    .metaBox{padding:10px 4px 0}
     .h1{font-size:18px;font-weight:900;margin:0 0 6px}
     .meta{color:var(--muted);font-size:12px;line-height:1.4}
     .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
@@ -123,11 +125,57 @@
       cursor:pointer;
       font-weight:800;
     }
-    .btn:hover{filter:brightness(1.05)}
     .btn.green{
       background:var(--green);
       color:var(--greenDark);
       border:1px solid rgba(34,197,94,.55);
+    }
+
+    /* ===== Player box ===== */
+    .playerWrap{
+      background:rgba(2,6,23,.45);
+      border:1px solid var(--border2);
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .playerTop{
+      padding:12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px solid var(--border2);
+      background:rgba(2,6,23,.55);
+    }
+    .playerTitle{font-weight:900}
+    .playerHint{color:var(--muted);font-size:12px}
+    .playerBody{padding:12px 14px}
+    video{
+      width:100%;
+      border-radius:14px;
+      background:#000;
+      outline:none;
+    }
+    .iframeBox{
+      width:100%;
+      aspect-ratio:16/9;
+      border-radius:14px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+      background:#000;
+      display:none;
+    }
+    .iframeBox iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+    .playerNote{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
     }
 
     /* ===== Episode tools ===== */
@@ -226,8 +274,19 @@
     .modalBody{padding:14px 16px 16px;color:#dbe7ff;font-size:13px;line-height:1.5}
     .muted{color:var(--muted);font-size:12px;margin-top:6px}
 
+    /* ===== Footer note ===== */
+    .footerNote{
+      max-width:1200px;
+      margin:14px auto 0;
+      padding:12px 16px;
+      color:rgba(148,163,184,.92);
+      font-size:11.5px;
+      line-height:1.55;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+
     @media (max-width: 1100px){
-      .movieRow{grid-template-columns: 200px 1fr}
+      .movieRow{grid-template-columns: 220px 1fr}
       .epGrid{grid-template-columns: repeat(8, 1fr)}
     }
     @media (max-width: 860px){
@@ -257,7 +316,7 @@
         </svg>
         <div class="brandText">
           <div class="brandName">XEMPHIMHH3D</div>
-          <div class="brandTag">xem phim giãi trí ngiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
+          <div class="brandTag">xem phim giải trí • nghiêm cấm & không khuyến khích cờ bạc online dưới mọi hình thức</div>
         </div>
       </a>
 
@@ -271,14 +330,15 @@
     <section class="panel">
       <div class="panelHeader">
         <div class="panelTitle">🎬 Tiên Nghịch</div>
-        <div class="panelSub" id="subInfo">Cập nhật: tập 126/128</div>
+        <div class="panelSub" id="subInfo">Cập nhật: tập 125/128</div>
       </div>
 
       <div class="movieRow">
         <div class="posterBox">
           <div class="poster">
             <!-- ✅ POSTER: đổi đường dẫn ảnh ở đây -->
-            <img src="images/anh-tien-nghich.jpg" alt="Tiên Nghịch" onerror="this.remove(); document.getElementById('noimg').style.display='flex';">
+            <img src="images/anh-tien-nghich.jpg" alt="Tiên Nghịch"
+              onerror="this.remove(); document.getElementById('noimg').style.display='flex';">
             <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
           </div>
           <div class="metaBox">
@@ -286,7 +346,6 @@
             <div class="meta">
               <div>Thể loại: <b>Tiên hiệp</b></div>
               <div>Tổng tập: <b>128</b></div>
-              <div></div>
             </div>
             <div class="btnRow">
               <button class="btn" onclick="location.href='index.html'">← Về trang chủ</button>
@@ -296,7 +355,27 @@
         </div>
 
         <div>
-          <div class="meta" style="padding:6px 4px 10px">
+          <!-- PLAYER -->
+          <div class="playerWrap">
+            <div class="playerTop">
+              <div class="playerTitle" id="nowPlaying">Chọn tập để xem</div>
+              <div class="playerHint" id="playerType">Hỗ trợ m3u8 / player</div>
+            </div>
+            <div class="playerBody">
+              <video id="video" controls playsinline></video>
+
+              <!-- player dạng iframe (nếu link không phải m3u8) -->
+              <div class="iframeBox" id="iframeBox">
+                <iframe id="iframe" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>
+              </div>
+
+              <div class="playerNote">
+                ✅ Nếu link bị chặn (CORS/Referer/token) thì có thể không phát được dù code đúng.
+              </div>
+            </div>
+          </div>
+
+          <div class="meta" style="padding:10px 4px 10px">
             ✅ Tập nào có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.
           </div>
 
@@ -317,6 +396,14 @@
         </div>
       </div>
     </section>
+
+    <div class="footerNote">
+      Lưu ý: Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
+      Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+      Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng, vui lòng liên hệ ngay cho chúng tôi
+      sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
+      Và xem phim giải trí, nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
+    </div>
   </div>
 
   <!-- Modal -->
@@ -337,31 +424,160 @@
     /* =========================================================
       ✅ CẤU HÌNH PHIM: Tiên Nghịch
       - TOTAL_EP: tổng tập
-      - UPDATED_EP: tập mới nhất đang có
+      - UPDATED_EP: tập mới nhất đang có link
       - EP_URLS: map { số_tập: "link m3u8 hoặc link player" }
-         -> Em chỉ cần thêm như: EP_URLS[1] = "https://....m3u8";
+         -> Em chỉ cần thêm như: EP_URLS[126] = "https://....m3u8";
     ========================================================= */
-
     const MOVIE_TITLE = "Tiên Nghịch";
     const TOTAL_EP = 128;
-    const UPDATED_EP = 126; // ✅ sửa theo cập nhật của em
+    const UPDATED_EP = 125; // ✅ em gửi tới tập 125
 
-    // ✅ LINK TẬP: để trống thì coi như chưa có
+    // ✅ LINK TẬP (đã điền sẵn 1→125)
     const EP_URLS = {};
-    // Ví dụ:
-    // EP_URLS[1] = "https://example.com/ep1.m3u8";
-    // EP_URLS[2] = "https://example.com/ep2.m3u8";
+    EP_URLS[1]  = "https://s4.phim1280.tv/20240902/nkndLrz4/index.m3u8";
+    EP_URLS[2]  = "https://s4.phim1280.tv/20240902/81WUV6fg/index.m3u8";
+    EP_URLS[3]  = "https://s4.phim1280.tv/20240902/vnt5dWem/index.m3u8";
+    EP_URLS[4]  = "https://s4.phim1280.tv/20240902/P9JDqwRd/index.m3u8";
+    EP_URLS[5]  = "https://s4.phim1280.tv/20240902/qxtZu37s/index.m3u8";
+    EP_URLS[6]  = "https://s4.phim1280.tv/20240902/9GBHeFgZ/index.m3u8";
+    EP_URLS[7]  = "https://s4.phim1280.tv/20240902/e1ZUCMpW/index.m3u8";
+    EP_URLS[8]  = "https://s4.phim1280.tv/20240902/tZXy5eVa/index.m3u8";
+    EP_URLS[9]  = "https://s4.phim1280.tv/20240902/oz4kRHxo/index.m3u8";
+    EP_URLS[10] = "https://s4.phim1280.tv/20240902/gpI609pJ/index.m3u8";
+    EP_URLS[11] = "https://s4.phim1280.tv/20240902/xUrVd8wF/index.m3u8";
+    EP_URLS[12] = "https://s4.phim1280.tv/20240902/Csf5y5ea/index.m3u8";
+    EP_URLS[13] = "https://s4.phim1280.tv/20240902/dpGukr3a/index.m3u8";
+    EP_URLS[14] = "https://s4.phim1280.tv/20240902/raqbZK8W/index.m3u8";
+    EP_URLS[15] = "https://s4.phim1280.tv/20240902/p0dbdtCV/index.m3u8";
+    EP_URLS[16] = "https://s4.phim1280.tv/20240902/DAJ1aPht/index.m3u8";
+    EP_URLS[17] = "https://s4.phim1280.tv/20240902/32HJMyxH/index.m3u8";
+    EP_URLS[18] = "https://s4.phim1280.tv/20240902/dwHrM6X9/index.m3u8";
+    EP_URLS[19] = "https://s4.phim1280.tv/20240902/lIkT49nH/index.m3u8";
+    EP_URLS[20] = "https://s4.phim1280.tv/20240902/I7xOOHGv/index.m3u8";
+    EP_URLS[21] = "https://s4.phim1280.tv/20240902/ZHwwFGpT/index.m3u8";
+    EP_URLS[22] = "https://s4.phim1280.tv/20240902/Y6YFZf1I/index.m3u8";
+    EP_URLS[23] = "https://s4.phim1280.tv/20240902/osEqerpC/index.m3u8";
+    EP_URLS[24] = "https://s4.phim1280.tv/20240902/IszCdMJJ/index.m3u8";
+    EP_URLS[25] = "https://s4.phim1280.tv/20240902/UcgaQIy8/index.m3u8";
+    EP_URLS[26] = "https://s4.phim1280.tv/20240902/b6vOL0z2/index.m3u8";
+    EP_URLS[27] = "https://s4.phim1280.tv/20240902/Lld9jJhv/index.m3u8";
+    EP_URLS[28] = "https://s4.phim1280.tv/20240902/evZDqztr/index.m3u8";
+    EP_URLS[29] = "https://s4.phim1280.tv/20240902/ii77Y5Ur/index.m3u8";
+    EP_URLS[30] = "https://s4.phim1280.tv/20240902/RFGt0l9A/index.m3u8";
+    EP_URLS[31] = "https://s4.phim1280.tv/20240902/udjaoPjF/index.m3u8";
+    EP_URLS[32] = "https://s4.phim1280.tv/20240902/KoJy5F26/index.m3u8";
+    EP_URLS[33] = "https://s4.phim1280.tv/20240902/UexGW1KC/index.m3u8";
+    EP_URLS[34] = "https://s4.phim1280.tv/20240902/UzcisvC0/index.m3u8";
+    EP_URLS[35] = "https://s4.phim1280.tv/20240902/vwmU5Dqr/index.m3u8";
+    EP_URLS[36] = "https://s4.phim1280.tv/20240902/q8kWvxP3/index.m3u8";
+    EP_URLS[37] = "https://s4.phim1280.tv/20240902/pcV053Zf/index.m3u8";
+    EP_URLS[38] = "https://s4.phim1280.tv/20240902/5qYtUXrU/index.m3u8";
+    EP_URLS[39] = "https://s4.phim1280.tv/20240902/6MYLKhBA/index.m3u8";
+    EP_URLS[40] = "https://s4.phim1280.tv/20240902/3fWNeYaO/index.m3u8";
+    EP_URLS[41] = "https://s4.phim1280.tv/20240902/91I83K0q/index.m3u8";
+    EP_URLS[42] = "https://s4.phim1280.tv/20240902/s952CEmg/index.m3u8";
+    EP_URLS[43] = "https://s4.phim1280.tv/20240902/WPiED4QN/index.m3u8";
+    EP_URLS[44] = "https://s4.phim1280.tv/20240902/Qxlr84Rk/index.m3u8";
+    EP_URLS[45] = "https://s4.phim1280.tv/20240902/EBPVfPpA/index.m3u8";
+    EP_URLS[46] = "https://s4.phim1280.tv/20240902/wz7lSCVI/index.m3u8";
+    EP_URLS[47] = "https://s4.phim1280.tv/20240902/q6U5PdGa/index.m3u8";
+    EP_URLS[48] = "https://s4.phim1280.tv/20240902/IAoPWvC6/index.m3u8";
+    EP_URLS[49] = "https://s4.phim1280.tv/20240902/lf1u1s2u/index.m3u8";
+    EP_URLS[50] = "https://s4.phim1280.tv/20240902/A368EtxJ/index.m3u8";
+    EP_URLS[51] = "https://s4.phim1280.tv/20240902/Gc31K6ES/index.m3u8";
+    EP_URLS[52] = "https://s4.phim1280.tv/20240902/72u6OKhp/index.m3u8";
+    EP_URLS[53] = "https://s4.phim1280.tv/20240910/AgnW6jg5/index.m3u8";
+    EP_URLS[54] = "https://s4.phim1280.tv/20240916/pQwFfDJh/index.m3u8";
+    EP_URLS[55] = "https://s5.phim1280.tv/20240925/ev5LaTe5/index.m3u8";
+    EP_URLS[56] = "https://s5.phim1280.tv/20240930/wJyZTmgh/index.m3u8";
+    EP_URLS[57] = "https://s5.phim1280.tv/20241008/tZhxIMfd/index.m3u8";
+    EP_URLS[58] = "https://s4.phim1280.tv/20241021/AvZ9KDGX/index.m3u8";
+    EP_URLS[59] = "https://s4.phim1280.tv/20241021/hbsz3IqB/index.m3u8";
+    EP_URLS[60] = "https://s5.phim1280.tv/20241028/C5zAGgfh/index.m3u8";
+    EP_URLS[61] = "https://s4.phim1280.tv/20241104/ubgQPtgV/index.m3u8";
+    EP_URLS[62] = "https://s5.phim1280.tv/20241112/L2S2UFfL/index.m3u8";
+    EP_URLS[63] = "https://s4.phim1280.tv/20241126/xzwaQY40/index.m3u8";
+    EP_URLS[64] = "https://s4.phim1280.tv/20241126/ZPy2j4fV/index.m3u8";
+    EP_URLS[65] = "https://s4.phim1280.tv/20241209/9sv21U3V/index.m3u8";
+    EP_URLS[66] = "https://s4.phim1280.tv/20241209/lHJqyIqQ/index.m3u8";
+    EP_URLS[67] = "https://s4.phim1280.tv/20241223/npxPlKjZ/index.m3u8";
+    EP_URLS[68] = "https://s4.phim1280.tv/20241223/SfYqeLSI/index.m3u8";
+    EP_URLS[69] = "https://s5.phim1280.tv/20241230/vpoQSKuU/index.m3u8";
+    EP_URLS[70] = "https://s5.phim1280.tv/20250113/HbYRkB5Q/index.m3u8";
+    EP_URLS[71] = "https://s5.phim1280.tv/20250113/TJlfC5Ym/index.m3u8";
+    EP_URLS[72] = "https://s5.phim1280.tv/20250121/GsCqvjIJ/index.m3u8";
+    EP_URLS[73] = "https://s4.phim1280.tv/20250128/5fmooGLO/index.m3u8";
+    EP_URLS[74] = "https://s4.phim1280.tv/20250203/hn7glH9O/index.m3u8";
+    EP_URLS[75] = "https://s4.phim1280.tv/20250211/ZGjJUTzf/index.m3u8";
+    EP_URLS[76] = "https://s4.phim1280.tv/20250217/FnsyBqiP/index.m3u8";
+    EP_URLS[77] = "https://s5.phim1280.tv/20250225/kerZ5vM0/index.m3u8";
+    EP_URLS[78] = "https://s4.phim1280.tv/20250307/OI61voPZ/index.m3u8";
+    EP_URLS[79] = "https://s4.phim1280.tv/20250310/AzMBuXLM/index.m3u8";
+    EP_URLS[80] = "https://s5.phim1280.tv/20250322/ExajaR4u/index.m3u8";
+    EP_URLS[81] = "https://s5.phim1280.tv/20250324/BcQQ8wlx/index.m3u8";
+    EP_URLS[82] = "https://s4.phim1280.tv/20250401/H4EySjYc/index.m3u8";
+    EP_URLS[83] = "https://s5.phim1280.tv/20250407/WHjTD1Bv/index.m3u8";
+    EP_URLS[84] = "https://s4.phim1280.tv/20250414/qF3LiXXQ/index.m3u8";
+    EP_URLS[85] = "https://s5.phim1280.tv/20250421/h4YYM2VR/index.m3u8";
+    EP_URLS[86] = "https://s4.phim1280.tv/20250428/3JFqX7zD/index.m3u8";
+    EP_URLS[87] = "https://s5.phim1280.tv/20250505/Zpo48XHh/index.m3u8";
+    EP_URLS[88] = "https://s5.phim1280.tv/20250512/Kg5rNTil/index.m3u8";
+    EP_URLS[89] = "https://s4.phim1280.tv/20250519/EYnWB7NX/index.m3u8";
+    EP_URLS[90] = "https://s6.kkphimplayer6.com/20250525/6VjWTWRK/index.m3u8";
+    EP_URLS[91] = "https://s6.kkphimplayer6.com/20250602/2gCXJwTu/index.m3u8";
+    EP_URLS[92] = "https://s6.kkphimplayer6.com/20250609/sbhhXwD0/index.m3u8";
+    EP_URLS[93] = "https://s6.kkphimplayer6.com/20250616/oPZUpkff/index.m3u8";
+    EP_URLS[94] = "https://s6.kkphimplayer6.com/20250625/ZmAN0RVB/index.m3u8";
+    EP_URLS[95] = "https://s6.kkphimplayer6.com/20250630/AfuvfaNo/index.m3u8";
+    EP_URLS[96] = "https://s6.kkphimplayer6.com/20250707/0cPvATsU/index.m3u8";
+    EP_URLS[97] = "https://s6.kkphimplayer6.com/20250713/XWc58Mqq/index.m3u8";
+    EP_URLS[98] = "https://s6.kkphimplayer6.com/20250720/9p8psu23/index.m3u8";
+    EP_URLS[99] = "https://s6.kkphimplayer6.com/20250728/DwPkieIz/index.m3u8";
+    EP_URLS[100]= "https://s6.kkphimplayer6.com/20250805/qRrLo11N/index.m3u8";
+    EP_URLS[101]= "https://s6.kkphimplayer6.com/20250811/rIeKyOog/index.m3u8";
+    EP_URLS[102]= "https://s6.kkphimplayer6.com/20250819/YHakKU9Y/index.m3u8";
+    EP_URLS[103]= "https://s6.kkphimplayer6.com/20250825/v4gxLfJd/index.m3u8";
+    EP_URLS[104]= "https://s6.kkphimplayer6.com/20250901/w0afEOVq/index.m3u8";
+    EP_URLS[105]= "https://s6.kkphimplayer6.com/20250907/KwVRQ6qF/index.m3u8";
+    EP_URLS[106]= "https://s6.kkphimplayer6.com/20250915/q8R2ht6s/index.m3u8";
+    EP_URLS[107]= "https://s6.kkphimplayer6.com/20250922/IqSifeBs/index.m3u8";
+    EP_URLS[108]= "https://s6.kkphimplayer6.com/20250930/ZIE5kF1t/index.m3u8";
+    EP_URLS[109]= "https://s6.kkphimplayer6.com/20251006/Nn9XuTXc/index.m3u8";
+    EP_URLS[110]= "https://s6.kkphimplayer6.com/20251013/PyQnpX5Y/index.m3u8";
+    EP_URLS[111]= "https://s6.kkphimplayer6.com/20251020/pwGh7FcV/index.m3u8";
+    EP_URLS[112]= "https://s6.kkphimplayer6.com/20251103/QgYDekJy/index.m3u8";
+    EP_URLS[113]= "https://s6.kkphimplayer6.com/20251103/7kaGY4Az/index.m3u8";
+    EP_URLS[114]= "https://s6.kkphimplayer6.com/20251109/Mlw3oaAX/index.m3u8";
+    EP_URLS[115]= "https://s6.kkphimplayer6.com/20251116/w3QUN352/index.m3u8";
+    EP_URLS[116]= "https://s6.kkphimplayer6.com/20251123/km737TkW/index.m3u8";
+    EP_URLS[117]= "https://s6.kkphimplayer6.com/20251130/XNRMqlJF/index.m3u8";
+    EP_URLS[118]= "https://s6.kkphimplayer6.com/20251208/Ozq3pc8f/index.m3u8";
+    EP_URLS[119]= "https://s6.kkphimplayer6.com/20251215/1LjoFDEH/index.m3u8";
+    EP_URLS[120]= "https://s6.kkphimplayer6.com/20251222/x4DDm68O/index.m3u8";
+    EP_URLS[121]= "https://s6.kkphimplayer6.com/20251229/B7MuH4x0/index.m3u8";
+    EP_URLS[122]= "https://s6.kkphimplayer6.com/20260105/hKA0MbvL/index.m3u8";
+    EP_URLS[123]= "https://s6.kkphimplayer6.com/20260112/TXODlCvA/index.m3u8";
+    EP_URLS[124]= "https://s6.kkphimplayer6.com/20260119/Za0qyXSD/index.m3u8";
+    EP_URLS[125]= "https://s6.kkphimplayer6.com/20260126/yJmCuVRM/index.m3u8";
+    // EP_URLS[126] = ""; // em thêm sau
+    // EP_URLS[127] = "";
+    // EP_URLS[128] = "";
 
-    /* =========================================================
-      (Tuỳ chọn) AFF random TikTok / Shopee khi bấm tập
-      - Nếu em muốn bật, bỏ comment trong playEpisode()
-    ========================================================= */
+    // (Tuỳ chọn) AFF (nếu muốn)
     const AFF_TIKTOK = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
     const AFF_SHOPEE = ""; // em điền sau
 
     /* ================== UI ================== */
     document.getElementById("movieInfo").textContent = `${MOVIE_TITLE} • ${TOTAL_EP} tập`;
     document.getElementById("subInfo").textContent = `Cập nhật: tập ${UPDATED_EP}/${TOTAL_EP}`;
+
+    const videoEl = document.getElementById("video");
+    const iframeBox = document.getElementById("iframeBox");
+    const iframeEl = document.getElementById("iframe");
+    const nowPlayingEl = document.getElementById("nowPlaying");
+    const playerTypeEl = document.getElementById("playerType");
+
+    let hls = null;
 
     function showModal(title, msg, sub){
       document.getElementById("modalTitle").textContent = title;
@@ -372,16 +588,13 @@
     function hideModal(){
       document.getElementById("modalBack").style.display = "none";
     }
-
     function scrollToEpisodes(){
       document.getElementById("epGrid").scrollIntoView({behavior:"smooth", block:"start"});
     }
 
     function getEpList(){
-      // tạo mảng [1..TOTAL_EP]
       const arr = Array.from({length: TOTAL_EP}, (_,i) => i+1);
 
-      // filter theo search
       const q = (document.getElementById("epSearch").value || "").trim();
       let out = arr;
       if (q){
@@ -389,7 +602,6 @@
         if (!Number.isNaN(n)) out = arr.filter(x => x === n);
       }
 
-      // sort
       const mode = document.getElementById("epSort").value;
       if (mode === "desc") out = out.slice().sort((a,b)=>b-a);
       else if (mode === "done"){
@@ -397,7 +609,7 @@
           const da = !!EP_URLS[a];
           const db = !!EP_URLS[b];
           if (da === db) return a-b;
-          return db - da; // có link lên trước
+          return db - da;
         });
       }
       return out;
@@ -427,6 +639,77 @@
       });
     }
 
+    function resetPlayers(){
+      // tắt iframe
+      iframeEl.src = "about:blank";
+      iframeBox.style.display = "none";
+
+      // tắt video/hls
+      try { videoEl.pause(); } catch(e){}
+      videoEl.removeAttribute("src");
+      videoEl.load();
+
+      if (hls){
+        try { hls.destroy(); } catch(e){}
+        hls = null;
+      }
+    }
+
+    function isM3U8(url){
+      return /\.m3u8(\?.*)?$/i.test(url);
+    }
+
+    function isProbablyPlayer(url){
+      // link dạng player/iframe (em có thể chỉnh thêm điều kiện nếu muốn)
+      return /player|embed|iframe/i.test(url) && !isM3U8(url);
+    }
+
+    function playM3U8(url){
+      resetPlayers();
+      iframeBox.style.display = "none";
+      videoEl.style.display = "block";
+
+      // Safari iOS có thể play native HLS
+      if (videoEl.canPlayType("application/vnd.apple.mpegurl")){
+        videoEl.src = url;
+        videoEl.play().catch(()=>{});
+        playerTypeEl.textContent = "Đang phát: m3u8 (native)";
+        return;
+      }
+
+      // Chrome/Android/PC dùng HLS.js
+      if (window.Hls && window.Hls.isSupported()){
+        hls = new Hls({
+          // cấu hình nhẹ, giảm lỗi timeout
+          maxBufferLength: 30,
+          backBufferLength: 30
+        });
+        hls.loadSource(url);
+        hls.attachMedia(videoEl);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          videoEl.play().catch(()=>{});
+        });
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          // Nếu nguồn chặn/cors => báo cho user
+          if (data && data.fatal){
+            showModal("Không phát được", "Nguồn video có thể chặn (CORS/Referer/token).", "Thử đổi nguồn khác hoặc dùng link player/iframe.");
+          }
+        });
+        playerTypeEl.textContent = "Đang phát: m3u8 (HLS.js)";
+        return;
+      }
+
+      showModal("Thiếu hỗ trợ", "Trình duyệt không hỗ trợ phát m3u8.", "Thử Safari iPhone hoặc cập nhật trình duyệt.");
+    }
+
+    function playIFRAME(url){
+      resetPlayers();
+      videoEl.style.display = "none";
+      iframeBox.style.display = "block";
+      iframeEl.src = url;
+      playerTypeEl.textContent = "Đang phát: player/iframe";
+    }
+
     function playEpisode(ep){
       const url = EP_URLS[ep];
 
@@ -435,18 +718,27 @@
         return;
       }
 
-      // ✅ mở link tập (em đang dùng kiểu nhúng/hls thế nào thì thay ở đây)
-      // Option 1: mở thẳng link
-      window.open(url, "_blank");
+      nowPlayingEl.textContent = `${MOVIE_TITLE} – Tập ${String(ep).padStart(2,"0")}`;
 
-      /* ✅ Nếu em muốn “kèm AFF” thì bật đoạn này (tuỳ ý):
+      // ✅ chọn kiểu phát theo link
+      if (isM3U8(url)){
+        playM3U8(url);
+      } else if (isProbablyPlayer(url)){
+        playIFRAME(url);
+      } else {
+        // fallback: mở tab mới
+        window.open(url, "_blank");
+        playerTypeEl.textContent = "Mở link ngoài (fallback)";
+      }
+
+      /* ✅ Nếu muốn bật AFF random khi bấm tập (tuỳ ý)
       setTimeout(() => {
         const list = [AFF_TIKTOK, AFF_SHOPEE].filter(Boolean);
         if (list.length){
           const pick = list[Math.floor(Math.random()*list.length)];
           window.location.href = pick;
         }
-      }, 2000);
+      }, 1500);
       */
     }
 
