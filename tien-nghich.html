@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tiên Nghịch – XEMPHIMHH3D</title>
+  <title>Tiên Nghịch – HH3D</title>
 
-  <!-- HLS.js (phát m3u8 trên Chrome/Edge/Firefox) -->
+  <!-- HLS.js để nhúng m3u8 (nếu server không chặn CORS thì phát được) -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <style>
@@ -22,7 +22,6 @@
       --greenDark:#062a16;
       --blue:#38bdf8;
       --shadow:0 12px 28px rgba(0,0,0,.35);
-      --red:#ef4444;
     }
     *{box-sizing:border-box}
     body{
@@ -36,6 +35,7 @@
     }
     a{color:inherit;text-decoration:none}
 
+    /* ===== Header ===== */
     .siteHeader{
       position:sticky;top:0;z-index:50;
       background:rgba(2,6,23,.88);
@@ -62,9 +62,11 @@
       padding:10px 12px;
       font-size:13px;
       color:#cbd5e1;
+      white-space:nowrap;
     }
 
-    .container{max-width:1200px;margin:0 auto;padding:14px 16px 24px}
+    /* ===== Layout ===== */
+    .container{max-width:1200px;margin:0 auto;padding:14px 16px 30px}
     .panel{
       background:var(--panel);
       border:1px solid var(--border2);
@@ -77,6 +79,7 @@
       border-bottom:1px solid var(--border2);
       display:flex;align-items:center;justify-content:space-between;gap:10px;
       background:rgba(2,6,23,.55);
+      flex-wrap:wrap;
     }
     .panelTitle{display:flex;align-items:center;gap:10px;font-weight:900}
     .panelSub{color:var(--muted);font-size:12px;white-space:nowrap}
@@ -110,10 +113,9 @@
       color:rgba(148,163,184,.95);
       font-weight:900;letter-spacing:.6px;font-size:12px;
     }
-
-    .metaBox{padding:10px 4px 0}
+    .metaBox{padding:10px 4px 0;}
     .h1{font-size:18px;font-weight:900;margin:0 0 6px}
-    .meta{color:var(--muted);font-size:12px;line-height:1.5}
+    .meta{color:var(--muted);font-size:12px;line-height:1.45}
     .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .btn{
       border:none;
@@ -132,99 +134,85 @@
       border:1px solid rgba(34,197,94,.55);
     }
 
-    /* Player box */
-    .playerWrap{
-      background:rgba(2,6,23,.45);
-      border:1px solid var(--border2);
-      border-radius:16px;
-      padding:12px;
-      overflow:hidden;
-    }
-    .playerTop{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin-bottom:10px;
-    }
-    .playerTitle{
-      font-weight:900;
-      font-size:14px;
-      color:#e8eefb;
-    }
-    .playerHint{color:var(--muted);font-size:12px}
-    .playerBox{
-      width:100%;
-      border-radius:14px;
-      overflow:hidden;
-      background:#0b1020;
-      border:1px solid rgba(255,255,255,.08);
-      aspect-ratio: 16/9;
-      position:relative;
-    }
-    video{
-      width:100%;height:100%;
-      display:block;
-      background:#000;
-    }
-    iframe{
-      width:100%;height:100%;
-      border:0;
-      display:block;
-      background:#000;
-    }
-    .playerMsg{
-      position:absolute;inset:0;
-      display:flex;align-items:center;justify-content:center;
-      color:#cbd5e1;
-      padding:12px;
-      text-align:center;
-      font-weight:800;
-      line-height:1.4;
-    }
-    .playerState{
-      margin-top:8px;
-      color:var(--muted);
-      font-size:12px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .statePill{
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(2,6,23,.45);
-      border-radius:999px;
-      padding:6px 10px;
-    }
-
-    /* Sub/Thuyet minh toggle */
+    /* ===== Switch Vietsub / Thuyet minh ===== */
     .modeRow{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top:12px;
+      display:flex;gap:10px;flex-wrap:wrap;
+      padding:0 14px 12px;
     }
     .modeBtn{
-      flex:0 0 auto;
-      min-width:140px;
-      border-radius:14px;
-      padding:10px 12px;
-      font-weight:900;
-      cursor:pointer;
       border:1px solid rgba(255,255,255,.10);
       background:rgba(2,6,23,.55);
       color:#e5e7eb;
+      padding:10px 14px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:900;
       transition:.12s ease;
+      display:flex;align-items:center;gap:8px;
     }
     .modeBtn:hover{border-color:rgba(56,189,248,.35);transform:translateY(-1px)}
     .modeBtn.active{
-      background:rgba(34,197,94,.16);
+      background:rgba(34,197,94,.18);
       border-color:rgba(34,197,94,.55);
-      color:#dcfce7;
-      box-shadow: 0 10px 18px rgba(34,197,94,.08);
+      box-shadow:0 10px 18px rgba(34,197,94,.08);
+    }
+    .modeHint{color:var(--muted);font-size:12px;padding:0 14px 10px}
+
+    /* ===== Player area ===== */
+    .playerWrap{
+      padding:0 14px 14px;
+    }
+    .playerBox{
+      background:rgba(2,6,23,.55);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .playerTop{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;flex-wrap:wrap;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(11,16,32,.55);
+    }
+    .nowPlaying{font-weight:900;font-size:13px}
+    .playerBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .miniBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:8px 10px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+    }
+    .miniBtn:hover{border-color:rgba(56,189,248,.35)}
+    .stage{
+      position:relative;
+      background:#000;
+      aspect-ratio:16/9;
+      width:100%;
+    }
+    video, iframe{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      border:0;
+      background:#000;
+    }
+    iframe{display:none;}
+    .stageHint{
+      padding:10px 12px;
+      color:var(--muted);
+      font-size:12px;
+      background:rgba(2,6,23,.45);
+      border-top:1px solid rgba(255,255,255,.08);
     }
 
+    /* ===== Episode tools ===== */
     .epTools{
       display:flex;gap:10px;flex-wrap:wrap;
-      margin-top:10px;
+      padding:0 14px 14px;
     }
     .searchWrap{
       display:flex;align-items:center;gap:8px;
@@ -249,14 +237,14 @@
       padding:10px 12px;
       outline:none;
       font-size:13px;
-      cursor:pointer;
     }
 
+    /* ===== Episode grid ===== */
     .epGrid{
       display:grid;
       grid-template-columns: repeat(10, 1fr);
       gap:10px;
-      margin-top:12px;
+      padding:0 14px 18px;
     }
     .epBtn{
       border:1px solid rgba(255,255,255,.10);
@@ -268,17 +256,13 @@
       font-weight:900;
       transition:.12s ease;
       position:relative;
-      user-select:none;
     }
     .epBtn:hover{transform:translateY(-1px);border-color:rgba(56,189,248,.35)}
     .epBtn.done{
       border-color: rgba(34,197,94,.55);
       box-shadow: 0 10px 18px rgba(34,197,94,.08);
     }
-    .epBtn.lock{
-      cursor:not-allowed;
-      opacity:.55;
-    }
+    .epBtn.lock{cursor:not-allowed;opacity:.55}
     .epBtn small{
       position:absolute;
       bottom:6px;left:0;right:0;
@@ -287,16 +271,7 @@
       font-weight:700;
     }
 
-    .noteLine{
-      margin-top:10px;
-      color:#cbd5e1;
-      font-size:12px;
-      line-height:1.5;
-    }
-    .noteLine .ok{color:#86efac;font-weight:900}
-    .noteLine .warn{color:#fca5a5;font-weight:900}
-
-    /* Modal */
+    /* ===== Modal ===== */
     .modalBack{
       position:fixed;inset:0;
       background: rgba(0,0,0,.55);
@@ -327,17 +302,15 @@
     .modalBody{padding:14px 16px 16px;color:#dbe7ff;font-size:13px;line-height:1.5}
     .muted{color:var(--muted);font-size:12px;margin-top:6px}
 
-    /* Footer note */
+    /* ===== Footer note ===== */
     .footerNote{
       max-width:1200px;
-      margin:14px auto 26px;
-      padding:0 16px;
-      color:#a7b0c0;
+      margin:0 auto;
+      padding:0 16px 26px;
+      color:var(--muted);
       font-size:11px;
       line-height:1.55;
-      opacity:.92;
     }
-    .footerNote b{color:#dbeafe}
 
     @media (max-width: 1100px){
       .movieRow{grid-template-columns: 220px 1fr}
@@ -370,12 +343,12 @@
         </svg>
         <div class="brandText">
           <div class="brandName">XEMPHIMHH3D</div>
-          <div class="brandTag">xem phim giải trí • nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
+          <div class="brandTag">xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
         </div>
       </a>
 
       <div class="tools">
-        <div class="pill" id="movieInfo">Tiên Nghịch • 128 tập</div>
+        <div class="pill" id="movieInfo">Tiên Nghịch • ...</div>
       </div>
     </div>
   </header>
@@ -384,27 +357,24 @@
     <section class="panel">
       <div class="panelHeader">
         <div class="panelTitle">🎬 <span id="movieTitleTop">Tiên Nghịch</span></div>
-        <div class="panelSub" id="subInfo"></div>
+        <div class="panelSub" id="subInfo">...</div>
       </div>
 
       <div class="movieRow">
-        <!-- LEFT -->
         <div class="posterBox">
           <div class="poster">
-            <!-- ✅ POSTER: đổi ảnh tại đây -->
+            <!-- ✅ POSTER: đổi đường dẫn ảnh ở đây -->
             <img src="images/anh-tien-nghich.jpg" alt="Tiên Nghịch"
                  onerror="this.remove(); document.getElementById('noimg').style.display='flex';">
             <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
           </div>
-
           <div class="metaBox">
             <p class="h1" id="movieTitleLeft">Tiên Nghịch</p>
             <div class="meta">
               <div>Thể loại: <b>Tiên hiệp</b></div>
-              <div>Tổng tập (hiển thị): <b id="totalEpShow">128</b></div>
-              <div>Vietsub: <b id="vsCount">125</b> • Thuyết minh: <b id="tmCount">107</b></div>
+              <div id="metaTotal">Tổng tập: <b>...</b></div>
+              <div id="metaHas">Đã có link: <b>...</b></div>
             </div>
-
             <div class="btnRow">
               <button class="btn" onclick="location.href='index.html'">← Về trang chủ</button>
               <button class="btn green" onclick="scrollToEpisodes()">Xem danh sách tập</button>
@@ -412,54 +382,56 @@
           </div>
         </div>
 
-        <!-- RIGHT -->
         <div>
-          <div class="playerWrap">
-            <div class="playerTop">
-              <div class="playerTitle" id="nowPlayingTitle">Tiên Nghịch – Tập 01</div>
-              <div class="playerHint" id="playerTypeLabel">Chưa chọn tập</div>
-            </div>
-
-            <div class="playerBox" id="playerBox">
-              <div class="playerMsg" id="playerMsg">
-                Chọn tập để xem. (Hỗ trợ: m3u8 / player.phimapi / link embed khác)
-              </div>
-              <!-- video/iframe sẽ được JS gắn vào đây -->
-            </div>
-
-            <div class="playerState">
-              <div class="statePill" id="modeLabel">Đang chọn: Vietsub</div>
-              <div class="statePill" id="affLabel"></div>
-            </div>
-
-            <div class="noteLine">
-              <span class="ok">✅</span> Tập nào có link sẽ có viền xanh.
-              <span class="warn">⚠</span> 
-            </div>
-
-            <!-- ✅ 2 ô chọn: THUYẾT MINH / VIETSUB -->
-            <div class="modeRow" id="modeRow">
-              <button class="modeBtn" id="btnTM" type="button">THUYẾT MINH</button>
-              <button class="modeBtn active" id="btnVS" type="button">VIETSUB</button>
-            </div>
-
-            <!-- tools -->
-            <div class="epTools" id="episodeTools">
-              <div class="searchWrap">
-                <span>🔎</span>
-                <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric" />
-              </div>
-
-              <select id="epSort" class="select" title="Sắp xếp">
-                <option value="asc">Tập tăng dần</option>
-                <option value="desc">Tập giảm dần</option>
-                <option value="done">Có link trước</option>
-              </select>
-            </div>
-
-            <!-- grid -->
-            <div class="epGrid" id="epGrid"></div>
+          <!-- ✅ 2 NÚT MODE: VIETSUB / THUYẾT MINH -->
+          <div class="modeRow">
+            <button class="modeBtn active" id="btnVietsub" type="button">✅ Vietsub</button>
+            <button class="modeBtn" id="btnThuyetMinh" type="button">🎙️ Thuyết minh</button>
           </div>
+          <div class="modeHint" id="modeHint">
+            Bấm <b>Vietsub</b> hoặc <b>Thuyết minh</b> để hiện danh sách tập tương ứng.
+          </div>
+
+          <!-- ✅ Player: nhúng được thì chạy trong trang -->
+          <div class="playerWrap">
+            <div class="playerBox">
+              <div class="playerTop">
+                <div class="nowPlaying" id="nowPlaying">Chưa chọn tập</div>
+                <div class="playerBtns">
+                  <button class="miniBtn" type="button" onclick="openCurrentInNewTab()">Mở tab mới</button>
+                  <button class="miniBtn" type="button" onclick="stopPlayer()">Dừng</button>
+                </div>
+              </div>
+
+              <div class="stage">
+                <video id="video" controls playsinline></video>
+                <iframe id="frame" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
+              </div>
+
+              <div class="stageHint" id="stageHint">
+                ✅ Link nhúng được sẽ phát tại đây. Nếu link bị chặn, hệ thống sẽ tự mở tab mới.
+              </div>
+            </div>
+          </div>
+
+          <div class="meta" style="padding:6px 4px 10px">
+            ✅ Tập có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.
+          </div>
+
+          <div class="epTools">
+            <div class="searchWrap">
+              <span>🔎</span>
+              <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric" />
+            </div>
+
+            <select id="epSort" class="select" title="Sắp xếp">
+              <option value="asc">Tập tăng dần</option>
+              <option value="desc">Tập giảm dần</option>
+              <option value="done">Có link trước</option>
+            </select>
+          </div>
+
+          <div class="epGrid" id="epGrid"></div>
         </div>
       </div>
     </section>
@@ -484,29 +456,20 @@
     Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
     Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
     vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
-    Và xem phim giải trí • nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
+    Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
   </div>
 
   <script>
     /* =========================================================
-      CẤU HÌNH PHIM
+      ✅ CHỈ DÁN 2 LIST VÀO 2 CHỖ DƯỚI ĐÂY LÀ XONG
+      - Format mỗi dòng:
+        Tập 01|https://...
+        Tập 02|https://...
     ========================================================= */
-    const MOVIE_TITLE = "Tiên Nghịch";
-    const GENRE_TEXT  = "Tiên hiệp";
-    const TOTAL_EP_DISPLAY = 128;
 
-    // ✅ SỐ TẬP THEO LOẠI (đúng như em chốt)
-    const COUNT_VIETSUB = 125;
-    const COUNT_THUYETMINH = 107;
-
-    // ✅ 2 LIST LINK: em dán vào đây theo định dạng:
-    // Tập 01|https://....
-    // Tập 02|https://....
-    // ...
-    // (NHỚ: phải nằm trong dấu ` ` để nhiều dòng)
-
+    // ========================= 1) DÁN LIST VIETSUB (125 tập) =========================
     const RAW_VIETSUB = `
-      Tập 01|https://s4.phim1280.tv/20240902/nkndLrz4/index.m3u8
+Tập 01|https://s4.phim1280.tv/20240902/nkndLrz4/index.m3u8
 Tập 02|https://s4.phim1280.tv/20240902/81WUV6fg/index.m3u8
 Tập 03|https://s4.phim1280.tv/20240902/vnt5dWem/index.m3u8
 Tập 04|https://s4.phim1280.tv/20240902/P9JDqwRd/index.m3u8
@@ -632,10 +595,13 @@ Tập 123|https://s6.kkphimplayer6.com/20260112/TXODlCvA/index.m3u8
 Tập 124|https://s6.kkphimplayer6.com/20260119/Za0qyXSD/index.m3u8
 Tập 125|https://s6.kkphimplayer6.com/20260126/yJmCuVRM/index.m3u8
 
-    `.trim();
 
+`.trim();
+
+    
+// ========================= 2) DÁN LIST THUYẾT MINH (107 tập) =========================
     const RAW_THUYETMINH = `
-      Tập 01|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250519/ugj0GZjf/index.m3u8
+Tập 01|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250519/ugj0GZjf/index.m3u8
 Tập 02|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250519/c1GR9Zsa/index.m3u8
 Tập 03|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250519/VpbbdC3R/index.m3u8
 Tập 04|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250519/erRrMv2R/index.m3u8
@@ -743,23 +709,40 @@ Tập 105|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
 Tập 106|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250915/tv79j46j/index.m3u8
 Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250922/7F81IsvL/index.m3u8
 
-    `.trim();
+`.trim();
+
 
     /* =========================================================
-      AFF (7/3) = 7 NHẤN KHÔNG NHẢY, 3 NHẤN MỚI NHẢY
-      - Mobile: ưu tiên mở app (universal/deeplink) + fallback web
-      - PC: mở web (tab mới)
+      ✅ CẤU HÌNH PHIM
     ========================================================= */
-    const AFF_RATE = 0.; // 3/10 nhảy
+    const MOVIE_TITLE = "Tiên Nghịch";
+    const GENRE_TEXT = "Tiên hiệp";
 
-    const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/"; // universal link
-    const SHOPEE_WEB = ""; // em điền link aff shopee web
-    const SHOPEE_APP = ""; // em điền deep link shopee nếu có
+    // Tổng tập theo 2 mode:
+    const TOTAL_VIETSUB = 125;
+    const TOTAL_THUYETMINH = 107;
+
+    // ✅ Mode hiện tại: "vietsub" | "thuyetminh"
+    let MODE = "vietsub";
+
+    // =========================================================
+    // ======================== AFF (7 KHÔNG NHẢY / 3 NHẢY) ========================
+    // =========================================================
+    // TikTok link em đưa (universal link) — mobile thường tự bật app
+    const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
+
+    // Shopee: em tự điền sau
+    const SHOPEE_WEB = "";        // ví dụ: "https://shopee.vn/....(link aff)"
+    const SHOPEE_APP = "";        // deep link app (nếu có): "shopee://..."
+
+    // 7/3 = 30% nhảy
+    const AFF_JUMP_RATE = 0.30;   // 0.30 = 3/10 lần nhảy, 7/10 không nhảy
 
     function isMobileDevice(){
       return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
 
+    // mở app trước, nếu không được thì fallback sang web
     function openMobileWithFallback(appUrl, webUrl){
       const hasWeb = !!(webUrl && webUrl.trim());
       const hasApp = !!(appUrl && appUrl.trim());
@@ -779,28 +762,28 @@ Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
     function openAFFRandom(){
       const sources = [];
 
-      // TikTok: universal link trên mobile hay tự mở app
       sources.push({
-        name:"tiktok",
-        mobileApp:"",
-        mobileWeb:TIKTOK_WEB,
-        pcWeb:TIKTOK_WEB
+        name: "tiktok",
+        mobileApp: "",          // TikTok universal link đủ dùng
+        mobileWeb: TIKTOK_WEB,
+        pcWeb: TIKTOK_WEB
       });
 
-      // Shopee
       if (SHOPEE_WEB || SHOPEE_APP){
         sources.push({
-          name:"shopee",
-          mobileApp:SHOPEE_APP,
-          mobileWeb:SHOPEE_WEB,
-          pcWeb:SHOPEE_WEB
+          name: "shopee",
+          mobileApp: SHOPEE_APP,
+          mobileWeb: SHOPEE_WEB,
+          pcWeb: SHOPEE_WEB
         });
       }
 
       if (!sources.length) return;
 
       const pick = sources[Math.floor(Math.random() * sources.length)];
-      if (isMobileDevice()){
+      const isMobile = isMobileDevice();
+
+      if (isMobile){
         openMobileWithFallback(pick.mobileApp, pick.mobileWeb || pick.pcWeb);
       } else {
         const url = pick.pcWeb || pick.mobileWeb;
@@ -808,234 +791,263 @@ Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
       }
     }
 
-    function maybeOpenAFF(){
-     
-      if (Math.random() < AFF_RATE){
-        // delay nhẹ cho đỡ khó chịu
+    function maybeJumpAFF(){
+      // 30% nhảy, 70% không nhảy
+      if (Math.random() < AFF_JUMP_RATE){
         setTimeout(() => openAFFRandom(), 800);
       }
     }
 
     /* =========================================================
-      AUTO PARSE LIST -> map epNumber => url
+      ✅ PARSE LIST -> map {epNumber: url}
     ========================================================= */
-    function parseRawToMap(raw){
+    function parseList(raw){
       const map = {};
       if (!raw) return map;
 
-      const lines = raw.split("\n").map(s => s.trim()).filter(Boolean);
-
+      const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
       for (const line of lines){
-        // dạng: "Tập 01|https://..."
         const parts = line.split("|");
         if (parts.length < 2) continue;
-        const left = parts[0].trim();  // "Tập 01"
-        const url  = parts.slice(1).join("|").trim(); // phòng trường hợp link có |
+        const left = parts[0].trim();
+        const url = parts.slice(1).join("|").trim();
+
+        // lấy số trong "Tập 01"
         const m = left.match(/(\d+)/);
         if (!m) continue;
         const ep = parseInt(m[1], 10);
-        if (Number.isFinite(ep) && url) map[ep] = url;
+        if (!Number.isFinite(ep)) continue;
+
+        map[ep] = url;
       }
       return map;
     }
 
-    // Tạo map link cho 2 chế độ
-    const MAP_VIETSUB    = parseRawToMap(RAW_VIETSUB);
-    const MAP_THUYETMINH = parseRawToMap(RAW_THUYETMINH);
+    const EP_URLS_VIETSUB = parseList(RAW_VIETSUB.replace(/^DÁN LIST VIETSUB VÀO ĐÂY$/i, ""));
+    const EP_URLS_THUYETMINH = parseList(RAW_THUYETMINH.replace(/^DÁN LIST THUYẾT MINH VÀO ĐÂY$/i, ""));
+
+    function getTotalByMode(){
+      return MODE === "vietsub" ? TOTAL_VIETSUB : TOTAL_THUYETMINH;
+    }
+    function getUrlsByMode(){
+      return MODE === "vietsub" ? EP_URLS_VIETSUB : EP_URLS_THUYETMINH;
+    }
+
+    function countHasLink(map){
+      return Object.keys(map || {}).length;
+    }
 
     /* =========================================================
-      PLAYER (3-in-1): m3u8 / player.phimapi / embed khác
+      ✅ PLAYER (nhúng được thì nhúng, không được -> mở tab mới)
     ========================================================= */
-    let hls = null;
+    const videoEl = document.getElementById("video");
+    const frameEl = document.getElementById("frame");
+    let hlsInstance = null;
+    let CURRENT_URL = "";
 
-    function isM3U8(url){
-      return /\.m3u8(\?|#|$)/i.test(url) || /\/index\.m3u8(\?|#|$)/i.test(url);
+    function isPhimApiPlayer(u){
+      return /^https?:\/\/player\.phimapi\.com\/player\/\?/i.test(u || "");
     }
-    function isPhimApiPlayer(url){
-      return /player\.phimapi\.com\/player\/\?url=/i.test(url);
-    }
-    function isProbablyEmbed(url){
-      // Nếu là https page/ player / embed ... ưu tiên iframe
-      return /^https?:\/\//i.test(url) && !isM3U8(url);
-    }
-
-    function clearPlayer(){
-      const box = document.getElementById("playerBox");
-      box.innerHTML = `<div class="playerMsg" id="playerMsg">
-        Chọn tập để xem. (Hỗ trợ: m3u8 / player.phimapi / link embed khác)
-      </div>`;
-      if (hls){
-        try{ hls.destroy(); }catch(e){}
-        hls = null;
+    function extractInnerUrlFromPhimApi(u){
+      try{
+        const x = new URL(u);
+        return x.searchParams.get("url") || "";
+      }catch(e){
+        return "";
       }
     }
-
-    function setPlayerTypeText(txt){
-      document.getElementById("playerTypeLabel").textContent = txt;
+    function isM3U8(u){
+      return /\.m3u8(\?|$)/i.test(u || "");
     }
 
-    function playM3U8(url){
-      const box = document.getElementById("playerBox");
-      box.innerHTML = "";
-      const video = document.createElement("video");
-      video.controls = true;
-      video.playsInline = true;
-      video.autoplay = true;
-      box.appendChild(video);
+    function stopPlayer(){
+      CURRENT_URL = "";
+      document.getElementById("nowPlaying").textContent = "Chưa chọn tập";
 
-      // Safari iOS thường phát native m3u8
-      if (video.canPlayType("application/vnd.apple.mpegurl")){
-        video.src = url;
-        setPlayerTypeText("Đang phát: m3u8 (native)");
-        return;
-      }
+      // destroy hls
+      try{ if (hlsInstance) hlsInstance.destroy(); }catch(e){}
+      hlsInstance = null;
 
-      // HLS.js
-      if (window.Hls && Hls.isSupported()){
-        hls = new Hls({
-          enableWorker:true,
-          lowLatencyMode:true
-        });
-        hls.loadSource(url);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.ERROR, function(_, data){
-          // Nếu lỗi, báo nhẹ
-          setPlayerTypeText("Lỗi phát m3u8 (có thể do CORS/Referer/token)");
-        });
-        setPlayerTypeText("Đang phát: m3u8 (hls.js)");
-        return;
-      }
+      // hide iframe
+      frameEl.style.display = "none";
+      frameEl.src = "about:blank";
 
-      // fallback
-      video.src = url;
-      setPlayerTypeText("Đang phát: m3u8 (fallback)");
+      // reset video
+      try{
+        videoEl.pause();
+        videoEl.removeAttribute("src");
+        videoEl.load();
+      }catch(e){}
     }
 
-    function playIFRAME(url){
-      const box = document.getElementById("playerBox");
-      box.innerHTML = "";
-      const iframe = document.createElement("iframe");
-      iframe.allow = "autoplay; fullscreen; picture-in-picture";
-      iframe.referrerPolicy = "no-referrer"; // giảm rủi ro referrer
-      iframe.src = url;
-      box.appendChild(iframe);
-
-      if (isPhimApiPlayer(url)){
-        setPlayerTypeText("Đang phát: player.phimapi (iframe)");
-      } else {
-        setPlayerTypeText("Đang phát: embed (iframe)");
-      }
+    function openCurrentInNewTab(){
+      if (CURRENT_URL) window.open(CURRENT_URL, "_blank");
+      else showModal("Chưa có link", "Bạn chưa chọn tập.", "");
     }
 
-       function playURL(url){
-  if (!url){
-    clearPlayer();
-    return;
-  }
-
-  // 1) Nếu là link player.phimapi => thử bóc url=...m3u8 để phát trực tiếp
-  if (isPhimApiPlayer(url)) {
-    const u = new URL(url);
-    const inner = u.searchParams.get("url");
-    if (inner && isM3U8(inner)) {
-      playM3U8(inner);
-      setPlayerTypeText("Đang phát:)");
-      return;
+    function showVideo(){
+      frameEl.style.display = "none";
+      videoEl.style.display = "block";
+    }
+    function showFrame(){
+      videoEl.style.display = "none";
+      frameEl.style.display = "block";
     }
 
-    // không bóc được => mở tab mới
-    window.open(url, "_blank");
-    setPlayerTypeText("player.phimapi bị chặn iframe → mở tab mới");
-    return;
-  }
-
-  // 2) m3u8 thường => phát trong video
-  if (isM3U8(url)){
-    playM3U8(url);
-    return;
-  }
-
-  // 3) link embed khác (nếu không bị chặn) => iframe
-  if (isProbablyEmbed(url)){
-    playIFRAME(url);
-    return;
-  }
-
-  // 4) fallback
-  window.open(url, "_blank");
-  setPlayerTypeText("Mở link ngoài (fallback)");
-}
-
-    
-
-    /* =========================================================
-      UI + EP LIST
-    ========================================================= */
-    const $ = (id)=>document.getElementById(id);
-
-    function showModal(title, msg, sub){
-      $("modalTitle").textContent = title;
-      $("modalMsg").textContent = msg;
-      $("modalSub").textContent = sub || "";
-      $("modalBack").style.display = "flex";
-    }
-    function hideModal(){ $("modalBack").style.display = "none"; }
-
-    function scrollToEpisodes(){
-      $("epGrid").scrollIntoView({behavior:"smooth", block:"start"});
+    function openFallback(url){
+      window.open(url, "_blank");
     }
 
-    // Mode: "vs" hoặc "tm"
-    let MODE = "vs";
-    let CURRENT_EP = null;
+    // thử play m3u8, nếu bị chặn => fallback
+    function playM3U8(url, fallbackUrl){
+      stopHlsOnly();
 
-    function setMode(mode){
-      MODE = mode;
+      showVideo();
 
-      $("btnVS").classList.toggle("active", MODE === "vs");
-      $("btnTM").classList.toggle("active", MODE === "tm");
+      // iOS Safari có thể play HLS native
+      const canNative = videoEl.canPlayType("application/vnd.apple.mpegurl");
 
-      $("modeLabel").textContent = "Đang chọn: " + (MODE === "vs" ? "Vietsub" : "Thuyết minh");
-
-      // Khi đổi mode: giữ tập đang chọn nếu mode đó có link, không thì chỉ update UI
-      renderEpisodes();
-      if (CURRENT_EP != null){
-        const url = getUrlForEp(CURRENT_EP);
-        if (url){
-          playEpisode(CURRENT_EP, true); // true = không trigger aff khi đổi mode
-        } else {
-          // không có link ở mode mới
-          $("nowPlayingTitle").textContent = `${MOVIE_TITLE} – Tập ${String(CURRENT_EP).padStart(2,"0")}`;
-          setPlayerTypeText("Chưa có link ở chế độ này");
+      try{
+        if (canNative) {
+          videoEl.src = url;
+          videoEl.play().catch(() => openFallback(fallbackUrl || url));
+          return true;
         }
+
+        if (window.Hls && window.Hls.isSupported()) {
+          hlsInstance = new Hls({
+            xhrSetup: function(xhr){ xhr.withCredentials = false; }
+          });
+
+          hlsInstance.loadSource(url);
+          hlsInstance.attachMedia(videoEl);
+
+          hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+            videoEl.play().catch(() => openFallback(fallbackUrl || url));
+          });
+
+          // nếu lỗi (CORS/403/timeout) -> fallback tab mới
+          hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+            if (data && data.fatal) {
+              stopHlsOnly();
+              openFallback(fallbackUrl || url);
+            }
+          });
+
+          // nếu 2-3 giây không lên -> fallback
+          setTimeout(() => {
+            // nếu vẫn chưa load được time
+            if (!videoEl.currentTime || videoEl.readyState < 2) {
+              // đừng phá nếu đang chạy được
+              // nhưng nếu bị chặn thì thường readyState thấp
+            }
+          }, 2500);
+
+          return true;
+        }
+
+        openFallback(fallbackUrl || url);
+        return false;
+
+      }catch(e){
+        stopHlsOnly();
+        openFallback(fallbackUrl || url);
+        return false;
       }
     }
 
-    function getUrlForEp(ep){
-      return MODE === "vs" ? MAP_VIETSUB[ep] : MAP_THUYETMINH[ep];
+    function stopHlsOnly(){
+      try{ if (hlsInstance) hlsInstance.destroy(); }catch(e){}
+      hlsInstance = null;
+      try{
+        videoEl.pause();
+        videoEl.removeAttribute("src");
+        videoEl.load();
+      }catch(e){}
     }
 
-    function getMaxEpForMode(){
-      return MODE === "vs" ? COUNT_VIETSUB : COUNT_THUYETMINH;
+    // play 1 url bất kỳ (auto nhúng nếu được)
+    function playURL(url, epLabel){
+      if (!url){
+        showModal("Đang cập nhật", "Tập này chưa có link.", "Bạn quay lại sau nha.");
+        return;
+      }
+
+      CURRENT_URL = url;
+      document.getElementById("nowPlaying").textContent = epLabel ? `${MOVIE_TITLE} • ${epLabel} • ${MODE.toUpperCase()}` : `${MOVIE_TITLE}`;
+
+      // 1) Nếu là phimapi player -> bóc m3u8
+      if (isPhimApiPlayer(url)){
+        const inner = extractInnerUrlFromPhimApi(url);
+
+        if (inner && isM3U8(inner)){
+          // thử nhúng inner
+          const ok = playM3U8(inner, url);
+          if (!ok) openFallback(url);
+          maybeJumpAFF();
+          return;
+        }
+
+        // không bóc được -> mở tab
+        openFallback(url);
+        maybeJumpAFF();
+        return;
+      }
+
+      // 2) m3u8 trực tiếp
+      if (isM3U8(url)){
+        const ok = playM3U8(url, url);
+        if (!ok) openFallback(url);
+        maybeJumpAFF();
+        return;
+      }
+
+      // 3) link khác: thử iframe (nhiều site chặn -> fallback)
+      // Nếu bị chặn iframe (X-Frame-Options/CSP) => user sẽ thấy trắng,
+      // nên mình vẫn mở tab mới để chắc chắn xem được.
+      showFrame();
+      frameEl.src = url;
+
+      // fallback mở tab mới sau 1s (để chắc chắn user xem được)
+      setTimeout(() => {
+        // nếu iframe bị chặn thường vẫn hiện trắng,
+        // mình không detect chắc 100% được => cứ mở tab mới luôn cho chắc
+        openFallback(url);
+      }, 900);
+
+      maybeJumpAFF();
     }
+
+    /* =========================================================
+      ✅ UI Episodes
+    ========================================================= */
+    function scrollToEpisodes(){
+      document.getElementById("epGrid").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function pad2(n){ return String(n).padStart(2,"0"); }
 
     function getEpList(){
-      const total = getMaxEpForMode();
-      const arr = Array.from({length: total}, (_,i)=>i+1);
+      const total = getTotalByMode();
+      const urls = getUrlsByMode();
 
-      const q = ($("epSearch").value || "").trim();
+      const arr = Array.from({length: total}, (_,i) => i+1);
+
+      // filter search
+      const q = (document.getElementById("epSearch").value || "").trim();
       let out = arr;
       if (q){
         const n = parseInt(q, 10);
         if (!Number.isNaN(n)) out = arr.filter(x => x === n);
       }
 
-      const sortMode = $("epSort").value;
-      if (sortMode === "desc") out = out.slice().sort((a,b)=>b-a);
-      else if (sortMode === "done"){
+      // sort
+      const mode = document.getElementById("epSort").value;
+      if (mode === "desc") out = out.slice().sort((a,b)=>b-a);
+      else if (mode === "done"){
         out = out.slice().sort((a,b)=>{
-          const da = !!getUrlForEp(a);
-          const db = !!getUrlForEp(b);
+          const da = !!urls[a];
+          const db = !!urls[b];
           if (da === db) return a-b;
           return db - da;
         });
@@ -1043,18 +1055,37 @@ Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
       return out;
     }
 
+    function renderHeaderMeta(){
+      const total = getTotalByMode();
+      const has = countHasLink(getUrlsByMode());
+
+      document.getElementById("movieInfo").textContent = `${MOVIE_TITLE} • ${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"} • ${total} tập`;
+      document.getElementById("subInfo").textContent = `Chế độ: ${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"} • Có link: ${has}/${total}`;
+      document.getElementById("metaTotal").innerHTML = `Tổng tập (${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"}): <b>${total}</b>`;
+      document.getElementById("metaHas").innerHTML = `Đã có link: <b>${has}</b>`;
+      document.getElementById("movieTitleTop").textContent = MOVIE_TITLE;
+      document.getElementById("movieTitleLeft").textContent = MOVIE_TITLE;
+
+      document.getElementById("modeHint").innerHTML =
+        `Bạn đang xem: <b>${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"}</b> • Bấm tập để phát (nhúng được thì nhúng, không được sẽ mở tab mới).`;
+    }
+
     function renderEpisodes(){
-      const grid = $("epGrid");
+      renderHeaderMeta();
+
+      const grid = document.getElementById("epGrid");
       grid.innerHTML = "";
 
+      const urls = getUrlsByMode();
       const eps = getEpList();
+
       eps.forEach(ep=>{
         const btn = document.createElement("button");
         btn.className = "epBtn";
         btn.type = "button";
-        btn.textContent = String(ep).padStart(2,"0");
+        btn.textContent = pad2(ep);
 
-        const hasLink = !!getUrlForEp(ep);
+        const hasLink = !!urls[ep];
         if (hasLink) btn.classList.add("done");
         else btn.classList.add("lock");
 
@@ -1062,54 +1093,68 @@ Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
         note.textContent = hasLink ? "Có link" : "Đang cập nhật";
         btn.appendChild(note);
 
-        btn.onclick = () => playEpisode(ep);
+        btn.onclick = () => {
+          const url = urls[ep];
+          if (!url){
+            showModal(`${MOVIE_TITLE} – Tập ${pad2(ep)} (${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"})`,
+                      "Tập này chưa có link.", "Bạn quay lại sau nha.");
+            return;
+          }
+          playURL(url, `Tập ${pad2(ep)}`);
+        };
+
         grid.appendChild(btn);
       });
     }
 
-    function playEpisode(ep, silentAff){
-      const url = getUrlForEp(ep);
-      CURRENT_EP = ep;
-
-      $("nowPlayingTitle").textContent = `${MOVIE_TITLE} – Tập ${String(ep).padStart(2,"0")} (${MODE === "vs" ? "Vietsub" : "Thuyết minh"})`;
-
-      if (!url){
-        setPlayerTypeText("Chưa có link");
-        showModal(`${MOVIE_TITLE} – Tập ${ep}`, "Tập này chưa có link ở chế độ đang chọn.", "Bạn quay lại sau nha.");
-        return;
-      }
-
-      // phát ngay trong trang
-      playURL(url);
-
-      // 7/3: chỉ 3/10 mới nhảy (và nếu silentAff=true thì bỏ qua)
-      if (!silentAff) maybeOpenAFF();
+    /* =========================================================
+      ✅ Modal
+    ========================================================= */
+    function showModal(title, msg, sub){
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalMsg").textContent = msg;
+      document.getElementById("modalSub").textContent = sub || "";
+      document.getElementById("modalBack").style.display = "flex";
+    }
+    function hideModal(){
+      document.getElementById("modalBack").style.display = "none";
     }
 
     /* =========================================================
-      INIT
+      ✅ Switch Mode
     ========================================================= */
-    $("movieInfo").textContent = `${MOVIE_TITLE} • ${TOTAL_EP_DISPLAY} tập`;
-    $("movieTitleTop").textContent = MOVIE_TITLE;
-    $("movieTitleLeft").textContent = MOVIE_TITLE;
-    $("totalEpShow").textContent = TOTAL_EP_DISPLAY;
-    $("vsCount").textContent = COUNT_VIETSUB;
-    $("tmCount").textContent = COUNT_THUYETMINH;
-    $("subInfo").textContent = `Cập nhật: Vietsub ${COUNT_VIETSUB} • Thuyết minh ${COUNT_THUYETMINH}`;
+    function setMode(m){
+      MODE = m;
 
-    $("btnVS").addEventListener("click", ()=>setMode("vs"));
-    $("btnTM").addEventListener("click", ()=>setMode("tm"));
+      document.getElementById("btnVietsub").classList.toggle("active", MODE === "vietsub");
+      document.getElementById("btnThuyetMinh").classList.toggle("active", MODE === "thuyetminh");
 
-    $("epSearch").addEventListener("input", renderEpisodes);
-    $("epSort").addEventListener("change", renderEpisodes);
+      // reset search
+      document.getElementById("epSearch").value = "";
+      document.getElementById("epSort").value = "asc";
 
-    $("closeModal").addEventListener("click", hideModal);
-    $("modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") hideModal(); });
+      // stop current player (đỡ lộn mode)
+      stopPlayer();
+
+      renderEpisodes();
+    }
+
+    /* =========================================================
+      ✅ INIT
+    ========================================================= */
+    // events
+    document.getElementById("epSearch").addEventListener("input", renderEpisodes);
+    document.getElementById("epSort").addEventListener("change", renderEpisodes);
+
+    document.getElementById("btnVietsub").addEventListener("click", () => setMode("vietsub"));
+    document.getElementById("btnThuyetMinh").addEventListener("click", () => setMode("thuyetminh"));
+
+    document.getElementById("closeModal").addEventListener("click", hideModal);
+    document.getElementById("modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") hideModal(); });
     document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") hideModal(); });
 
-    // default: Vietsub
-    setMode("vs");
-    clearPlayer();
+    // start
+    setMode("vietsub");
   </script>
 </body>
 </html>
