@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mục Thần Kí – HH3D</title>
+
+  <style>
+    :root{
+      --bg:#0f172a;
+      --panel:rgba(17,24,39,.55);
+      --panel2:rgba(2,6,23,.55);
+      --panel3:rgba(11,16,32,.85);
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --border:rgba(255,255,255,.12);
+      --border2:rgba(255,255,255,.06);
+      --green:#22c55e;
+      --greenDark:#062a16;
+      --blue:#38bdf8;
+      --shadow:0 12px 28px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial,sans-serif;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.10), transparent 60%),
+        radial-gradient(1000px 500px at 20% 0%, rgba(34,197,94,.10), transparent 55%),
+        var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* ===== Header (giống index) ===== */
+    .siteHeader{
+      position:sticky;top:0;z-index:50;
+      background:rgba(2,6,23,.88);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--border2);
+    }
+    .headerInner{
+      max-width:1200px;margin:0 auto;
+      padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;flex-wrap:wrap;
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:220px}
+    .logo{width:42px;height:42px;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.35)}
+    .brandText{display:flex;flex-direction:column;line-height:1.1}
+    .brandName{font-size:18px;font-weight:900;letter-spacing:.3px}
+    .brandTag{font-size:12px;color:var(--muted);margin-top:2px}
+
+    .tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end;flex:1}
+    .pill{
+      background:rgba(11,16,32,.85);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      font-size:13px;
+      color:#cbd5e1;
+    }
+
+    /* ===== Layout ===== */
+    .container{max-width:1200px;margin:0 auto;padding:14px 16px 30px}
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border2);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .panelHeader{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border2);
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:rgba(2,6,23,.55);
+    }
+    .panelTitle{display:flex;align-items:center;gap:10px;font-weight:900}
+    .panelSub{color:var(--muted);font-size:12px;white-space:nowrap}
+
+    .movieRow{
+      display:grid;
+      grid-template-columns: 220px 1fr;
+      gap:14px;
+      padding:14px;
+      align-items:start;
+    }
+
+    .posterBox{
+      background:rgba(2,6,23,.45);
+      border:1px solid var(--border2);
+      border-radius:16px;
+      padding:10px;
+    }
+    .poster{
+      width:100%;
+      aspect-ratio:2/3;
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(11,16,32,.85);
+      position:relative;
+    }
+    .poster img{width:100%;height:100%;object-fit:cover;display:block}
+    .noimg{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      color:rgba(148,163,184,.95);
+      font-weight:900;letter-spacing:.6px;font-size:12px;
+    }
+    .metaBox{padding:10px 4px 0}
+    .h1{font-size:18px;font-weight:900;margin:0 0 6px}
+    .meta{color:var(--muted);font-size:12px;line-height:1.4}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .btn{
+      border:none;
+      background:rgba(56,189,248,.18);
+      border:1px solid rgba(56,189,248,.35);
+      color:#dbeafe;
+      padding:10px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:800;
+    }
+    .btn:hover{filter:brightness(1.05)}
+    .btn.green{
+      background:var(--green);
+      color:var(--greenDark);
+      border:1px solid rgba(34,197,94,.55);
+    }
+
+    /* ===== Tabs Vietsub / Thuyet minh ===== */
+    .modeTabs{
+      display:flex;gap:10px;flex-wrap:wrap;
+      padding:0 14px 12px;
+    }
+    .modeBtn{
+      flex:1;
+      min-width:160px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:12px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:900;
+      transition:.12s ease;
+      text-align:center;
+    }
+    .modeBtn:hover{border-color:rgba(56,189,248,.35);transform:translateY(-1px)}
+    .modeBtn.active{
+      background:rgba(34,197,94,.16);
+      border-color:rgba(34,197,94,.55);
+      box-shadow:0 10px 18px rgba(34,197,94,.08);
+    }
+    .modeBtn small{display:block;color:var(--muted);font-weight:700;margin-top:3px}
+
+    /* ===== Episode tools ===== */
+    .epTools{
+      display:flex;gap:10px;flex-wrap:wrap;
+      padding:0 14px 14px;
+    }
+    .searchWrap{
+      display:flex;align-items:center;gap:8px;
+      background:var(--panel3);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      flex:1;
+      min-width:240px;
+    }
+    .searchWrap input{
+      width:100%;
+      background:none;border:none;outline:none;
+      color:var(--text);
+      font-size:14px;
+    }
+    .select{
+      background:var(--panel3);
+      color:#cbd5e1;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:10px 12px;
+      outline:none;
+      font-size:13px;
+    }
+
+    /* ===== Episode grid ===== */
+    .epGrid{
+      display:grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap:10px;
+      padding:0 14px 14px;
+    }
+    .epBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:10px 0;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:900;
+      transition:.12s ease;
+      position:relative;
+    }
+    .epBtn:hover{transform:translateY(-1px);border-color:rgba(56,189,248,.35)}
+    .epBtn.done{
+      border-color: rgba(34,197,94,.55);
+      box-shadow: 0 10px 18px rgba(34,197,94,.08);
+    }
+    .epBtn.lock{
+      cursor:not-allowed;
+      opacity:.55;
+    }
+    .epBtn small{
+      position:absolute;
+      bottom:6px;left:0;right:0;
+      font-size:10px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    /* ===== Modal ===== */
+    .modalBack{
+      position:fixed;inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;align-items:center;justify-content:center;
+      z-index:999;padding:16px;
+    }
+    .modal{
+      width:min(520px, 96vw);
+      background: rgba(2,6,23,.95);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .modalTop{
+      padding:14px 16px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .closeBtn{
+      border:none;
+      background: rgba(255,255,255,.08);
+      color:var(--text);
+      border-radius:10px;
+      padding:8px 10px;
+      cursor:pointer;
+    }
+    .modalBody{padding:14px 16px 16px;color:#dbe7ff;font-size:13px;line-height:1.5}
+    .muted{color:var(--muted);font-size:12px;margin-top:6px}
+
+    /* ===== Footer note ===== */
+    .footerNote{
+      max-width:1200px;
+      margin:14px auto 26px;
+      padding:0 16px;
+      color:rgba(148,163,184,.95);
+      font-size:11px;
+      line-height:1.55;
+    }
+
+    @media (max-width: 1100px){
+      .movieRow{grid-template-columns: 200px 1fr}
+      .epGrid{grid-template-columns: repeat(8, 1fr)}
+    }
+    @media (max-width: 860px){
+      .movieRow{grid-template-columns: 1fr}
+      .epGrid{grid-template-columns: repeat(6, 1fr)}
+    }
+    @media (max-width: 560px){
+      .epGrid{grid-template-columns: repeat(4, 1fr)}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="siteHeader">
+    <div class="headerInner">
+      <a class="brand" href="index.html" title="Về trang chủ">
+        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#22c55e"/>
+              <stop offset="1" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+          <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.22"/>
+          <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
+          <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
+        </svg>
+        <div class="brandText">
+          <div class="brandName">HH3D</div>
+          <div class="brandTag">Kho phim chọn lọc</div>
+        </div>
+      </a>
+
+      <div class="tools">
+        <div class="pill" id="movieInfo">Mục Thần Kí</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="panel">
+      <div class="panelHeader">
+        <div class="panelTitle">🎬 <span id="movieTitle">Mục Thần Kí</span></div>
+        <div class="panelSub" id="subInfo">Cập nhật: ...</div>
+      </div>
+
+      <div class="movieRow">
+        <div class="posterBox">
+          <div class="poster">
+            <!-- ✅ POSTER: đổi đường dẫn ảnh ở đây -->
+            <img src="images/muc-than-ki.jpg" alt="Mục Thần Kí"
+                 onerror="this.remove(); document.getElementById('noimg').style.display='flex';">
+            <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
+          </div>
+
+          <div class="metaBox">
+            <p class="h1" id="h1Title">Mục Thần Kí</p>
+            <div class="meta" id="metaBox">
+              <div>Thể loại: <b>Kiếm hiệp</b></div>
+              <div>VIETSUB: <b id="vsCount">0</b> tập</div>
+              <div>THUYẾT MINH: <b id="tmCount">0</b> tập</div>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn" onclick="location.href='index.html'">← Về trang chủ</button>
+              <button class="btn green" onclick="scrollToEpisodes()">Xem danh sách tập</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="meta" style="padding:6px 4px 10px">
+            ✅ Chọn <b>VIETSUB</b> hoặc <b>THUYẾT MINH</b>. Tập nào có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.
+          </div>
+
+          <!-- ===== TAB 2 CHẾ ĐỘ ===== -->
+          <div class="modeTabs">
+            <button class="modeBtn active" id="btnVS" type="button" onclick="setMode('vietsub')">
+              VIETSUB
+              <small id="vsSmall">0 tập</small>
+            </button>
+            <button class="modeBtn" id="btnTM" type="button" onclick="setMode('thuyetminh')">
+              THUYẾT MINH
+              <small id="tmSmall">0 tập</small>
+            </button>
+          </div>
+
+          <div class="epTools">
+            <div class="searchWrap">
+              <span>🔎</span>
+              <input id="epSearch" placeholder="Nhập số tập… (vd: 12)" inputmode="numeric" />
+            </div>
+
+            <select id="epSort" class="select" title="Sắp xếp">
+              <option value="asc">Tập tăng dần</option>
+              <option value="desc">Tập giảm dần</option>
+              <option value="done">Có link trước</option>
+            </select>
+          </div>
+
+          <div class="epGrid" id="epGrid"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modalTop">
+        <b id="modalTitle">Đang cập nhật</b>
+        <button class="closeBtn" id="closeModal">Đóng</button>
+      </div>
+      <div class="modalBody">
+        <div id="modalMsg">Tập này chưa có link.</div>
+        <div class="muted" id="modalSub">Bạn quay lại sau nha.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footerNote">
+    Lưu ý: Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
+    Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+    Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng, vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời.
+    Xin cảm ơn sự thông cảm và hợp tác của bạn. Xem phim giải trí – nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
+  </div>
+
+  <script>
+    /* =========================================================
+      ✅ CẤU HÌNH PHIM: Mục Thần Kí
+      - Em chỉ cần sửa 2 LIST link ở dưới (VIETSUB_LIST, THUYETMINH_LIST)
+      - Và sửa số tập hiển thị nếu muốn
+    ========================================================= */
+
+    const MOVIE_TITLE = "Mục Thần Kí";
+    const MOVIE_GENRE_TEXT = "Kiếm hiệp";
+
+    // ======================== AFF (tỉ lệ 7/3: 7 KHÔNG nhảy, 3 NHẢY) ========================
+    const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
+    const SHOPEE_WEB = "";      // ✅ em tự điền sau
+    const SHOPEE_APP = "";      // ✅ em tự điền sau (nếu có deep link)
+
+    function isMobileDevice(){
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+    function openMobileWithFallback(appUrl, webUrl){
+      const hasWeb = !!(webUrl && webUrl.trim());
+      const hasApp = !!(appUrl && appUrl.trim());
+      if (!hasApp){
+        if (hasWeb) window.location.href = webUrl;
+        return;
+      }
+      window.location.href = appUrl;
+      setTimeout(() => { if (hasWeb) window.location.href = webUrl; }, 900);
+    }
+    function openAFFRandom(){
+      const sources = [];
+      sources.push({ name:"tiktok", mobileApp:"", mobileWeb:TIKTOK_WEB, pcWeb:TIKTOK_WEB });
+      if (SHOPEE_WEB || SHOPEE_APP){
+        sources.push({ name:"shopee", mobileApp:SHOPEE_APP, mobileWeb:SHOPEE_WEB, pcWeb:SHOPEE_WEB });
+      }
+      if (!sources.length) return;
+      const pick = sources[Math.floor(Math.random()*sources.length)];
+      if (isMobileDevice()){
+        openMobileWithFallback(pick.mobileApp, pick.mobileWeb || pick.pcWeb);
+      } else {
+        const url = pick.pcWeb || pick.mobileWeb;
+        if (url) window.open(url, "_blank");
+      }
+    }
+
+    // ======================== 1) DÁN LIST TẬP Ở ĐÂY ========================
+    // ✅ GHI CHÚ:
+    // - Mỗi dòng dạng: "Tập 01|https://...m3u8" hoặc "Tập 01|https://player.../?url=...m3u8"
+    // - Em chỉ cần paste list vào chuỗi `...` là xong
+
+    const VIETSUB_LIST = `
+    Tập 01|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20241030/TKCwTAxb/index.m3u8
+Tập 02|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20241030/AfPVhijt/index.m3u8
+Tập 03|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20241105/CahKpr6w/index.m3u8
+Tập 04|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20241112/islK2RjT/index.m3u8
+Tập 05|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20241119/VVkmGgV5/index.m3u8
+Tập 06|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20241127/tsKZhPCZ/index.m3u8
+Tập 07|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20241204/UBYImZUf/index.m3u8
+Tập 08|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20241210/hY4coQMV/index.m3u8
+Tập 09|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20241217/j0oYoq3j/index.m3u8
+Tập 10|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20241225/oEimCEZc/index.m3u8
+Tập 11|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250101/TrnYRIc0/index.m3u8
+Tập 12|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250108/DRCsrage/index.m3u8
+Tập 13|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250114/fuaJBVdQ/index.m3u8
+Tập 14|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250122/9ZTahGhf/index.m3u8
+Tập 15|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250130/axwbnvWv/index.m3u8
+Tập 16|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250204/boFWCvUT/index.m3u8
+Tập 17|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250211/wrbY2r6M/index.m3u8
+Tập 18|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250220/R2MPyUYW/index.m3u8
+Tập 19|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250225/NsrVLqVk/index.m3u8
+Tập 20|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250307/KiXvdAAF/index.m3u8
+Tập 21|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250310/rB6PvT1q/index.m3u8
+Tập 22|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250318/laVtRs0T/index.m3u8
+Tập 23|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250325/qgfSlNJX/index.m3u8
+Tập 24|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250330/7bBINXLg/index.m3u8
+Tập 25|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250407/1enOb2EC/index.m3u8
+Tập 26|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250413/yYjmop56/index.m3u8
+Tập 27|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250420/K3pWwnTY/index.m3u8
+Tập 28|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250428/rkNEm2CM/index.m3u8
+Tập 29|https://player.phimapi.com/player/?url=https://s5.phim1280.tv/20250504/aSQw7At4/index.m3u8
+Tập 30|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250511/Q52JpIUF/index.m3u8
+Tập 31|https://player.phimapi.com/player/?url=https://s4.phim1280.tv/20250519/bhZf82WQ/index.m3u8
+Tập 32|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250525/VSpQI4Y1/index.m3u8
+Tập 33|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250602/TM7rLZmZ/index.m3u8
+Tập 34|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250609/R2GrPdQr/index.m3u8
+Tập 35|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250616/oPvgNq95/index.m3u8
+Tập 36|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250622/Vs78iL3P/index.m3u8
+Tập 37|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250630/fdPjEfbx/index.m3u8
+Tập 38|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250707/IpjOiFC3/index.m3u8
+Tập 39|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250713/70O366q4/index.m3u8
+Tập 40|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250721/l74hNP6V/index.m3u8
+Tập 41|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250728/txvMS5OS/index.m3u8
+Tập 42|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250803/vszMNpx2/index.m3u8
+Tập 43|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250811/vTKn9EmB/index.m3u8
+Tập 44|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250819/JlE2JPCt/index.m3u8
+Tập 45|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250824/1cKoBYRk/index.m3u8
+Tập 46|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250902/9iBddkfE/index.m3u8
+Tập 47|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250907/eZ7A9Qzu/index.m3u8
+Tập 48|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250915/ItXTZ09X/index.m3u8
+Tập 49|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250922/3bEuYjHv/index.m3u8
+Tập 50|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250928/EAeleMoK/index.m3u8
+Tập 51|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251005/4vzufaCJ/index.m3u8
+Tập 52|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251013/Tww2NTIr/index.m3u8
+Tập 53|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251021/xT5zl4n1/index.m3u8
+Tập 54|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251026/dcQaFarF/index.m3u8
+Tập 55|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251102/m53j943i/index.m3u8
+Tập 56|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251109/mPP9xIr4/index.m3u8
+Tập 57|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251116/MeQDJiV0/index.m3u8
+Tập 58|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251123/aAYAvrJ5/index.m3u8
+Tập 59|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251130/OFipS1fE/index.m3u8
+Tập 60|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251208/PRdvS2yX/index.m3u8
+Tập 61|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251214/NJBEh9RU/index.m3u8
+Tập 62|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251221/Hte1apAE/index.m3u8
+Tập 63|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251228/dI7OFt0q/index.m3u8
+Tập 64|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260104/NqUT2TTE/index.m3u8
+Tập 65|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260111/JlVW2ZPq/index.m3u8
+Tập 66|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260118/vmVObiRG/index.m3u8
+Tập 67|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260125/ImP5s8go/index.m3u8
+Tập 68|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260201/xWrRd9El/index.m3u8
+
+    `;
+
+    const THUYETMINH_LIST = `
+    Tập 1|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/4nfGm6RS/index.m3u8
+Tập 2|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/gJQ1i1Pw/index.m3u8
+Tập 3|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/TDjZp8v6/index.m3u8
+Tập 4|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/kLYzW895/index.m3u8
+Tập 5|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/FjNivQe3/index.m3u8
+Tập 6|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/5IR8jwyr/index.m3u8
+Tập 7|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/Ty9ID5PL/index.m3u8
+Tập 8|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/dWy9y26n/index.m3u8
+Tập 9|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/kamwxq05/index.m3u8
+Tập 10|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/vVY5DHCM/index.m3u8
+Tập 11|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/d5MwSyuR/index.m3u8
+Tập 12|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/W3sAy0QX/index.m3u8
+Tập 13|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/DaA23uoP/index.m3u8
+Tập 14|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/JqSCa10I/index.m3u8
+Tập 15|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/ZECHMXwb/index.m3u8
+Tập 16|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/x41nL1ju/index.m3u8
+Tập 17|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/ms2b5pOx/index.m3u8
+Tập 18|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/UYPLZ0eA/index.m3u8
+Tập 19|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/e9DumImN/index.m3u8
+Tập 20|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/7peVkSBc/index.m3u8
+Tập 21|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/OZj46VKU/index.m3u8
+Tập 22|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/f3b87Yaq/index.m3u8
+Tập 23|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/Hj1C5gSj/index.m3u8
+Tập 24|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/AnOkH4UQ/index.m3u8
+Tập 25|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/xDshYikA/index.m3u8
+Tập 26|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/Iq9kzR3k/index.m3u8
+Tập 27|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/qQIj89g2/index.m3u8
+Tập 28|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/3FOs6U3r/index.m3u8
+Tập 29|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/qnJJubn4/index.m3u8
+Tập 30|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/HihAObDS/index.m3u8
+Tập 31|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/vYU6HQCX/index.m3u8
+Tập 32|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/KYkwOJpX/index.m3u8
+Tập 33|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/k6xCRsln/index.m3u8
+Tập 34|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250614/Yy6fTZZQ/index.m3u8
+Tập 35|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250616/IL8AMj6e/index.m3u8
+Tập 36|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250622/zDlYQIYq/index.m3u8
+Tập 37|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250630/Z75Vo4cn/index.m3u8
+Tập 38|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250707/hu0T6df9/index.m3u8
+Tập 39|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250713/koQwhzj4/index.m3u8
+Tập 40|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250721/EgsOHUNw/index.m3u8
+Tập 41|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250728/9XGAb1dJ/index.m3u8
+Tập 42|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250803/9dn1CUEj/index.m3u8
+Tập 43|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250811/Q5Kdplly/index.m3u8
+Tập 44|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250819/I42uIqqo/index.m3u8
+Tập 45|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250824/fucuv2JR/index.m3u8
+Tập 46|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250902/66387faK/index.m3u8
+Tập 47|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250907/Yxmlnp5q/index.m3u8
+Tập 48|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250915/e506PdVL/index.m3u8
+Tập 49|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250922/AJAH880B/index.m3u8
+
+    `;
+
+    // ======================== 2) (TUỲ CHỌN) SỐ TẬP HIỂN THỊ Ở BOX TRÁI ========================
+    // ✅ Nếu em muốn hiển thị đúng theo list:
+    // - VietsubCount = số dòng có link trong VIETSUB_LIST
+    // - ThuyetMinhCount = số dòng có link trong THUYETMINH_LIST
+    // Anh sẽ tự đếm tự động, em KHÔNG cần sửa
+    // ======================================================================
+
+    /* ================== Parse list -> map EP_URLS ================== */
+    function parseEpisodeList(text){
+      const map = {};
+      const lines = (text || "").split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+      for (const line of lines){
+        if (line.startsWith("//")) continue; // bỏ comment
+        const parts = line.split("|");
+        if (parts.length < 2) continue;
+        const name = parts[0].trim(); // "Tập 01"
+        const url = parts.slice(1).join("|").trim(); // phòng khi url có |
+        const m = name.match(/(\d+)/);
+        if (!m) continue;
+        const ep = parseInt(m[1], 10);
+        if (!Number.isNaN(ep) && url) map[ep] = url;
+      }
+      return map;
+    }
+
+    const EP_URLS_VS = parseEpisodeList(VIETSUB_LIST);
+    const EP_URLS_TM = parseEpisodeList(THUYETMINH_LIST);
+
+    function getMaxEp(map){
+      const keys = Object.keys(map).map(n=>parseInt(n,10)).filter(n=>!Number.isNaN(n));
+      return keys.length ? Math.max(...keys) : 0;
+    }
+    function countLinks(map){
+      return Object.keys(map).length;
+    }
+
+    let MODE = "vietsub"; // "vietsub" | "thuyetminh"
+
+    // ===== UI init text =====
+    document.getElementById("movieTitle").textContent = MOVIE_TITLE;
+    document.getElementById("h1Title").textContent = MOVIE_TITLE;
+    document.getElementById("movieInfo").textContent = `${MOVIE_TITLE}`;
+
+    // auto count
+    const vsCount = countLinks(EP_URLS_VS);
+    const tmCount = countLinks(EP_URLS_TM);
+    document.getElementById("vsCount").textContent = vsCount;
+    document.getElementById("tmCount").textContent = tmCount;
+    document.getElementById("vsSmall").textContent = `${vsCount} tập`;
+    document.getElementById("tmSmall").textContent = `${tmCount} tập`;
+
+    // sub header update
+    function refreshSub(){
+      const map = (MODE === "vietsub") ? EP_URLS_VS : EP_URLS_TM;
+      const max = getMaxEp(map);
+      const label = (MODE === "vietsub") ? "VIETSUB" : "THUYẾT MINH";
+      document.getElementById("subInfo").textContent = `Đang xem: ${label} • Cập nhật đến tập ${max || 0}`;
+    }
+
+    function showModal(title, msg, sub){
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalMsg").textContent = msg;
+      document.getElementById("modalSub").textContent = sub || "";
+      document.getElementById("modalBack").style.display = "flex";
+    }
+    function hideModal(){
+      document.getElementById("modalBack").style.display = "none";
+    }
+    function scrollToEpisodes(){
+      document.getElementById("epGrid").scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function setMode(mode){
+      MODE = mode;
+      document.getElementById("btnVS").classList.toggle("active", MODE === "vietsub");
+      document.getElementById("btnTM").classList.toggle("active", MODE === "thuyetminh");
+      document.getElementById("epSearch").value = "";
+      refreshSub();
+      renderEpisodes();
+    }
+
+    function getCurrentMap(){
+      return MODE === "vietsub" ? EP_URLS_VS : EP_URLS_TM;
+    }
+
+    function getEpList(){
+      const map = getCurrentMap();
+      const total = Math.max(getMaxEp(map), 1); // nếu chưa dán list thì vẫn hiện 1 tập demo
+      const arr = Array.from({length: total}, (_,i) => i+1);
+
+      // search
+      const q = (document.getElementById("epSearch").value || "").trim();
+      let out = arr;
+      if (q){
+        const n = parseInt(q, 10);
+        if (!Number.isNaN(n)) out = arr.filter(x => x === n);
+      }
+
+      // sort
+      const mode = document.getElementById("epSort").value;
+      if (mode === "desc") out = out.slice().sort((a,b)=>b-a);
+      else if (mode === "done"){
+        out = out.slice().sort((a,b)=>{
+          const da = !!map[a];
+          const db = !!map[b];
+          if (da === db) return a-b;
+          return (db?1:0) - (da?1:0);
+        });
+      }
+      return out;
+    }
+
+    function renderEpisodes(){
+      const grid = document.getElementById("epGrid");
+      const map = getCurrentMap();
+      grid.innerHTML = "";
+
+      const eps = getEpList();
+      eps.forEach(ep=>{
+        const btn = document.createElement("button");
+        btn.className = "epBtn";
+        btn.type = "button";
+        btn.textContent = String(ep).padStart(2,"0");
+
+        const hasLink = !!map[ep];
+        if (hasLink) btn.classList.add("done");
+        else btn.classList.add("lock");
+
+        const note = document.createElement("small");
+        note.textContent = hasLink ? "Có link" : "Đang cập nhật";
+        btn.appendChild(note);
+
+        btn.onclick = () => playEpisode(ep);
+        grid.appendChild(btn);
+      });
+    }
+
+    // ✅ tỉ lệ 7/3: 70% KHÔNG nhảy, 30% NHẢY AFF
+    function shouldJumpAFF(){
+      return Math.random() < 0.30; // 30% nhảy
+    }
+
+    function playEpisode(ep){
+      const map = getCurrentMap();
+      const url = map[ep];
+
+      const label = (MODE === "vietsub") ? "Vietsub" : "Thuyết minh";
+
+      if (!url){
+        showModal(`${MOVIE_TITLE} – Tập ${ep} (${label})`, "Tập này chưa có link.", "Bạn quay lại sau nha.");
+        return;
+      }
+
+      // 1) mở link tập
+      // - Nếu là link player (có /player/?url=...) thì mở tab mới cho chắc
+      // - Nếu là link m3u8 trực tiếp thì cũng mở tab mới (em đang dùng kiểu nào thì ok)
+      window.open(url, "_blank");
+
+      // 2) (tuỳ) nhảy AFF theo tỉ lệ 7/3
+      if (shouldJumpAFF()){
+        setTimeout(() => openAFFRandom(), 800);
+      }
+    }
+
+    // events
+    document.getElementById("epSearch").addEventListener("input", renderEpisodes);
+    document.getElementById("epSort").addEventListener("change", renderEpisodes);
+
+    document.getElementById("closeModal").addEventListener("click", hideModal);
+    document.getElementById("modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") hideModal(); });
+    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") hideModal(); });
+
+    // init
+    refreshSub();
+    renderEpisodes();
+  </script>
+</body>
+</html>
