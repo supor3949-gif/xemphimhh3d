@@ -927,22 +927,46 @@ Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
       }
     }
 
-    function playURL(url){
-      if (!url){
-        clearPlayer();
-        return;
-      }
+       function playURL(url){
+  if (!url){
+    clearPlayer();
+    return;
+  }
 
-      // ưu tiên m3u8
-      if (isM3U8(url)){
-        playM3U8(url);
-      } else if (isPhimApiPlayer(url) || isProbablyEmbed(url)){
-        playIFRAME(url);
-      } else {
-        // hiếm khi rơi vào đây
-        playIFRAME(url);
-      }
+  // 1) Nếu là link player.phimapi => thử bóc url=...m3u8 để phát trực tiếp
+  if (isPhimApiPlayer(url)) {
+    const u = new URL(url);
+    const inner = u.searchParams.get("url");
+    if (inner && isM3U8(inner)) {
+      playM3U8(inner);
+      setPlayerTypeText("Đang phát: m3u8 (bóc từ player.phimapi)");
+      return;
     }
+
+    // không bóc được => mở tab mới
+    window.open(url, "_blank");
+    setPlayerTypeText("player.phimapi bị chặn iframe → mở tab mới");
+    return;
+  }
+
+  // 2) m3u8 thường => phát trong video
+  if (isM3U8(url)){
+    playM3U8(url);
+    return;
+  }
+
+  // 3) link embed khác (nếu không bị chặn) => iframe
+  if (isProbablyEmbed(url)){
+    playIFRAME(url);
+    return;
+  }
+
+  // 4) fallback
+  window.open(url, "_blank");
+  setPlayerTypeText("Mở link ngoài (fallback)");
+}
+
+    
 
     /* =========================================================
       UI + EP LIST
