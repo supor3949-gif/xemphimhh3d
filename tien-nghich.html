@@ -429,12 +429,12 @@
 
             <div class="playerState">
               <div class="statePill" id="modeLabel">Đang chọn: Vietsub</div>
-              <div class="statePill" id="affLabel">AFF: 7/10 không nhảy • 3/10 nhảy</div>
+              <div class="statePill" id="affLabel"></div>
             </div>
 
             <div class="noteLine">
               <span class="ok">✅</span> Tập nào có link sẽ có viền xanh.
-              <span class="warn">⚠</span> Nếu link bị chặn (CORS/Referer/token) thì có thể không phát được dù code đúng.
+              <span class="warn">⚠</span> 
             </div>
 
             <!-- ✅ 2 ô chọn: THUYẾT MINH / VIETSUB -->
@@ -939,7 +939,7 @@ Tập 107|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
     const inner = u.searchParams.get("url");
     if (inner && isM3U8(inner)) {
       playM3U8(inner);
-      setPlayerTypeText("Đang phát: m3u8 (bóc từ player.phimapi)");
+      setPlayerTypeText("Đang phát:)");
       return;
     }
 
