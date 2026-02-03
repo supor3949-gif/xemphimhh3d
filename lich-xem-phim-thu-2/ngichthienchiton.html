@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title id="pageTitle">Phim – HH3D</title>
 
-  <!-- HLS.js để nhúng m3u8 (nếu server không chặn CORS thì phát được) -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <style>
@@ -132,10 +131,7 @@
       border:1px solid rgba(34,197,94,.55);
     }
 
-    .modeRow{
-      display:flex;gap:10px;flex-wrap:wrap;
-      padding:0 14px 12px;
-    }
+    .modeRow{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 12px;}
     .modeBtn{
       border:1px solid rgba(255,255,255,.10);
       background:rgba(2,6,23,.55);
@@ -182,18 +178,8 @@
       font-size:12px;
     }
     .miniBtn:hover{border-color:rgba(56,189,248,.35)}
-    .stage{
-      position:relative;
-      background:#000;
-      aspect-ratio:16/9;
-      width:100%;
-    }
-    video, iframe{
-      position:absolute;inset:0;
-      width:100%;height:100%;
-      border:0;
-      background:#000;
-    }
+    .stage{position:relative;background:#000;aspect-ratio:16/9;width:100%;}
+    video, iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;}
     iframe{display:none;}
     .stageHint{
       padding:10px 12px;
@@ -203,10 +189,7 @@
       border-top:1px solid rgba(255,255,255,.08);
     }
 
-    .epTools{
-      display:flex;gap:10px;flex-wrap:wrap;
-      padding:0 14px 14px;
-    }
+    .epTools{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 14px;}
     .searchWrap{
       display:flex;align-items:center;gap:8px;
       background:var(--panel3);
@@ -216,12 +199,7 @@
       flex:1;
       min-width:240px;
     }
-    .searchWrap input{
-      width:100%;
-      background:none;border:none;outline:none;
-      color:var(--text);
-      font-size:14px;
-    }
+    .searchWrap input{width:100%;background:none;border:none;outline:none;color:var(--text);font-size:14px;}
     .select{
       background:var(--panel3);
       color:#cbd5e1;
@@ -232,12 +210,7 @@
       font-size:13px;
     }
 
-    .epGrid{
-      display:grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap:10px;
-      padding:0 14px 18px;
-    }
+    .epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;padding:0 14px 18px;}
     .epBtn{
       border:1px solid rgba(255,255,255,.10);
       background:rgba(2,6,23,.55);
@@ -250,76 +223,33 @@
       position:relative;
     }
     .epBtn:hover{transform:translateY(-1px);border-color:rgba(56,189,248,.35)}
-    .epBtn.done{
-      border-color: rgba(34,197,94,.55);
-      box-shadow: 0 10px 18px rgba(34,197,94,.08);
-    }
+    .epBtn.done{border-color:rgba(34,197,94,.55);box-shadow:0 10px 18px rgba(34,197,94,.08);}
     .epBtn.lock{cursor:not-allowed;opacity:.55}
     .epBtn small{
-      position:absolute;
-      bottom:6px;left:0;right:0;
-      font-size:10px;
-      color:var(--muted);
-      font-weight:700;
+      position:absolute;bottom:6px;left:0;right:0;
+      font-size:10px;color:var(--muted);font-weight:700;
     }
 
-    .modalBack{
-      position:fixed;inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;align-items:center;justify-content:center;
-      z-index:999;padding:16px;
-    }
-    .modal{
-      width:min(520px, 96vw);
-      background: rgba(2,6,23,.95);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:18px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.55);
-      overflow:hidden;
-    }
-    .modalTop{
-      padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    .closeBtn{
-      border:none;
-      background: rgba(255,255,255,.08);
-      color:var(--text);
-      border-radius:10px;
-      padding:8px 10px;
-      cursor:pointer;
-    }
+    .modalBack{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:999;padding:16px;}
+    .modal{width:min(520px,96vw);background:rgba(2,6,23,.95);border:1px solid rgba(255,255,255,.10);border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.55);overflow:hidden;}
+    .modalTop{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);}
+    .closeBtn{border:none;background:rgba(255,255,255,.08);color:var(--text);border-radius:10px;padding:8px 10px;cursor:pointer;}
     .modalBody{padding:14px 16px 16px;color:#dbe7ff;font-size:13px;line-height:1.5}
     .muted{color:var(--muted);font-size:12px;margin-top:6px}
 
-    .footerNote{
-      max-width:1200px;
-      margin:0 auto;
-      padding:0 16px 26px;
-      color:var(--muted);
-      font-size:11px;
-      line-height:1.55;
-    }
+    .footerNote{max-width:1200px;margin:0 auto;padding:0 16px 26px;color:var(--muted);font-size:11px;line-height:1.55;}
 
-    @media (max-width: 1100px){
-      .movieRow{grid-template-columns: 220px 1fr}
-      .epGrid{grid-template-columns: repeat(8, 1fr)}
-    }
-    @media (max-width: 860px){
-      .movieRow{grid-template-columns: 1fr}
-      .epGrid{grid-template-columns: repeat(6, 1fr)}
-    }
-    @media (max-width: 560px){
-      .epGrid{grid-template-columns: repeat(4, 1fr)}
-    }
+    @media (max-width:1100px){ .movieRow{grid-template-columns:220px 1fr} .epGrid{grid-template-columns:repeat(8,1fr)} }
+    @media (max-width:860px){ .movieRow{grid-template-columns:1fr} .epGrid{grid-template-columns:repeat(6,1fr)} }
+    @media (max-width:560px){ .epGrid{grid-template-columns:repeat(4,1fr)} }
   </style>
 </head>
 
 <body>
   <header class="siteHeader">
     <div class="headerInner">
-      <a class="brand" href="index.html" title="Về trang chủ">
+      <!-- ✅ brand link cũng dùng HOME_LINK -->
+      <a class="brand" id="homeBrand" href="#" title="Về trang chủ">
         <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
           <defs>
             <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
@@ -353,8 +283,7 @@
       <div class="movieRow">
         <div class="posterBox">
           <div class="poster">
-            <img id="posterImg" src="" alt="Poster"
-                 onerror="this.remove(); document.getElementById('noimg').style.display='flex';">
+            <img id="posterImg" src="" alt="Poster">
             <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
           </div>
           <div class="metaBox">
@@ -364,8 +293,10 @@
               <div id="metaTotal">Tổng tập: <b>...</b></div>
               <div id="metaHas">Đã có link: <b>...</b></div>
             </div>
+
             <div class="btnRow">
-              <button class="btn" onclick="location.href='index.html'">← Về trang chủ</button>
+              <!-- ✅ NÚT VỀ TRANG CHỦ dùng HOME_LINK -->
+              <button class="btn" id="btnHome">← Về trang chủ</button>
               <button class="btn green" onclick="scrollToEpisodes()">Xem danh sách tập</button>
             </div>
           </div>
@@ -445,24 +376,26 @@
 
   <script>
     /* =========================================================
-      ✅ CONFIG — 4 CHỖ EM CẦN ĐIỀN (đặt gần nhau cho dễ)
-      1) TÊN PHIM
-      2) THỂ LOẠI
-      3) POSTER
-      4) 2 LIST (VIETSUB / THUYẾT MINH)
+      ✅ CONFIG — CÁC CHỖ EM CẦN ĐIỀN (đặt gần nhau)
     ========================================================= */
 
-    // (1) TÊN PHIM
-    const MOVIE_TITLE = "Nghịch Thiên Chí Tôn"; // <<< đổi tên phim ở đây
+    // ✅ (0) LINK VỀ TRANG CHỦ
+    // Nếu file phim nằm trong thư mục con (vd: lich-xem-phim-thu-2/phim.html) => dùng "../index.html"
+    // Nếu file phim nằm cùng cấp với index.html => dùng "index.html"
+    const HOME_LINK = "../index.html"; // <<< SỬA 1 DÒNG NÀY CHO ĐÚNG THƯ MỤC
 
-    // (2) THỂ LOẠI
-    const GENRE_TEXT = "Tiên hiệp"; // <<< đổi thể loại ở đây
+    // ✅ (1) TÊN PHIM
+    const MOVIE_TITLE = "Nghịch Thiên Chí Tôn"; // <<< đổi tên phim
 
-    // (3) POSTER (đường dẫn ảnh)
-    const POSTER_URL = "images/NTCT.jpg"; // <<< đổi ảnh ở đây
+    // ✅ (2) THỂ LOẠI
+    const GENRE_TEXT = "Tiên hiệp"; // <<< đổi thể loại
 
-    // (4) DÁN 2 LIST TẬP
-    // Format mỗi dòng: Tập 01|https://...
+    // ✅ (3) POSTER
+    // - Nếu ảnh ở thư mục images: vd "../images/anh.jpg" (vì phim nằm trong folder con)
+    // - Nếu ảnh là link https: dán thẳng vào
+    const POSTER_URL = "../images/images/NTCT.jpg"; // <<< đổi ảnh (đúng đường dẫn)
+
+    // ✅ (4) DÁN 2 LIST TẬP (auto nhận tổng tập theo số lớn nhất)
     const RAW_VIETSUB = `
 Tập 01-06|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251021/lfh9Rzqj/index.m3u8
 Tập 07|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250903/jiGOQ59S/index.m3u8
@@ -957,12 +890,12 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
 `.trim();
 
     /* =========================================================
-      ✅ AFF (7 KHÔNG NHẢY / 3 NHẢY) — tuỳ em dùng
+      ✅ AFF (tuỳ em)
     ========================================================= */
-    const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
-    const SHOPEE_WEB = "";
-    const SHOPEE_APP = "";
-    const AFF_JUMP_RATE = 0.30; // 30% nhảy
+    const TIKTOK_WEB = "https://vt.tiktok.com/ZS91toLTD646r-LRcCy/";
+    const SHOPEE_WEB = "https://s.shopee.vn/3fxvwKdzAg";
+    const SHOPEE_APP = "https://s.shopee.vn/3fxvwKdzAg";
+    const AFF_JUMP_RATE = 0.30;
 
     function isMobileDevice(){ return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent); }
     function openMobileWithFallback(appUrl, webUrl){
@@ -986,7 +919,7 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
     function maybeJumpAFF(){ if (Math.random() < AFF_JUMP_RATE) setTimeout(openAFFRandom, 800); }
 
     /* =========================================================
-      ✅ PARSE LIST -> map {epNumber: url}
+      ✅ PARSE LIST
     ========================================================= */
     function parseList(raw){
       const map = {};
@@ -1002,35 +935,25 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
         if (!m) continue;
         const ep = parseInt(m[1], 10);
         if (!Number.isFinite(ep)) continue;
-        map[ep] = url || ""; // có thể rỗng
+        map[ep] = url || "";
       }
       return map;
     }
-
     const EP_URLS_VIETSUB = parseList(RAW_VIETSUB);
     const EP_URLS_THUYETMINH = parseList(RAW_THUYETMINH);
 
-    // ✅ TỰ NHẬN “TỔNG TẬP” = số tập lớn nhất trong list (không cần nhập số)
     function getMaxEp(map){
       const keys = Object.keys(map || {}).map(n => parseInt(n,10)).filter(n => Number.isFinite(n));
-      if (!keys.length) return 0;
-      return Math.max(...keys);
+      return keys.length ? Math.max(...keys) : 0;
     }
-    function getTotalByMode(){
-      return MODE === "vietsub" ? getMaxEp(EP_URLS_VIETSUB) : getMaxEp(EP_URLS_THUYETMINH);
-    }
-    function getUrlsByMode(){
-      return MODE === "vietsub" ? EP_URLS_VIETSUB : EP_URLS_THUYETMINH;
-    }
-    function countHasLink(map){
-      return Object.values(map || {}).filter(u => !!(u && u.trim())).length;
-    }
+    function countHasLink(map){ return Object.values(map || {}).filter(u => !!(u && u.trim())).length; }
 
-    // ✅ Mode hiện tại
     let MODE = "vietsub";
+    function getTotalByMode(){ return MODE === "vietsub" ? getMaxEp(EP_URLS_VIETSUB) : getMaxEp(EP_URLS_THUYETMINH); }
+    function getUrlsByMode(){ return MODE === "vietsub" ? EP_URLS_VIETSUB : EP_URLS_THUYETMINH; }
 
     /* =========================================================
-      ✅ PLAYER (nhúng được thì nhúng, không được -> mở tab mới)
+      ✅ PLAYER
     ========================================================= */
     const videoEl = document.getElementById("video");
     const frameEl = document.getElementById("frame");
@@ -1129,7 +1052,6 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
         return;
       }
 
-      // link khác: iframe thử, rồi mở tab mới cho chắc
       showFrame();
       frameEl.src = url;
       setTimeout(() => openFallback(url), 900);
@@ -1137,7 +1059,7 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
     }
 
     /* =========================================================
-      ✅ UI Episodes
+      ✅ UI
     ========================================================= */
     function scrollToEpisodes(){
       document.getElementById("epGrid").scrollIntoView({behavior:"smooth", block:"start"});
@@ -1147,12 +1069,8 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
     function getEpList(){
       const total = getTotalByMode();
       const urls = getUrlsByMode();
-      const safeTotal = Math.max(total, 0);
-
-      // Nếu chưa có list => không vẽ gì
-      if (safeTotal === 0) return [];
-
-      const arr = Array.from({length: safeTotal}, (_,i) => i+1);
+      if (!total) return [];
+      const arr = Array.from({length: total}, (_,i) => i+1);
 
       const q = (document.getElementById("epSearch").value || "").trim();
       let out = arr;
@@ -1179,19 +1097,15 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
       const has = countHasLink(getUrlsByMode());
 
       document.getElementById("movieInfo").textContent =
-        `${MOVIE_TITLE} • ${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"} • ${total || 0} tập`;
+        `${MOVIE_TITLE} • ${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"} • ${total} tập`;
 
       document.getElementById("subInfo").textContent =
-        `Chế độ: ${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"} • Có link: ${has}/${total || 0}`;
+        `Chế độ: ${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"} • Có link: ${has}/${total}`;
 
       document.getElementById("metaTotal").innerHTML =
-        `Tổng tập (${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"}): <b>${total || 0}</b>`;
+        `Tổng tập (${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"}): <b>${total}</b>`;
 
-      document.getElementById("metaHas").innerHTML =
-        `Đã có link: <b>${has}</b>`;
-
-      document.getElementById("movieTitleTop").textContent = MOVIE_TITLE;
-      document.getElementById("movieTitleLeft").textContent = MOVIE_TITLE;
+      document.getElementById("metaHas").innerHTML = `Đã có link: <b>${has}</b>`;
 
       document.getElementById("modeHint").innerHTML =
         `Bạn đang xem: <b>${MODE === "vietsub" ? "Vietsub" : "Thuyết minh"}</b> • Bấm tập để phát (nhúng được thì nhúng, không được sẽ mở tab mới).`;
@@ -1202,14 +1116,12 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
 
       const grid = document.getElementById("epGrid");
       grid.innerHTML = "";
-
       const urls = getUrlsByMode();
       const eps = getEpList();
 
-      // nếu chưa dán list
       if (!eps.length){
         grid.innerHTML = `<div class="meta" style="grid-column:1/-1;padding:10px 4px">
-          ⚠️ Chưa có danh sách tập. Em dán list vào phần CONFIG (RAW_VIETSUB / RAW_THUYETMINH) là sẽ tự hiện số tập.
+          ⚠️ Chưa có danh sách tập. Em dán list vào phần CONFIG (RAW_VIETSUB / RAW_THUYETMINH) là tự hiện số tập.
         </div>`;
         return;
       }
@@ -1261,21 +1173,40 @@ DÁN LIST THUYẾT MINH VÀO ĐÂY
     }
 
     /* =========================================================
-      ✅ INIT (tự set tên phim / poster)
+      ✅ INIT: FIX LINK HOME + FIX POSTER
     ========================================================= */
+    // set home link everywhere
+    document.getElementById("btnHome").onclick = () => location.href = HOME_LINK;
+    document.getElementById("homeBrand").href = HOME_LINK;
+
+    // title/labels
     document.getElementById("pageTitle").textContent = `${MOVIE_TITLE} – HH3D`;
     document.getElementById("movieTitleTop").textContent = MOVIE_TITLE;
     document.getElementById("movieTitleLeft").textContent = MOVIE_TITLE;
     document.getElementById("genreText").textContent = GENRE_TEXT;
-    document.getElementById("posterImg").src = POSTER_URL;
-    document.getElementById("posterImg").alt = MOVIE_TITLE;
 
+    // poster: nếu trống hoặc lỗi => hiện NO IMAGE
+    (function initPoster(){
+      const img = document.getElementById("posterImg");
+      const no = document.getElementById("noimg");
+      img.alt = MOVIE_TITLE || "Poster";
+
+      if (!POSTER_URL || !POSTER_URL.trim()){
+        img.style.display = "none";
+        no.style.display = "flex";
+        return;
+      }
+
+      img.onload = () => { img.style.display = "block"; no.style.display = "none"; };
+      img.onerror = () => { img.style.display = "none"; no.style.display = "flex"; };
+      img.src = POSTER_URL;
+    })();
+
+    // events
     document.getElementById("epSearch").addEventListener("input", renderEpisodes);
     document.getElementById("epSort").addEventListener("change", renderEpisodes);
-
     document.getElementById("btnVietsub").addEventListener("click", () => setMode("vietsub"));
     document.getElementById("btnThuyetMinh").addEventListener("click", () => setMode("thuyetminh"));
-
     document.getElementById("closeModal").addEventListener("click", hideModal);
     document.getElementById("modalBack").addEventListener("click", (e)=>{ if(e.target.id==="modalBack") hideModal(); });
     document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") hideModal(); });
