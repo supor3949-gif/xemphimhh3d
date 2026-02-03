@@ -3,92 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title id="pageTitle">Phim – HH3D</title>
+<title id="pageTitle">Phim</title>
 
-<!-- HLS -->
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-/* ===== GIAO DIỆN GIỮ NGUYÊN CHUẨN TIÊN NGHỊCH ===== */
-body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#e5e7eb}
+body{margin:0;background:#0f172a;color:#e5e7eb;font-family:Arial}
 a{text-decoration:none;color:inherit}
-header{background:#020617;position:sticky;top:0;z-index:99}
-.header{max-width:1200px;margin:auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
-.brand{font-weight:900;font-size:18px}
 .container{max-width:1200px;margin:auto;padding:16px}
-.panel{background:#111827;border-radius:16px;padding:16px}
-.movie{display:grid;grid-template-columns:240px 1fr;gap:16px}
-.poster img{width:100%;border-radius:14px}
-.btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
-.btn.home{background:#334155;color:#fff}
-.btn.green{background:#22c55e;color:#062a16}
-.mode button{margin-right:8px}
-.mode .active{background:#22c55e;color:#062a16}
-video,iframe{width:100%;height:100%;background:#000}
-.stage{aspect-ratio:16/9;position:relative}
+.stage{position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+video,iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 iframe{display:none}
-.epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;margin-top:12px}
-.epBtn{padding:10px;border-radius:12px;border:1px solid #334155;background:#020617;color:#fff;font-weight:800;cursor:pointer}
-.epBtn.done{border-color:#22c55e}
-.epBtn.lock{opacity:.4;cursor:not-allowed}
-@media(max-width:860px){.movie{grid-template-columns:1fr}.epGrid{grid-template-columns:repeat(5,1fr)}}
+.epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin-top:16px}
+.epBtn{padding:10px;border-radius:10px;background:#020617;color:#fff;border:1px solid #22c55e;cursor:pointer}
+.epBtn.lock{opacity:.4;cursor:not-allowed;border-color:#555}
+.modeBtn{padding:8px 14px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
+.modeBtn.active{background:#22c55e;color:#052e16}
 </style>
 </head>
 
 <body>
-
-<header>
-  <div class="header">
-    <a class="brand" href="../index.html">XEMPHIMHH3D</a>
-    <div id="movieInfo">...</div>
-  </div>
-</header>
-
 <div class="container">
-<div class="panel">
 
-<div class="movie">
-  <div class="poster">
-    <img id="posterImg">
-    <p><b id="movieTitleLeft"></b></p>
-    <p>Thể loại: <b id="genreText"></b></p>
-    <button class="btn home" onclick="goHome()">← Về trang chủ</button>
-  </div>
+<a href="../index.html">← Về trang chủ</a>
 
-  <div>
-    <div class="mode">
-      <button id="btnVS" class="btn active">Vietsub</button>
-      <button id="btnTM" class="btn">Thuyết minh</button>
-    </div>
+<h2 id="movieTitle"></h2>
 
-    <div class="stage">
-      <video id="video" controls></video>
-      <iframe id="frame" allowfullscreen></iframe>
-    </div>
+<img id="poster" style="width:180px;border-radius:12px" />
 
-    <div class="epGrid" id="epGrid"></div>
-  </div>
+<div style="margin:12px 0">
+  <button class="modeBtn active" id="btnVietsub">Vietsub</button>
+  <button class="modeBtn" id="btnTM">Thuyết minh</button>
 </div>
 
+<div class="stage">
+  <video id="video" controls playsinline></video>
+  <iframe id="frame" allowfullscreen referrerpolicy="no-referrer"></iframe>
 </div>
+
+<p id="nowPlaying">Chưa chọn tập</p>
+
+<div class="epGrid" id="epGrid"></div>
+
 </div>
 
 <script>
-/* ================= CONFIG – EM CHỈ SỬA TRONG NÀY ================= */
+/* ================= CONFIG ================= */
+const MOVIE_TITLE = "Tiên Nghịch";
+const POSTER_URL = "../images/tien-nghich.jpg";
 
-// 🔙 link quay về trang chủ (file phim nằm trong thư mục con)
-const HOME_LINK = "../index.html";
-
-// 🎬 tên phim
-const MOVIE_TITLE = "Nghịch Thiên Chí Tôn";
-
-// 🏷️ thể loại
-const GENRE_TEXT = "Tiên hiệp";
-
-// 🖼️ poster (đúng đường dẫn tương đối)
-const POSTER_URL = "../images/NTCT.jpg";
-
-// 📜 DÁN LIST – FORMAT: Tập 01|https://....
 const RAW_VIETSUB = `
 Tập 01-06|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251021/lfh9Rzqj/index.m3u8
 Tập 07|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250903/jiGOQ59S/index.m3u8
@@ -579,91 +542,102 @@ Tập 490|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
 `;
 
 const RAW_THUYETMINH = `
-Tập 01|https://...
 `;
 
-/* ================= AFF – RANDOM TIKTOK / SHOPEE ================= */
+/* ================= AFF ================= */
+const AFF_RATE = 0.3;
+const TIKTOK = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
+const SHOPEE = "https://s.shopee.vn/3fxvwKdzAg";
 
-const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
-const SHOPEE_WEB = "https://s.shopee.vn/3fxvwKdzAg";
-const AFF_RATE = 0.3; // 30% nhảy – 7 không nhảy
-
-function isMobile(){return /Android|iPhone|iPad/i.test(navigator.userAgent)}
-function jumpAFF(){
-  if(Math.random()>AFF_RATE) return;
-  const link = Math.random()<0.5 ? TIKTOK_WEB : SHOPEE_WEB;
-  if(isMobile()) location.href = link;
-  else window.open(link,"_blank");
+function isMobile(){return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);}
+function maybeAFF(){
+  if(Math.random()<AFF_RATE){
+    const link=Math.random()<.5?TIKTOK:SHOPEE;
+    setTimeout(()=>{isMobile()?location.href=link:window.open(link,"_blank")},600);
+  }
 }
 
-/* ================= LOGIC ================= */
-
-const video=document.getElementById("video");
-const frame=document.getElementById("frame");
-let MODE="vietsub";
-
-function parseList(raw){
-  const map={};
-  raw.trim().split(/\n/).forEach(l=>{
+/* ================= PARSE ================= */
+function parse(raw){
+  const m={};
+  raw.split(/\n/).forEach(l=>{
     const [t,u]=l.split("|");
     if(!u) return;
-    const n=parseInt(t.replace(/\D/g,""));
-    map[n]=u.trim();
+    const n=parseInt(t.match(/\d+/));
+    m[n]=u.trim();
   });
-  return map;
+  return m;
+}
+const VS=parse(RAW_VIETSUB);
+const TM=parse(RAW_THUYETMINH);
+
+/* ================= PLAYER ================= */
+const video=document.getElementById("video");
+const frame=document.getElementById("frame");
+let hls=null;
+
+function reset(){
+  if(hls){hls.destroy();hls=null;}
+  video.pause();video.removeAttribute("src");video.load();
+  frame.src="about:blank";frame.style.display="none";video.style.display="block";
 }
 
-const VS=parseList(RAW_VIETSUB);
-const TM=parseList(RAW_THUYETMINH);
+function play(url,ep){
+  document.getElementById("nowPlaying").textContent=`${MOVIE_TITLE} – Tập ${ep}`;
 
-function render(){
-  document.getElementById("movieTitleLeft").textContent=MOVIE_TITLE;
-  document.getElementById("genreText").textContent=GENRE_TEXT;
-  document.getElementById("posterImg").src=POSTER_URL;
-  document.getElementById("movieInfo").textContent=MOVIE_TITLE;
-  const grid=document.getElementById("epGrid");
-  grid.innerHTML="";
-  const data=MODE==="vietsub"?VS:TM;
-  const max=Math.max(...Object.keys(data).map(Number));
-  for(let i=1;i<=max;i++){
-    const b=document.createElement("button");
-    b.className="epBtn"+(data[i]?" done":" lock");
-    b.textContent=i;
-    if(data[i]){
-      b.onclick=()=>{
-        play(data[i]);
-        jumpAFF();
-      }
-    }
-    grid.appendChild(b);
+  if(url.includes("player.phimapi.com")){
+    window.open(url,"_blank"); maybeAFF(); return;
   }
-}
 
-function play(url){
-  frame.style.display="none";video.style.display="block";
   if(url.includes(".m3u8")){
-    if(Hls.isSupported()){
-      const hls=new Hls();
+    reset();
+    if(video.canPlayType("application/vnd.apple.mpegurl")){
+      video.src=url; video.play().catch(()=>window.open(url,"_blank"));
+    }else if(Hls.isSupported()){
+      hls=new Hls();
       hls.loadSource(url);
       hls.attachMedia(video);
-    }else{
-      video.src=url;
-    }
-  }else{
-    video.style.display="none";
-    frame.style.display="block";
-    frame.src=url;
+      hls.on(Hls.Events.ERROR,(_,d)=>{if(d.fatal)window.open(url,"_blank")});
+    }else window.open(url,"_blank");
+    maybeAFF(); return;
   }
+
+  window.open(url,"_blank"); maybeAFF();
 }
 
-function goHome(){location.href=HOME_LINK}
+/* ================= UI ================= */
+let MODE="vietsub";
+function render(){
+  const grid=document.getElementById("epGrid");
+  grid.innerHTML="";
+  const src=MODE==="vietsub"?VS:TM;
+  Object.keys(src).forEach(ep=>{
+    const b=document.createElement("button");
+    b.className="epBtn";
+    b.textContent=ep;
+    b.onclick=()=>play(src[ep],ep);
+    grid.appendChild(b);
+  });
+}
 
-document.getElementById("btnVS").onclick=()=>{MODE="vietsub";btnVS.classList.add("active");btnTM.classList.remove("active");render()}
-document.getElementById("btnTM").onclick=()=>{MODE="thuyetminh";btnTM.classList.add("active");btnVS.classList.remove("active");render()}
+document.getElementById("movieTitle").textContent=MOVIE_TITLE;
+document.getElementById("pageTitle").textContent=MOVIE_TITLE;
+document.getElementById("poster").src=POSTER_URL;
 
-document.getElementById("pageTitle").textContent=MOVIE_TITLE+" – HH3D";
+document.getElementById("btnVietsub").onclick=()=>{
+  MODE="vietsub";
+  btnVietsub.classList.add("active");
+  btnTM.classList.remove("active");
+  render();
+};
+document.getElementById("btnTM").onclick=()=>{
+  MODE="tm";
+  btnTM.classList.add("active");
+  btnVietsub.classList.remove("active");
+  render();
+};
+
 render();
 </script>
-
 </body>
 </html>
