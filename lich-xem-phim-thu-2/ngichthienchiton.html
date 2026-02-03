@@ -1,134 +1,94 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title id="pageTitle">Phim – HH3D</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title id="pageTitle">Phim – HH3D</title>
 
-  <!-- HLS.js -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-  <style>
-    /* ===== GIỮ NGUYÊN GIAO DIỆN TIÊN NGHỊCH ===== */
-    :root{
-      --bg:#0f172a;
-      --panel:rgba(17,24,39,.55);
-      --panel2:rgba(2,6,23,.55);
-      --panel3:rgba(11,16,32,.85);
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --border:rgba(255,255,255,.12);
-      --border2:rgba(255,255,255,.06);
-      --green:#22c55e;
-      --greenDark:#062a16;
-      --blue:#38bdf8;
-      --shadow:0 12px 28px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:
-        radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.10), transparent 60%),
-        radial-gradient(1000px 500px at 20% 0%, rgba(34,197,94,.10), transparent 55%),
-        var(--bg);
-      color:var(--text);
-    }
-    a{color:inherit;text-decoration:none}
-    /* ===== HEADER ===== */
-    .siteHeader{
-      position:sticky;top:0;z-index:50;
-      background:rgba(2,6,23,.88);
-      backdrop-filter: blur(12px);
-      border-bottom:1px solid var(--border2);
-    }
-    .headerInner{
-      max-width:1200px;margin:0 auto;
-      padding:12px 16px;
-      display:flex;align-items:center;justify-content:space-between;
-      gap:14px;flex-wrap:wrap;
-    }
-    .brand{display:flex;align-items:center;gap:10px;min-width:220px}
-    .logo{width:42px;height:42px;border-radius:12px}
-    .brandName{font-size:18px;font-weight:900}
-    .brandTag{font-size:12px;color:var(--muted)}
-    .pill{
-      background:rgba(11,16,32,.85);
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:13px;
-      color:#cbd5e1;
-    }
-    /* ===== LAYOUT / PLAYER / EPISODE ===== */
-    /* (rút gọn comment – giữ đúng CSS gốc) */
-    .container{max-width:1200px;margin:0 auto;padding:14px 16px 30px}
-    .panel{background:var(--panel);border-radius:16px;box-shadow:var(--shadow)}
-    .movieRow{display:grid;grid-template-columns:240px 1fr;gap:14px;padding:14px}
-    .poster img{width:100%;border-radius:14px}
-    .btn{padding:10px 12px;border-radius:14px;font-weight:800;cursor:pointer}
-    .btn.green{background:#22c55e;color:#062a16}
-    .stage{background:#000;aspect-ratio:16/9;position:relative}
-    video,iframe{position:absolute;inset:0;width:100%;height:100%}
-    iframe{display:none}
-    .epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px}
-    .epBtn{padding:10px 0;border-radius:14px;font-weight:900}
-  </style>
+<style>
+/* ===== GIAO DIỆN GIỮ NGUYÊN CHUẨN TIÊN NGHỊCH ===== */
+body{margin:0;font-family:Arial,sans-serif;background:#0f172a;color:#e5e7eb}
+a{text-decoration:none;color:inherit}
+header{background:#020617;position:sticky;top:0;z-index:99}
+.header{max-width:1200px;margin:auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:900;font-size:18px}
+.container{max-width:1200px;margin:auto;padding:16px}
+.panel{background:#111827;border-radius:16px;padding:16px}
+.movie{display:grid;grid-template-columns:240px 1fr;gap:16px}
+.poster img{width:100%;border-radius:14px}
+.btn{padding:10px 14px;border-radius:12px;border:none;cursor:pointer;font-weight:800}
+.btn.home{background:#334155;color:#fff}
+.btn.green{background:#22c55e;color:#062a16}
+.mode button{margin-right:8px}
+.mode .active{background:#22c55e;color:#062a16}
+video,iframe{width:100%;height:100%;background:#000}
+.stage{aspect-ratio:16/9;position:relative}
+iframe{display:none}
+.epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;margin-top:12px}
+.epBtn{padding:10px;border-radius:12px;border:1px solid #334155;background:#020617;color:#fff;font-weight:800;cursor:pointer}
+.epBtn.done{border-color:#22c55e}
+.epBtn.lock{opacity:.4;cursor:not-allowed}
+@media(max-width:860px){.movie{grid-template-columns:1fr}.epGrid{grid-template-columns:repeat(5,1fr)}}
+</style>
 </head>
 
 <body>
 
-<header class="siteHeader">
-  <div class="headerInner">
-    <a class="brand" href="../index.html">
-      <div class="brandName">XEMPHIMHH3D</div>
-      <div class="brandTag">xem phim giải trí</div>
-    </a>
-    <div class="pill" id="movieInfo"></div>
+<header>
+  <div class="header">
+    <a class="brand" href="../index.html">XEMPHIMHH3D</a>
+    <div id="movieInfo">...</div>
   </div>
 </header>
 
 <div class="container">
-<section class="panel">
-<div class="movieRow">
+<div class="panel">
 
-<!-- ===== POSTER ===== -->
-<div>
-  <img id="posterImg">
+<div class="movie">
+  <div class="poster">
+    <img id="posterImg">
+    <p><b id="movieTitleLeft"></b></p>
+    <p>Thể loại: <b id="genreText"></b></p>
+    <button class="btn home" onclick="goHome()">← Về trang chủ</button>
+  </div>
+
   <div>
-    <button class="btn" onclick="location.href='../index.html'">← Về trang chủ</button>
-    <button class="btn green" onclick="scrollToEpisodes()">Xem danh sách tập</button>
+    <div class="mode">
+      <button id="btnVS" class="btn active">Vietsub</button>
+      <button id="btnTM" class="btn">Thuyết minh</button>
+    </div>
+
+    <div class="stage">
+      <video id="video" controls></video>
+      <iframe id="frame" allowfullscreen></iframe>
+    </div>
+
+    <div class="epGrid" id="epGrid"></div>
   </div>
 </div>
 
-<!-- ===== PLAYER ===== -->
-<div>
-  <h2 id="movieTitleTop"></h2>
-
-  <div class="stage">
-    <video id="video" controls playsinline></video>
-    <iframe id="frame"></iframe>
-  </div>
-
-  <div class="epGrid" id="epGrid"></div>
 </div>
-
-</div>
-</section>
 </div>
 
 <script>
-/* =====================================================
-  🔧 CONFIG – 4 CHỖ EM CHỈ CẦN ĐỔI
-===================================================== */
+/* ================= CONFIG – EM CHỈ SỬA TRONG NÀY ================= */
 
-// (1) TÊN PHIM
-const MOVIE_TITLE = "TNghịch Thiên Chí Tôn";
+// 🔙 link quay về trang chủ (file phim nằm trong thư mục con)
+const HOME_LINK = "../index.html";
 
-// (2) POSTER (file phim nằm trong thư mục con)
+// 🎬 tên phim
+const MOVIE_TITLE = "Nghịch Thiên Chí Tôn";
+
+// 🏷️ thể loại
+const GENRE_TEXT = "Tiên hiệp";
+
+// 🖼️ poster (đúng đường dẫn tương đối)
 const POSTER_URL = "../images/NTCT.jpg";
 
-// (3) LIST VIETSUB
+// 📜 DÁN LIST – FORMAT: Tập 01|https://....
 const RAW_VIETSUB = `
 Tập 01-06|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251021/lfh9Rzqj/index.m3u8
 Tập 07|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250903/jiGOQ59S/index.m3u8
@@ -618,75 +578,91 @@ Tập 490|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
 
 `;
 
-// (4) LIST THUYẾT MINH
 const RAW_THUYETMINH = `
+Tập 01|https://...
 `;
 
-/* =====================================================
-  🎯 AFF – CHỈ CHẠY KHI VIDEO PLAY ĐƯỢC
-===================================================== */
-const AFF_LINKS = [
-  "https://vt.tiktok.com/ZSxxxx/",
-  "https://s.shopee.vn/xxxx"
-];
-const AFF_RATE = 0.5;
-let AFF_DONE = false;
+/* ================= AFF – RANDOM TIKTOK / SHOPEE ================= */
 
-/* =====================================================
-  CORE
-===================================================== */
-document.getElementById("pageTitle").textContent = MOVIE_TITLE + " – HH3D";
-document.getElementById("movieTitleTop").textContent = MOVIE_TITLE;
-document.getElementById("posterImg").src = POSTER_URL;
+const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
+const SHOPEE_WEB = "https://s.shopee.vn/3fxvwKdzAg";
+const AFF_RATE = 0.3; // 30% nhảy – 7 không nhảy
+
+function isMobile(){return /Android|iPhone|iPad/i.test(navigator.userAgent)}
+function jumpAFF(){
+  if(Math.random()>AFF_RATE) return;
+  const link = Math.random()<0.5 ? TIKTOK_WEB : SHOPEE_WEB;
+  if(isMobile()) location.href = link;
+  else window.open(link,"_blank");
+}
+
+/* ================= LOGIC ================= */
+
+const video=document.getElementById("video");
+const frame=document.getElementById("frame");
+let MODE="vietsub";
 
 function parseList(raw){
   const map={};
-  raw.split(/\n/).forEach(l=>{
-    const m=l.match(/(\d+)\|(https?.+)/);
-    if(m) map[+m[1]]=m[2];
+  raw.trim().split(/\n/).forEach(l=>{
+    const [t,u]=l.split("|");
+    if(!u) return;
+    const n=parseInt(t.replace(/\D/g,""));
+    map[n]=u.trim();
   });
   return map;
 }
 
-const EP = parseList(RAW_VIETSUB);
-const total = Math.max(...Object.keys(EP).map(Number));
+const VS=parseList(RAW_VIETSUB);
+const TM=parseList(RAW_THUYETMINH);
 
-const grid=document.getElementById("epGrid");
-for(let i=1;i<=total;i++){
-  const b=document.createElement("button");
-  b.className="epBtn";
-  b.textContent=i.toString().padStart(2,"0");
-  b.onclick=()=>play(EP[i]);
-  grid.appendChild(b);
+function render(){
+  document.getElementById("movieTitleLeft").textContent=MOVIE_TITLE;
+  document.getElementById("genreText").textContent=GENRE_TEXT;
+  document.getElementById("posterImg").src=POSTER_URL;
+  document.getElementById("movieInfo").textContent=MOVIE_TITLE;
+  const grid=document.getElementById("epGrid");
+  grid.innerHTML="";
+  const data=MODE==="vietsub"?VS:TM;
+  const max=Math.max(...Object.keys(data).map(Number));
+  for(let i=1;i<=max;i++){
+    const b=document.createElement("button");
+    b.className="epBtn"+(data[i]?" done":" lock");
+    b.textContent=i;
+    if(data[i]){
+      b.onclick=()=>{
+        play(data[i]);
+        jumpAFF();
+      }
+    }
+    grid.appendChild(b);
+  }
 }
-
-const video=document.getElementById("video");
-let hls=null;
 
 function play(url){
-  if(!url) return;
-  if(hls){hls.destroy();hls=null;}
-  if(Hls.isSupported()){
-    hls=new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
+  frame.style.display="none";video.style.display="block";
+  if(url.includes(".m3u8")){
+    if(Hls.isSupported()){
+      const hls=new Hls();
+      hls.loadSource(url);
+      hls.attachMedia(video);
+    }else{
+      video.src=url;
+    }
   }else{
-    video.src=url;
+    video.style.display="none";
+    frame.style.display="block";
+    frame.src=url;
   }
 }
 
-video.addEventListener("playing",()=>{
-  if(AFF_DONE) return;
-  if(Math.random()<AFF_RATE){
-    const link=AFF_LINKS[Math.floor(Math.random()*AFF_LINKS.length)];
-    window.open(link,"_blank");
-  }
-  AFF_DONE=true;
-});
+function goHome(){location.href=HOME_LINK}
 
-function scrollToEpisodes(){
-  grid.scrollIntoView({behavior:"smooth"});
-}
+document.getElementById("btnVS").onclick=()=>{MODE="vietsub";btnVS.classList.add("active");btnTM.classList.remove("active");render()}
+document.getElementById("btnTM").onclick=()=>{MODE="thuyetminh";btnTM.classList.add("active");btnVS.classList.remove("active");render()}
+
+document.getElementById("pageTitle").textContent=MOVIE_TITLE+" – HH3D";
+render();
 </script>
 
 </body>
