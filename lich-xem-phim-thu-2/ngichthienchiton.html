@@ -1,95 +1,221 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Tiên Nghịch – HH3D</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Tiên Nghịch – XEMPHIMHH3D</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- HLS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-  <style>
-    :root{
-      --bg:#0f172a;
-      --panel:rgba(17,24,39,.55);
-      --panel2:rgba(2,6,23,.55);
-      --panel3:rgba(11,16,32,.85);
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --border:rgba(255,255,255,.12);
-      --border2:rgba(255,255,255,.06);
-      --green:#22c55e;
-      --greenDark:#062a16;
-      --blue:#38bdf8;
-      --shadow:0 12px 28px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:
-        radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.10), transparent 60%),
-        radial-gradient(1000px 500px at 20% 0%, rgba(34,197,94,.10), transparent 55%),
-        var(--bg);
-      color:var(--text);
-    }
-    a{color:inherit;text-decoration:none}
-  </style>
+<style>
+/* ================= RESET + THEME ================= */
+:root{
+  --bg:#0b1220;
+  --panel:#0f172a;
+  --panel2:#020617;
+  --border:rgba(255,255,255,.08);
+  --green:#22c55e;
+  --text:#e5e7eb;
+  --muted:#94a3b8;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,sans-serif;
+  background:radial-gradient(1200px 600px at 50% -10%, rgba(56,189,248,.12), transparent 60%),var(--bg);
+  color:var(--text);
+}
+a{text-decoration:none;color:inherit}
+
+/* ================= HEADER ================= */
+header{
+  position:sticky;top:0;z-index:50;
+  background:#020617cc;backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.header{
+  max-width:1200px;margin:auto;
+  padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;gap:10px;align-items:center}
+.logo{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,#22c55e,#38bdf8);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;
+}
+.brand small{color:var(--muted);font-size:12px}
+.badge{
+  background:#020617;
+  border:1px solid var(--border);
+  padding:8px 12px;border-radius:999px;
+  font-size:13px;color:#cbd5e1;
+}
+
+/* ================= LAYOUT ================= */
+.container{max-width:1200px;margin:auto;padding:16px}
+.panel{
+  background:linear-gradient(180deg,#0f172a,#020617);
+  border:1px solid var(--border);
+  border-radius:18px;overflow:hidden;
+}
+.panelHeader{
+  padding:14px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.grid{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  gap:16px;padding:16px;
+}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+/* ================= POSTER ================= */
+.posterBox{
+  background:#020617;
+  border:1px solid var(--border);
+  border-radius:16px;padding:12px;
+}
+.poster img{width:100%;border-radius:12px}
+.meta{font-size:13px;color:var(--muted);margin-top:8px}
+.btn{
+  margin-top:10px;
+  width:100%;padding:10px;border-radius:12px;
+  border:1px solid var(--border);
+  background:#020617;color:#e5e7eb;
+  cursor:pointer;font-weight:700;
+}
+.btn.green{background:var(--green);color:#022c16;border:none}
+
+/* ================= PLAYER ================= */
+.playerBox{
+  border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;
+  background:#020617;
+}
+.playerTop{
+  padding:10px 12px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.stage{aspect-ratio:16/9;background:#000;position:relative}
+video{width:100%;height:100%;background:#000}
+
+/* ================= EP GRID ================= */
+.epTools{display:flex;gap:10px;margin-top:14px}
+.epTools input,.epTools select{
+  flex:1;padding:10px;border-radius:12px;
+  border:1px solid var(--border);
+  background:#020617;color:#e5e7eb;
+}
+.epGrid{
+  display:grid;grid-template-columns:repeat(10,1fr);
+  gap:10px;margin-top:14px;
+}
+.epBtn{
+  padding:10px;border-radius:12px;
+  background:#020617;border:1px solid var(--border);
+  color:#e5e7eb;font-weight:700;cursor:pointer;
+}
+.epBtn.done{border-color:var(--green);color:#22c55e}
+
+/* ================= FOOTER ================= */
+footer{
+  max-width:1200px;margin:auto;
+  padding:16px;color:var(--muted);
+  font-size:11px;line-height:1.6;
+}
+</style>
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
-<header class="siteHeader">
-  <div class="headerInner">
-    <a class="brand" href="index.html">
-      <div class="brandText">
-        <div class="brandName">XEMPHIMHH3D</div>
-        <div class="brandTag">
-          xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức
-        </div>
+<header>
+  <div class="header">
+    <div class="brand">
+      <div class="logo">▶</div>
+      <div>
+        <b>XEMPHIMHH3D</b><br>
+        <small>xem phim giải trí — nghiêm cấm cờ bạc online</small>
       </div>
-    </a>
+    </div>
+    <div class="badge" id="movieBadge">Tiên Nghịch • Vietsub</div>
   </div>
 </header>
 
 <div class="container">
 <section class="panel">
 
-<!-- ===== THÔNG TIN PHIM ===== -->
-<h1 id="movieTitleTop">Tiên Nghịch</h1>
-
-<button onclick="location.href='index.html'">← Về trang chủ</button>
-
-<div>
-  <button id="btnVietsub">Vietsub</button>
-  <button id="btnThuyetMinh">Thuyết minh</button>
+<div class="panelHeader">
+  <b id="movieTitle">Tiên Nghịch</b>
+  <small id="modeInfo">Vietsub • 0/126</small>
 </div>
 
-<!-- ===== PLAYER ===== -->
-<div>
-  <video id="video" controls playsinline></video>
-  <iframe id="frame" allow="autoplay; fullscreen" referrerpolicy="no-referrer"></iframe>
+<div class="grid">
+
+<!-- LEFT -->
+<div class="posterBox">
+  <img src="images/anh-tien-nghich.jpg">
+  <div class="meta">
+    Thể loại: <b>Tiên hiệp</b><br>
+    Tổng tập: <b>126</b>
+  </div>
+  <button class="btn" onclick="location.href='index.html'">← Về trang chủ</button>
+  <button class="btn green" onclick="scrollToEp()">Xem danh sách tập</button>
 </div>
 
-<div id="nowPlaying">Chưa chọn tập</div>
+<!-- RIGHT -->
+<div>
 
-<!-- ===== EP LIST ===== -->
-<div id="epGrid"></div>
+<div style="display:flex;gap:10px;margin-bottom:10px">
+  <button class="btn green" onclick="setMode('vietsub')">Vietsub</button>
+  <button class="btn" onclick="setMode('thuyetminh')">Thuyết minh</button>
+</div>
 
+<div class="playerBox">
+  <div class="playerTop">
+    <b id="nowPlaying">Chưa chọn tập</b>
+    <button class="btn" onclick="openCurrent()">Mở tab mới</button>
+  </div>
+  <div class="stage">
+    <video id="video" controls></video>
+  </div>
+</div>
+
+<div class="meta">✔ Link nhúng được sẽ phát tại đây. Link bị chặn sẽ tự mở tab mới.</div>
+
+<div class="epTools">
+  <input id="search" placeholder="Nhập số tập…">
+  <select id="sort">
+    <option value="asc">Tăng dần</option>
+    <option value="desc">Giảm dần</option>
+  </select>
+</div>
+
+<div class="epGrid" id="epGrid"></div>
+
+</div>
+</div>
 </section>
 </div>
 
-<!-- ===== FOOTER PHÁP LÝ ===== -->
-<footer class="footerNote">
-  <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
-  Tất cả video được tổng hợp từ Internet. Không sở hữu nội dung.
+<footer>
+<b>Lưu ý:</b> Chúng tôi không lưu trữ nội dung video.  
+Tất cả dữ liệu được tổng hợp từ Internet. Nếu có vi phạm bản quyền, vui lòng liên hệ để gỡ bỏ.
 </footer>
 
 <script>
-/* =====================================================
-   ✅ CHỈ DÁN 2 LIST Ở ĐÂY
-===================================================== */
-const RAW_VIETSUB = `
+/* ================== CONFIG ================== */
+const MOVIE_TITLE="Tiên Nghịch";
+const TOTAL={vietsub:126,thuyetminh:126};
+let MODE="vietsub";
+let CURRENT_URL="";
+
+/* ===== DÁN LIST Ở ĐÂY ===== */
+const RAW={
+vietsub:`
 Tập 01-06|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20251021/lfh9Rzqj/index.m3u8
 Tập 07|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250903/jiGOQ59S/index.m3u8
 Tập 08|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20250903/6Vngplf8/index.m3u8
@@ -576,140 +702,56 @@ Tập 488|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20
 Tập 489|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260202/W8pUiaqL/index.m3u8
 Tập 490|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260202/qltZQ6Tn/index.m3u8
 
-`;
+`,
+thuyetminh:`
+`
+};
 
-const RAW_THUYETMINH = `
-`;
-
-/* =====================================================
-   ✅ CẤU HÌNH PHIM
-===================================================== */
-const MOVIE_TITLE = "Tiên Nghịch";
-let MODE = "vietsub";
-
-/* =====================================================
-   ✅ AFF 7/3 (CHẠY CHẮC)
-===================================================== */
-const TIKTOK_WEB = "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/";
-const SHOPEE_WEB = "";
-const SHOPEE_APP = "";
-const AFF_JUMP_RATE = 0.30;
-
-function isMobile(){
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-function maybeJumpAFF(){
-  if (Math.random() < AFF_JUMP_RATE){
-    if (isMobile()) {
-      location.href = TIKTOK_WEB;
-    } else {
-      window.open(TIKTOK_WEB, "_blank");
-    }
-  }
-}
-
-/* =====================================================
-   ✅ PARSE LIST → AUTO NHẬN SỐ TẬP
-===================================================== */
-function parseList(raw){
-  const map = {};
+/* ================== CORE ================== */
+function parse(raw){
+  const m={};
   raw.split(/\n/).forEach(l=>{
-    const p=l.split("|");
-    if(p.length>=2){
-      const n=parseInt(p[0].match(/\d+/));
-      if(n) map[n]=p[1].trim();
-    }
+    const p=l.split("|");if(p.length<2)return;
+    const n=parseInt(p[0].replace(/\D/g,""));
+    if(n)m[n]=p[1].trim();
   });
-  return map;
+  return m;
+}
+const DATA={
+  vietsub:parse(RAW.vietsub),
+  thuyetminh:parse(RAW.thuyetminh)
+};
+
+function mustOpenNewTab(url){
+  return /phimapi|kkphim|s6\.kkphim/i.test(url);
 }
 
-const EP_VIETSUB = parseList(RAW_VIETSUB);
-const EP_TM = parseList(RAW_THUYETMINH);
-
-function getUrls(){
-  return MODE==="vietsub"?EP_VIETSUB:EP_TM;
-}
-function getTotal(){
-  const k=Object.keys(getUrls()).map(n=>+n);
-  return k.length?Math.max(...k):0;
-}
-
-/* =====================================================
-   ✅ PLAYER LOGIC – ƯU TIÊN NHÚNG, FAIL → TAB MỚI
-===================================================== */
-const video=document.getElementById("video");
-const frame=document.getElementById("frame");
-let hls=null, CURRENT_URL="";
-
-function stopAll(){
-  if(hls){hls.destroy();hls=null;}
-  video.pause(); video.removeAttribute("src"); video.load();
-  frame.src="about:blank"; frame.style.display="none";
-  video.style.display="block";
-}
-
-function openTab(url){ window.open(url,"_blank"); }
-
-function playURL(url,label){
-  maybeJumpAFF();
+function play(url,ep){
   CURRENT_URL=url;
-  document.getElementById("nowPlaying").innerText=label;
-
-  if(url.includes("phimapi")){
-    const u=new URL(url).searchParams.get("url");
-    if(u && u.endsWith(".m3u8")) return playM3U8(u,url);
-    return openTab(url);
+  document.getElementById("nowPlaying").innerText=`${MOVIE_TITLE} • Tập ${ep}`;
+  if(mustOpenNewTab(url)){window.open(url,"_blank");return;}
+  if(Hls.isSupported() && url.endsWith(".m3u8")){
+    const h=new Hls();h.loadSource(url);h.attachMedia(video);
+  }else{
+    window.open(url,"_blank");
   }
-
-  if(url.endsWith(".m3u8")) return playM3U8(url,url);
-
-  frame.style.display="block";
-  video.style.display="none";
-  frame.src=url;
-  setTimeout(()=>openTab(url),900);
 }
 
-function playM3U8(u,fallback){
-  stopAll();
-  if(video.canPlayType("application/vnd.apple.mpegurl")){
-    video.src=u;
-    video.play().catch(()=>openTab(fallback));
-    return;
-  }
-  if(Hls.isSupported()){
-    hls=new Hls();
-    hls.loadSource(u);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.ERROR,()=>openTab(fallback));
-    setTimeout(()=>{
-      if(video.readyState<2) openTab(fallback);
-    },1800);
-    return;
-  }
-  openTab(fallback);
-}
-
-/* =====================================================
-   ✅ RENDER TẬP
-===================================================== */
 function render(){
-  const grid=document.getElementById("epGrid");
-  grid.innerHTML="";
-  const urls=getUrls();
-  for(let i=1;i<=getTotal();i++){
+  const g=document.getElementById("epGrid");g.innerHTML="";
+  const d=DATA[MODE];
+  for(let i=1;i<=TOTAL[MODE];i++){
     const b=document.createElement("button");
+    b.className="epBtn"+(d[i]?" done":"");
     b.innerText=i;
-    b.onclick=()=>{
-      if(!urls[i]) return alert("Chưa có link");
-      playURL(urls[i],`Tập ${i}`);
-    };
-    grid.appendChild(b);
+    b.onclick=()=>d[i]?play(d[i],i):alert("Chưa có link");
+    g.appendChild(b);
   }
 }
 
-document.getElementById("btnVietsub").onclick=()=>{MODE="vietsub";stopAll();render();}
-document.getElementById("btnThuyetMinh").onclick=()=>{MODE="thuyetminh";stopAll();render();}
+function setMode(m){MODE=m;render();}
+function scrollToEp(){document.getElementById("epGrid").scrollIntoView({behavior:"smooth"});}
+function openCurrent(){if(CURRENT_URL)window.open(CURRENT_URL,"_blank");}
 
 render();
 </script>
