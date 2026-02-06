@@ -1,77 +1,126 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>XEMPHIMHH3D</title>
   <link rel="stylesheet" href="./assets/style.css">
-<script defer src="./assets/app.js"></script>
+  <script defer src="./assets/app.js"></script>
 </head>
 <body>
-  <header class="siteHeader">
-    <div class="headerInner">
-      <a class="brand" href="./index.html" title="Trang chủ">
-        <div class="logo">▶</div>
-        <div class="brandText">
-          <div class="brandName">XEMPHIMHH3D</div>
-          <div class="brandTag">xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
-        </div>
-      </a>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <div class="pill" id="todayText">...</div>
-        <a class="pill" href="./admin.html">Admin</a>
-      </div>
+  <header class="topbar">
+    <a class="brand" href="./index.html" title="Trang chủ">
+      <span class="brandIcon">▶</span>
+      <span class="brandText">
+        <b>XEMPHIMHH3D</b>
+        <small>xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</small>
+      </span>
+    </a>
+
+    <div class="topbarRight">
+      <div class="todayPill" id="todayText">Hôm nay (Giờ HCM): ...</div>
+      <a class="adminLink" href="./admin.html">Admin</a>
     </div>
   </header>
 
-  <div class="container">
-    <div class="homeGrid">
-      <div>
-        <section class="panel">
-          <div class="scheduleHeader">
-            <div style="font-weight:900;color:#7dd3fc">🔥 Top phim</div>
-            <div style="color:var(--muted);font-size:12px">Cuộn ngang để xem (Top 1–10)</div>
+  <main class="wrap">
+    <section class="layout">
+      <!-- MAIN -->
+      <div class="mainCol">
+        <!-- TOP SLIDER -->
+        <section class="card">
+          <div class="cardHead">
+            <div class="headTitle">
+              <span class="dot dotGreen"></span>
+              <b>Top phim</b>
+              <small class="muted">Cuộn ngang (Top 1→10)</small>
+            </div>
+            <div class="headRight">
+              <button class="miniBtn" id="btnTopPrev" type="button">‹</button>
+              <button class="miniBtn" id="btnTopNext" type="button">›</button>
+            </div>
           </div>
-          <div class="slider" id="topSlider"></div>
+
+          <div class="topSlider" id="topSlider" aria-label="Top slider"></div>
         </section>
 
-        <div style="height:14px"></div>
-
-        <section class="panel">
-          <div class="scheduleHeader">
-            <div style="display:flex;gap:10px;align-items:center">
-              <div style="font-weight:900;color:#22c55e">Lịch Phim</div>
-              <div class="pill" style="padding:8px 10px">Giờ HCM</div>
+        <!-- SCHEDULE -->
+        <section class="card">
+          <div class="cardHead">
+            <div class="headTitle">
+              <span class="dot dotBlue"></span>
+              <b>Lịch Phim</b>
+              <small class="muted" id="scheduleSubtitle">...</small>
             </div>
-            <div style="color:var(--muted);font-size:12px">Tự hiện phim theo ngày</div>
+            <div class="headRight">
+              <div class="chip">Giờ HCM</div>
+            </div>
           </div>
 
+          <div class="tabs" id="dayTabs"></div>
+
+          <!-- 6 cột lịch phim (Th2→CN) -->
           <div class="scheduleGrid" id="scheduleGrid"></div>
+        </section>
+
+        <!-- CONTACT + LEGAL -->
+        <section class="card">
+          <div class="cardHead">
+            <div class="headTitle">
+              <span class="dot dotGray"></span>
+              <b>Liên hệ & Pháp lý</b>
+              <small class="muted">Chỉ hiển thị link do bạn nhập trong Admin</small>
+            </div>
+          </div>
+
+          <div class="contactRow" id="contactRow"></div>
+
+          <div class="legalBox" id="legalBox">
+            <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
+            Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+            Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
+            vui lòng liên hệ để chúng tôi xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn.
+            Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
+          </div>
         </section>
       </div>
 
-      <aside class="panel">
-        <div class="rankWrap">
-          <h3 class="rankTitle">Bảng Xếp Hạng</h3>
+      <!-- RIGHT SIDEBAR -->
+      <aside class="sideCol">
+        <section class="card">
+          <div class="cardHead">
+            <div class="headTitle">
+              <span class="dot dotOrange"></span>
+              <b>Bảng Xếp Hạng</b>
+              <small class="muted">Top 1→10</small>
+            </div>
+          </div>
           <div class="rankList" id="rankList"></div>
-        </div>
+        </section>
+
+        <section class="card">
+          <div class="cardHead">
+            <div class="headTitle">
+              <span class="dot dotPurple"></span>
+              <b>Gợi ý</b>
+              <small class="muted">Phim mới cập nhật</small>
+            </div>
+          </div>
+          <div class="suggestList" id="suggestList"></div>
+        </section>
       </aside>
+    </section>
+  </main>
+
+  <!-- modal -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTop">
+        <b id="modalTitle">Thông báo</b>
+        <button class="closeBtn" id="closeModal" type="button">Đóng</button>
+      </div>
+      <div class="modalBody" id="modalBody">...</div>
     </div>
   </div>
-
-  <div class="footerGrid">
-    <div class="footerCard"><b>Facebook</b>Link liên hệ Facebook của bạn</div>
-    <div class="footerCard"><b>Telegram</b>Link liên hệ Telegram của bạn</div>
-    <div class="footerCard"><b>Zalo</b>Link liên hệ Zalo của bạn</div>
-  </div>
-
-  <div class="footerNote">
-    <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
-    Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
-    Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
-    vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
-  </div>
-
-  <script src="./assets/app.js"></script>
 </body>
 </html>

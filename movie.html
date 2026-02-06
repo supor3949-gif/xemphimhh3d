@@ -1,181 +1,99 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title id="pageTitle">Phim – HH3D</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Phim – HH3D</title>
 
+  <!-- HLS để nhúng m3u8 (nếu bị chặn CORS/403 sẽ tự mở tab mới) -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
   <link rel="stylesheet" href="./assets/style.css">
-<script defer src="./assets/movie.js"></script>
-  <style>
-    /* Giữ đúng vibe giao diện bạn chụp: sidebar poster + player + grid tập */
-    .movieRow{display:grid;grid-template-columns:260px 1fr;gap:14px;padding:14px}
-    @media (max-width:900px){ .movieRow{grid-template-columns:1fr} }
-
-    .posterBox{
-      background:rgba(2,6,23,.45);
-      border:1px solid var(--border2);
-      border-radius:16px;padding:10px;
-    }
-    .poster{width:100%;aspect-ratio:2/3;border-radius:14px;overflow:hidden;background:rgba(11,16,32,.85);position:relative}
-    .poster img{width:100%;height:100%;object-fit:cover;display:block}
-    .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,.95);font-weight:900;letter-spacing:.6px;font-size:12px}
-    .metaBox{padding:10px 4px 0}
-    .h1{font-size:20px;font-weight:900;margin:0 0 6px}
-    .meta{color:var(--muted);font-size:12px;line-height:1.45}
-    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-
-    .modeRow{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 12px}
-    .modeBtn{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(2,6,23,.55);
-      color:#e5e7eb;
-      padding:10px 14px;border-radius:14px;
-      cursor:pointer;font-weight:900;transition:.12s ease;
-      display:flex;align-items:center;gap:8px;
-    }
-    .modeBtn.active{
-      background:rgba(34,197,94,.18);
-      border-color:rgba(34,197,94,.55);
-      box-shadow:0 10px 18px rgba(34,197,94,.08);
-    }
-    .modeHint{color:var(--muted);font-size:12px;padding:0 14px 10px}
-
-    .playerWrap{padding:0 14px 14px}
-    .playerBox{
-      background:rgba(2,6,23,.55);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;overflow:hidden;
-    }
-    .playerTop{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:10px;flex-wrap:wrap;
-      padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);
-      background:rgba(11,16,32,.55);
-    }
-    .nowPlaying{font-weight:900;font-size:13px}
-    .playerBtns{display:flex;gap:8px;flex-wrap:wrap}
-    .miniBtn{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(2,6,23,.55);
-      color:#e5e7eb;
-      padding:8px 10px;border-radius:12px;
-      cursor:pointer;font-weight:800;font-size:12px;
-    }
-    .stage{position:relative;background:#000;aspect-ratio:16/9;width:100%}
-    video, iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
-    iframe{display:none}
-    .stageHint{
-      padding:10px 12px;color:var(--muted);font-size:12px;
-      background:rgba(2,6,23,.45);border-top:1px solid rgba(255,255,255,.08);
-    }
-
-    .epTools{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 14px}
-    .searchWrap{display:flex;align-items:center;gap:8px;background:var(--panel3);border:1px solid var(--border);
-      border-radius:14px;padding:10px 12px;flex:1;min-width:240px}
-    .searchWrap input{width:100%;background:none;border:none;outline:none;color:var(--text);font-size:14px}
-    .select{background:var(--panel3);color:#cbd5e1;border:1px solid var(--border);border-radius:14px;padding:10px 12px;outline:none;font-size:13px}
-
-    .epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;padding:0 14px 18px}
-    @media (max-width:1100px){ .epGrid{grid-template-columns:repeat(8,1fr)} }
-    @media (max-width:860px){ .epGrid{grid-template-columns:repeat(6,1fr)} }
-    @media (max-width:560px){ .epGrid{grid-template-columns:repeat(4,1fr)} }
-
-    .epBtn{
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(2,6,23,.55);
-      color:#e5e7eb;
-      padding:10px 0;border-radius:14px;
-      cursor:pointer;font-weight:900;transition:.12s ease;position:relative;
-    }
-    .epBtn.done{border-color:rgba(34,197,94,.55);box-shadow:0 10px 18px rgba(34,197,94,.08)}
-    .epBtn.lock{cursor:not-allowed;opacity:.55}
-    .epBtn small{position:absolute;bottom:6px;left:0;right:0;font-size:10px;color:var(--muted);font-weight:700}
-  </style>
+  <script defer src="./assets/movie.js"></script>
 </head>
-
 <body>
-  <header class="siteHeader">
-    <div class="headerInner">
-      <a class="brand" id="homeBrand" href="./index.html" title="Về trang chủ">
-        <div class="logo">▶</div>
-        <div class="brandText">
-          <div class="brandName">XEMPHIMHH3D</div>
-          <div class="brandTag">xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
-        </div>
-      </a>
-      <div class="pill" id="movieInfo">Phim • ...</div>
+  <header class="topbar">
+    <a class="brand" href="./index.html" title="Trang chủ">
+      <span class="brandIcon">▶</span>
+      <span class="brandText">
+        <b>XEMPHIMHH3D</b>
+        <small>xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</small>
+      </span>
+    </a>
+
+    <div class="topbarRight">
+      <div class="todayPill" id="moviePill">...</div>
     </div>
   </header>
 
-  <div class="container">
-    <section class="panel">
-      <div class="scheduleHeader">
-        <div style="font-weight:900">🎬 <span id="movieTitleTop">Phim</span></div>
-        <div style="color:var(--muted);font-size:12px" id="subInfo">...</div>
+  <main class="wrap">
+    <section class="card">
+      <div class="cardHead">
+        <div class="headTitle">
+          <span class="dot dotGreen"></span>
+          <b id="movieTitleTop">...</b>
+          <small class="muted" id="movieSubTop">...</small>
+        </div>
       </div>
 
-      <div class="movieRow">
-        <div class="posterBox">
-          <div class="poster">
-            <img id="posterImg" src="" alt="Poster">
-            <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
-          </div>
-
-          <div class="metaBox">
-            <p class="h1" id="movieTitleLeft">Phim</p>
-            <div class="meta">
-              <div>Thể loại: <b id="genreText">...</b></div>
-              <div id="metaTotal">Tổng tập: <b>...</b></div>
-              <div id="metaHas">Đã có link: <b>...</b></div>
+      <div class="movieLayout">
+        <!-- LEFT -->
+        <aside class="movieLeft">
+          <div class="posterBox">
+            <div class="posterFrame">
+              <img id="poster" alt="poster" />
+              <div class="posterFallback" id="posterFallback">NO IMAGE</div>
             </div>
 
-            <div class="btnRow">
-              <button class="btn" id="btnHome">← Về trang chủ</button>
-              <button class="btn green" onclick="scrollToEpisodes()">Xem danh sách tập</button>
+            <div class="movieMeta">
+              <h1 id="movieTitleLeft">...</h1>
+              <div class="metaLine"><span>Thể loại:</span> <b id="genreText">...</b></div>
+              <div class="metaLine"><span>Tổng tập (theo mode):</span> <b id="totalText">...</b></div>
+              <div class="metaLine"><span>Đã có link:</span> <b id="hasText">...</b></div>
+
+              <div class="btnRow">
+                <a class="btn" href="./index.html">← Về trang chủ</a>
+                <button class="btn btnGreen" id="btnScrollEps" type="button">Xem danh sách tập</button>
+              </div>
             </div>
           </div>
-        </div>
+        </aside>
 
-        <div>
+        <!-- RIGHT -->
+        <div class="movieRight">
           <div class="modeRow">
             <button class="modeBtn active" id="btnVietsub" type="button">✅ Vietsub</button>
             <button class="modeBtn" id="btnThuyetMinh" type="button">🎙️ Thuyết minh</button>
+            <div class="modeHint" id="modeHint">...</div>
           </div>
-          <div class="modeHint" id="modeHint">...</div>
 
-          <div class="playerWrap">
-            <div class="playerBox">
-              <div class="playerTop">
-                <div class="nowPlaying" id="nowPlaying">Chưa chọn tập</div>
-                <div class="playerBtns">
-                  <button class="miniBtn" type="button" onclick="openCurrentInNewTab()">Mở tab mới</button>
-                  <button class="miniBtn" type="button" onclick="stopPlayer()">Dừng</button>
-                </div>
+          <div class="playerBox">
+            <div class="playerTop">
+              <div class="nowPlaying" id="nowPlaying">Chưa chọn tập</div>
+              <div class="playerBtns">
+                <button class="miniBtn" id="btnOpenNew" type="button">Mở tab mới</button>
+                <button class="miniBtn" id="btnStop" type="button">Dừng</button>
               </div>
+            </div>
 
-              <div class="stage">
-                <video id="video" controls playsinline></video>
-                <iframe id="frame" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
-              </div>
+            <div class="stage">
+              <video id="video" controls playsinline></video>
+              <iframe id="frame" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
+            </div>
 
-              <div class="stageHint">
-                ✅ Link nhúng được sẽ phát tại đây. Nếu link bị chặn, hệ thống sẽ tự mở tab mới.
-              </div>
+            <div class="stageHint">
+              ✅ Ưu tiên nhúng trong web. Nếu link bị chặn / không phát được, hệ thống sẽ tự mở tab mới.
             </div>
           </div>
 
-          <div class="meta" style="padding:6px 14px 10px">
-            ✅ Tập có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.
-          </div>
+          <div class="tipLine">✅ Tập có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.</div>
 
           <div class="epTools">
             <div class="searchWrap">
               <span>🔎</span>
-              <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric" />
+              <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric"/>
             </div>
-            <select id="epSort" class="select" title="Sắp xếp">
+            <select id="epSort" class="select">
               <option value="asc">Tập tăng dần</option>
               <option value="desc">Tập giảm dần</option>
               <option value="done">Có link trước</option>
@@ -186,16 +104,23 @@
         </div>
       </div>
     </section>
-  </div>
 
-  <div class="footerNote">
-    <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
-    Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
-    Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
-    vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
-    Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
-  </div>
+    <div class="legalBox">
+      <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
+      Tất cả video và dữ liệu tại đây đều được tổng hợp từ Internet và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+      Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
+    </div>
+  </main>
 
-  <script src="./assets/movie.js"></script>
+  <!-- modal -->
+  <div class="modalBack" id="modalBack" aria-hidden="true">
+    <div class="modal">
+      <div class="modalTop">
+        <b id="modalTitle">Thông báo</b>
+        <button class="closeBtn" id="closeModal" type="button">Đóng</button>
+      </div>
+      <div class="modalBody" id="modalBody">...</div>
+    </div>
+  </div>
 </body>
 </html>

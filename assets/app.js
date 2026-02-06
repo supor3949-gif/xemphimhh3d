@@ -1,165 +1,351 @@
 /* ==========================
-  DATA STORE (LocalStorage)
-  - Demo step 1: lưu dữ liệu ngay trên trình duyệt
-  - Step 2 (Supabase) sẽ thay phần này bằng API thật
+   HH3D TEMPLATE - HOME APP
+   Lưu dữ liệu LocalStorage.
+   (Muốn nâng lên Supabase: thay load/save ở dưới)
 ========================== */
 
-const STORE_KEY = "HH3D_MOVIES_V1";
+const STORE_KEY_MOVIES = "HH3D_MOVIES_V1";
+const STORE_KEY_SETTINGS = "HH3D_SETTINGS_V1";
+const STORE_KEY_CONTACT = "HH3D_CONTACT_V1";
 
-function getHCMDate(){
-  // Lấy "ngày hiện tại theo giờ HCM"
-  const fmt = new Intl.DateTimeFormat("vi-VN", { timeZone:"Asia/Ho_Chi_Minh", year:"numeric", month:"2-digit", day:"2-digit" });
-  const parts = fmt.formatToParts(new Date());
-  const y = parts.find(p=>p.type==="year").value;
-  const m = parts.find(p=>p.type==="month").value;
-  const d = parts.find(p=>p.type==="day").value;
-  return { y, m, d, iso:`${y}-${m}-${d}` };
+// ---------- Utils ----------
+const $ = (id) => document.getElementById(id);
+
+function showModal(title, body){
+  const back = $("modalBack");
+  if (!back) return alert(body);
+  $("modalTitle").textContent = title;
+  $("modalBody").textContent = body;
+  back.style.display = "flex";
+  back.setAttribute("aria-hidden","false");
+}
+function hideModal(){
+  const back = $("modalBack");
+  if (!back) return;
+  back.style.display = "none";
+  back.setAttribute("aria-hidden","true");
 }
 
-function seedIfEmpty(){
-  const cur = localStorage.getItem(STORE_KEY);
-  if (cur) return;
-
-  // ✅ DỮ LIỆU MẪU (bạn có thể xoá hết sau này)
-  const sample = [
-    {
-      id: "tien-nghich",
-      title: "Tiên Nghịch",
-      genre: "Tiên hiệp",
-      poster: "https://i.imgur.com/7yUvePI.jpeg",
-      page: "./movie.html?id=tien-nghich",
-      // schedule: mỗi phim có thể xuất hiện trong 1 hoặc nhiều ngày (0=CN,1=Th2...6=Th7)
-      scheduleDays: [5], // Thứ 6
-      topRank: 1,
-      tags: ["Hot","Vietsub"],
-      updated: "2026-02-06"
-    }
-  ];
-  localStorage.setItem(STORE_KEY, JSON.stringify(sample));
+function getHCMDateParts(){
+  const d = new Date();
+  const fmt = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year:"numeric", month:"2-digit", day:"2-digit",
+  }).formatToParts(d);
+  const obj = Object.fromEntries(fmt.map(p=>[p.type,p.value]));
+  return { dd: obj.day, mm: obj.month, yyyy: obj.year };
 }
 
+function dayLabel(i){ // 1..7 (Mon..Sun)
+  return ["","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7","Chủ nhật"][i];
+}
+
+// ---------- Data (LocalStorage) ----------
 function loadMovies(){
-  seedIfEmpty();
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY_MOVIES) || "[]"); }
+  catch{ return []; }
+}
+function saveMovies(movies){
+  localStorage.setItem(STORE_KEY_MOVIES, JSON.stringify(movies));
+}
+
+// settings: aff + etc (home dùng contact thôi)
+function loadContact(){
   try{
-    return JSON.parse(localStorage.getItem(STORE_KEY) || "[]");
-  }catch(e){
-    return [];
+    return JSON.parse(localStorage.getItem(STORE_KEY_CONTACT) || "{}");
+  }catch{ return {}; }
+}
+
+// ---------- UI Render ----------
+function movieToHref(m){
+  // dùng 1 movie.html chung, truyền id bằng query
+  return `./movie.html?id=${encodeURIComponent(m.id)}`;
+}
+
+function renderTopSlider(movies){
+  const el = $("topSlider");
+  if (!el) return;
+  el.innerHTML = "";
+
+  const top = movies
+    .filter(m => Number.isFinite(+m.topRank) && +m.topRank >= 1 && +m.topRank <= 10)
+    .sort((a,b)=> (+a.topRank) - (+b.topRank));
+
+  if (!top.length){
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = "Chưa có phim Top. Vào Admin thêm topRank 1-10.";
+    el.appendChild(empty);
+    return;
+  }
+
+  top.forEach(m=>{
+    const a = document.createElement("a");
+    a.className = "cardMini";
+    a.href = movieToHref(m);
+    a.innerHTML = `
+      <div class="img">
+        <img src="${m.poster || ""}" alt="${escapeHtml(m.title)}"
+             onerror="this.style.display='none'">
+        <span class="badgeTop">TOP ${m.topRank}</span>
+      </div>
+      <div class="info">
+        <div class="title">${escapeHtml(m.title)}</div>
+        <div class="meta">${escapeHtml(m.genre || "")}</div>
+      </div>
+    `;
+    el.appendChild(a);
+  });
+
+  // buttons
+  const prev = $("btnTopPrev");
+  const next = $("btnTopNext");
+  if (prev && next){
+    prev.onclick = ()=> el.scrollBy({left:-240, behavior:"smooth"});
+    next.onclick = ()=> el.scrollBy({left: 240, behavior:"smooth"});
   }
 }
 
-function $(id){ return document.getElementById(id); }
+function renderDayTabs(){
+  const tabs = $("dayTabs");
+  if (!tabs) return;
+  tabs.innerHTML = "";
 
-function renderTopSlider(movies){
-  const top = movies
-    .slice()
-    .filter(m=>Number.isFinite(m.topRank))
-    .sort((a,b)=>a.topRank-b.topRank)
-    .slice(0,10);
-
-  const el = $("topSlider");
-  el.innerHTML = "";
-  top.forEach(m=>{
-    const card = document.createElement("a");
-    card.className = "cardMini";
-    card.href = m.page;
-    card.innerHTML = `
-      <img src="${m.poster||""}" alt="">
-      <div class="pad">
-        <div class="badge">TOP ${m.topRank}</div>
-        <div style="font-weight:900;margin-top:8px">${m.title}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">${m.genre||""}</div>
-      </div>
-    `;
-    el.appendChild(card);
+  // 6 ô như yêu cầu (Th2→Th7), CN vẫn hiện trong lịch 6 ô? -> em muốn 6 ô,
+  // nên mình làm 6 ô Th2→Th7, còn CN sẽ xuất hiện theo tab "Chủ nhật" nếu cần.
+  // Ở dưới scheduleGrid vẫn là 6 cột, nên ta map Th2..Th7 = 6 cột.
+  const days = [2,3,4,5,6,7,8]; // 8 = CN (tab riêng)
+  days.forEach((d,idx)=>{
+    const btn = document.createElement("button");
+    btn.className = "tabBtn" + (idx===0 ? " active" : "");
+    btn.type = "button";
+    btn.dataset.day = String(d);
+    btn.textContent = (d===8) ? "Chủ nhật" : dayLabel(d);
+    btn.onclick = ()=>{
+      [...tabs.querySelectorAll(".tabBtn")].forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      renderSchedule(loadMovies(), d);
+    };
+    tabs.appendChild(btn);
   });
 }
 
-function dayLabel(i){
-  // 0 CN, 1 Th2...
-  return ["Chủ nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"][i];
-}
-
-function renderSchedule(movies){
+function renderSchedule(movies, focusDay){
   const grid = $("scheduleGrid");
+  if (!grid) return;
+
+  // Lịch 6 ô hàng ngang: Th2..Th7 (6 cột)
+  // Nếu focusDay = CN (8) -> show CN ở 1 ô, còn 5 ô còn lại trống.
+  const cols = [2,3,4,5,6,7]; // 6 cột cố định
+
   grid.innerHTML = "";
 
-  for (let d=1; d<=6; d++){/* Th2..Th7 */} // chỉ để bạn thấy logic
-  const days = [1,2,3,4,5,6,0]; // hiển thị Th2->CN
+  const date = getHCMDateParts();
+  $("scheduleSubtitle").textContent = `Hôm nay: ${date.dd}/${date.mm}/${date.yyyy}`;
 
-  days.forEach(day=>{
+  cols.forEach(d=>{
     const box = document.createElement("div");
     box.className = "dayBox";
 
-    const list = movies.filter(m => (m.scheduleDays||[]).includes(day));
+    const head = document.createElement("div");
+    head.className = "dayBoxHead";
+    head.innerHTML = `<b>${dayLabel(d)}</b><small>${(focusDay===8 && d!==2) ? "" : ""}</small>`;
+    box.appendChild(head);
 
-    box.innerHTML = `
-      <div class="dayTop">
-        <b>${dayLabel(day)}</b>
-        <span>${list.length} phim</span>
-      </div>
-      <div class="dayList" id="day-${day}"></div>
-    `;
-    grid.appendChild(box);
+    const list = document.createElement("div");
+    list.className = "dayList";
 
-    const listEl = box.querySelector(`#day-${day}`);
-    if (!list.length){
-      const empty = document.createElement("div");
-      empty.style.color = "var(--muted)";
-      empty.style.fontSize = "12px";
-      empty.textContent = "Chưa có phim";
-      listEl.appendChild(empty);
-      return;
+    // lọc phim theo scheduleDays (m.scheduleDays chứa 2..8, 8=CN)
+    const dayToUse = (focusDay === 8) ? 8 : d;
+    const items = movies
+      .filter(m => Array.isArray(m.scheduleDays) && m.scheduleDays.includes(dayToUse))
+      .slice(0,6);
+
+    if (!items.length){
+      const e = document.createElement("div");
+      e.className = "empty";
+      e.textContent = "Chưa có phim";
+      list.appendChild(e);
+    } else {
+      items.forEach(m=>{
+        const a = document.createElement("a");
+        a.className = "itemRow";
+        a.href = movieToHref(m);
+        a.innerHTML = `
+          <img src="${m.poster || ""}" alt="${escapeHtml(m.title)}" onerror="this.style.display='none'">
+          <div>
+            <div class="t">${escapeHtml(m.title)}</div>
+            <div class="g">${escapeHtml(m.genre || "")}</div>
+          </div>
+        `;
+        list.appendChild(a);
+      });
     }
 
-    list.slice(0,6).forEach(m=>{
-      const row = document.createElement("a");
-      row.className = "itemRow";
-      row.href = m.page;
-      row.innerHTML = `
-        <img src="${m.poster||""}" alt="">
-        <div style="min-width:0">
-          <div class="t">${m.title}</div>
-          <div class="s">${m.genre||""}</div>
-        </div>
-      `;
-      listEl.appendChild(row);
-    });
+    box.appendChild(list);
+    grid.appendChild(box);
   });
+
+  // Nếu focusDay=CN: chỉ muốn hiện CN, còn lại trống -> ta override nhanh:
+  if (focusDay === 8){
+    // cột đầu dùng để hiển thị CN
+    const first = grid.firstElementChild;
+    if (first){
+      first.querySelector(".dayBoxHead b").textContent = "Chủ nhật";
+      const list = first.querySelector(".dayList");
+      list.innerHTML = "";
+      const items = movies
+        .filter(m => Array.isArray(m.scheduleDays) && m.scheduleDays.includes(8))
+        .slice(0,6);
+      if (!items.length){
+        const e = document.createElement("div");
+        e.className = "empty";
+        e.textContent = "Chưa có phim";
+        list.appendChild(e);
+      } else {
+        items.forEach(m=>{
+          const a = document.createElement("a");
+          a.className = "itemRow";
+          a.href = movieToHref(m);
+          a.innerHTML = `
+            <img src="${m.poster || ""}" alt="${escapeHtml(m.title)}" onerror="this.style.display='none'">
+            <div>
+              <div class="t">${escapeHtml(m.title)}</div>
+              <div class="g">${escapeHtml(m.genre || "")}</div>
+            </div>
+          `;
+          list.appendChild(a);
+        });
+      }
+    }
+    // các cột còn lại trống
+    [...grid.children].slice(1).forEach(x=>{
+      x.querySelector(".dayBoxHead b").textContent = "—";
+      x.querySelector(".dayList").innerHTML = `<div class="empty">—</div>`;
+    });
+  }
 }
 
 function renderRank(movies){
-  const rank = movies
-    .slice()
-    .filter(m=>Number.isFinite(m.topRank))
-    .sort((a,b)=>a.topRank-b.topRank)
-    .slice(0,10);
-
   const el = $("rankList");
+  if (!el) return;
   el.innerHTML = "";
-  rank.forEach(m=>{
-    const item = document.createElement("a");
-    item.className = "rankItem";
-    item.href = m.page;
-    item.innerHTML = `
+
+  const top = movies
+    .filter(m => Number.isFinite(+m.topRank) && +m.topRank >= 1 && +m.topRank <= 10)
+    .sort((a,b)=> (+a.topRank) - (+b.topRank));
+
+  if (!top.length){
+    el.innerHTML = `<div class="empty">Chưa có xếp hạng. Vào Admin đặt topRank 1-10.</div>`;
+    return;
+  }
+
+  top.forEach(m=>{
+    const a = document.createElement("a");
+    a.className = "rankItem";
+    a.href = movieToHref(m);
+    a.innerHTML = `
       <div class="rankNum">${m.topRank}</div>
-      <img src="${m.poster||""}" alt="">
-      <div style="min-width:0">
-        <div style="font-weight:900">${m.title}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:4px">${m.genre||""}</div>
+      <img src="${m.poster || ""}" alt="${escapeHtml(m.title)}" onerror="this.style.display='none'">
+      <div>
+        <b>${escapeHtml(m.title)}</b>
+        <small>${escapeHtml(m.genre || "")}</small>
       </div>
     `;
-    el.appendChild(item);
+    el.appendChild(a);
   });
 }
 
-function initHome(){
-  const now = getHCMDate();
-  $("todayText").textContent = `Hôm nay (giờ HCM): ${now.d}/${now.m}/${now.y}`;
+function renderSuggest(movies){
+  const el = $("suggestList");
+  if (!el) return;
+  el.innerHTML = "";
+
+  const list = movies
+    .slice()
+    .sort((a,b)=> (String(b.updatedAt||"")).localeCompare(String(a.updatedAt||"")))
+    .slice(0,8);
+
+  if (!list.length){
+    el.innerHTML = `<div class="empty">Chưa có phim. Vào Admin thêm phim.</div>`;
+    return;
+  }
+
+  list.forEach(m=>{
+    const a = document.createElement("a");
+    a.className = "rankItem";
+    a.href = movieToHref(m);
+    a.innerHTML = `
+      <div class="rankNum">NEW</div>
+      <img src="${m.poster || ""}" alt="${escapeHtml(m.title)}" onerror="this.style.display='none'">
+      <div>
+        <b>${escapeHtml(m.title)}</b>
+        <small>${escapeHtml(m.genre || "")}</small>
+      </div>
+    `;
+    el.appendChild(a);
+  });
+}
+
+function renderContact(){
+  const el = $("contactRow");
+  if (!el) return;
+
+  const c = loadContact();
+  const fb = c.facebook || "";
+  const tg = c.telegram || "";
+  const zl = c.zalo || "";
+
+  const items = [
+    {name:"Facebook", url:fb, hint:"Link liên hệ Facebook"},
+    {name:"Telegram", url:tg, hint:"Link liên hệ Telegram"},
+    {name:"Zalo", url:zl, hint:"Link liên hệ Zalo"},
+  ];
+
+  el.innerHTML = "";
+  items.forEach(it=>{
+    const a = document.createElement("a");
+    a.className = "contactCard";
+    a.href = it.url || "javascript:void(0)";
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.onclick = (e)=>{
+      if (!it.url){ e.preventDefault(); showModal("Chưa có link", `Bạn chưa nhập link ${it.name} trong Admin.`); }
+    };
+    a.innerHTML = `<b>${it.name}</b><small>${it.url ? it.url : "Chưa nhập (vào Admin)"}</small>`;
+    el.appendChild(a);
+  });
+}
+
+// ---------- Helpers ----------
+function escapeHtml(s){
+  return String(s||"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+// ---------- Init ----------
+document.addEventListener("DOMContentLoaded", ()=>{
+  // modal close
+  const close = $("closeModal");
+  const back = $("modalBack");
+  if (close) close.onclick = hideModal;
+  if (back) back.onclick = (e)=>{ if (e.target.id==="modalBack") hideModal(); };
+  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") hideModal(); });
+
+  const d = getHCMDateParts();
+  const today = $("todayText");
+  if (today) today.textContent = `Hôm nay (Giờ HCM): ${d.dd}/${d.mm}/${d.yyyy}`;
+
+  renderDayTabs();
 
   const movies = loadMovies();
   renderTopSlider(movies);
-  renderSchedule(movies);
+  renderSchedule(movies, 2); // mặc định focus Th2
   renderRank(movies);
-}
-
-document.addEventListener("DOMContentLoaded", initHome);
+  renderSuggest(movies);
+  renderContact();
+});
