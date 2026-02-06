@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin – XEMPHIMHH3D</title>
+  <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+  <header class="siteHeader">
+    <div class="headerInner">
+      <a class="brand" href="./index.html">
+        <div class="logo">▶</div>
+        <div class="brandText">
+          <div class="brandName">XEMPHIMHH3D</div>
+          <div class="brandTag">Admin demo (LocalStorage)</div>
+        </div>
+      </a>
+      <div class="pill">Sau này lên Supabase sẽ có login thật</div>
+    </div>
+  </header>
+
+  <div class="container">
+    <section class="panel">
+      <div class="scheduleHeader">
+        <div style="font-weight:900">🔐 Admin</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="btnExport">Xuất JSON</button>
+          <button class="btn" id="btnClear">Xoá toàn bộ</button>
+        </div>
+      </div>
+
+      <div class="form" id="loginBox">
+        <div style="color:var(--muted);font-size:12px">Demo: mật khẩu nằm trong code (bạn tự đổi)</div>
+        <input class="inp" id="pw" type="password" placeholder="Nhập mật khẩu admin">
+        <button class="btn green" id="btnLogin">Đăng nhập</button>
+      </div>
+
+      <div class="form" id="adminBox" style="display:none">
+        <div class="row2">
+          <input class="inp" id="id" placeholder="id (vd: tien-nghich)">
+          <input class="inp" id="title" placeholder="Tên phim">
+        </div>
+
+        <div class="row2">
+          <input class="inp" id="genre" placeholder="Thể loại">
+          <input class="inp" id="poster" placeholder="Poster URL (https://...)">
+        </div>
+
+        <div class="row2">
+          <input class="inp" id="page" placeholder="Link trang phim (vd: ./movie.html?id=tien-nghich)">
+          <input class="inp" id="topRank" placeholder="Top rank (1-10, để trống nếu không)">
+        </div>
+
+        <div class="row2">
+          <input class="inp" id="scheduleDays" placeholder="Ngày lịch (0=CN,1=Th2...6=Th7) vd: 5 hoặc 1,3,5">
+          <input class="inp" id="updated" placeholder="Ngày cập nhật (YYYY-MM-DD) vd: 2026-02-06">
+        </div>
+
+        <textarea id="vietsub" placeholder="Dán list VIETSUB:
+Tập 01|https://...
+Tập 02|https://..."></textarea>
+
+        <textarea id="thuyetminh" placeholder="Dán list THUYẾT MINH:
+Tập 01|https://...
+Tập 02|https://..."></textarea>
+
+        <button class="btn green" id="btnSave">Lưu phim</button>
+
+        <div style="height:6px"></div>
+        <div class="pill">Danh sách phim (click để sửa)</div>
+        <div id="list"></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="./assets/admin.js"></script>
+</body>
+</html>
