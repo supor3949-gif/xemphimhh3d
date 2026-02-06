@@ -1,120 +1,201 @@
-const STORE_KEY = "HH3D_MOVIES_V1";
-const ADMIN_SESSION = "HH3D_ADMIN_OK";
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title id="pageTitle">Phim – HH3D</title>
 
-/* ✅ DEMO PASSWORD: đổi chỗ này */
-const ADMIN_PASSWORD = "123456";
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <link rel="stylesheet" href="./assets/style.css">
 
-function load(){
-  try{ return JSON.parse(localStorage.getItem(STORE_KEY)||"[]"); }catch(e){ return []; }
-}
-function saveAll(arr){
-  localStorage.setItem(STORE_KEY, JSON.stringify(arr));
-}
-function $(id){ return document.getElementById(id); }
+  <style>
+    /* Giữ đúng vibe giao diện bạn chụp: sidebar poster + player + grid tập */
+    .movieRow{display:grid;grid-template-columns:260px 1fr;gap:14px;padding:14px}
+    @media (max-width:900px){ .movieRow{grid-template-columns:1fr} }
 
-function parseDays(s){
-  return (s||"").split(",").map(x=>parseInt(x.trim(),10)).filter(n=>Number.isFinite(n) && n>=0 && n<=6);
-}
+    .posterBox{
+      background:rgba(2,6,23,.45);
+      border:1px solid var(--border2);
+      border-radius:16px;padding:10px;
+    }
+    .poster{width:100%;aspect-ratio:2/3;border-radius:14px;overflow:hidden;background:rgba(11,16,32,.85);position:relative}
+    .poster img{width:100%;height:100%;object-fit:cover;display:block}
+    .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,.95);font-weight:900;letter-spacing:.6px;font-size:12px}
+    .metaBox{padding:10px 4px 0}
+    .h1{font-size:20px;font-weight:900;margin:0 0 6px}
+    .meta{color:var(--muted);font-size:12px;line-height:1.45}
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 
-/* Parse list tập -> map */
-function parseEp(raw){
-  const map = {};
-  (raw||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean).forEach(line=>{
-    const parts = line.split("|");
-    if (parts.length<2) return;
-    const epNum = parseInt((parts[0].match(/(\d+)/)||[])[1],10);
-    const url = parts.slice(1).join("|").trim();
-    if (!Number.isFinite(epNum)) return;
-    map[epNum] = url;
-  });
-  return map;
-}
+    .modeRow{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 12px}
+    .modeBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:10px 14px;border-radius:14px;
+      cursor:pointer;font-weight:900;transition:.12s ease;
+      display:flex;align-items:center;gap:8px;
+    }
+    .modeBtn.active{
+      background:rgba(34,197,94,.18);
+      border-color:rgba(34,197,94,.55);
+      box-shadow:0 10px 18px rgba(34,197,94,.08);
+    }
+    .modeHint{color:var(--muted);font-size:12px;padding:0 14px 10px}
 
-function renderList(items){
-  const wrap = $("list");
-  wrap.innerHTML = "";
-  items.forEach(m=>{
-    const row = document.createElement("div");
-    row.className = "pill";
-    row.style.marginTop = "10px";
-    row.style.cursor = "pointer";
-    row.textContent = `${m.title} (${m.id}) • lịch: ${(m.scheduleDays||[]).join(",")} • top: ${m.topRank||"-"}`;
-    row.onclick = ()=> fillForm(m);
-    wrap.appendChild(row);
-  });
-}
+    .playerWrap{padding:0 14px 14px}
+    .playerBox{
+      background:rgba(2,6,23,.55);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;overflow:hidden;
+    }
+    .playerTop{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;flex-wrap:wrap;
+      padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(11,16,32,.55);
+    }
+    .nowPlaying{font-weight:900;font-size:13px}
+    .playerBtns{display:flex;gap:8px;flex-wrap:wrap}
+    .miniBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:8px 10px;border-radius:12px;
+      cursor:pointer;font-weight:800;font-size:12px;
+    }
+    .stage{position:relative;background:#000;aspect-ratio:16/9;width:100%}
+    video, iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+    iframe{display:none}
+    .stageHint{
+      padding:10px 12px;color:var(--muted);font-size:12px;
+      background:rgba(2,6,23,.45);border-top:1px solid rgba(255,255,255,.08);
+    }
 
-function fillForm(m){
-  $("id").value = m.id||"";
-  $("title").value = m.title||"";
-  $("genre").value = m.genre||"";
-  $("poster").value = m.poster||"";
-  $("page").value = m.page||"";
-  $("topRank").value = (m.topRank ?? "");
-  $("scheduleDays").value = (m.scheduleDays||[]).join(",");
-  $("updated").value = m.updated||"";
+    .epTools{display:flex;gap:10px;flex-wrap:wrap;padding:0 14px 14px}
+    .searchWrap{display:flex;align-items:center;gap:8px;background:var(--panel3);border:1px solid var(--border);
+      border-radius:14px;padding:10px 12px;flex:1;min-width:240px}
+    .searchWrap input{width:100%;background:none;border:none;outline:none;color:var(--text);font-size:14px}
+    .select{background:var(--panel3);color:#cbd5e1;border:1px solid var(--border);border-radius:14px;padding:10px 12px;outline:none;font-size:13px}
 
-  // map -> text list
-  const toText = (map)=>{
-    return Object.keys(map||{})
-      .map(n=>parseInt(n,10))
-      .filter(n=>Number.isFinite(n))
-      .sort((a,b)=>a-b)
-      .map(n=>`Tập ${String(n).padStart(2,"0")}|${map[n]}`)
-      .join("\n");
-  };
-  $("vietsub").value = toText(m.vietsub||{});
-  $("thuyetminh").value = toText(m.thuyetminh||{});
-}
+    .epGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:10px;padding:0 14px 18px}
+    @media (max-width:1100px){ .epGrid{grid-template-columns:repeat(8,1fr)} }
+    @media (max-width:860px){ .epGrid{grid-template-columns:repeat(6,1fr)} }
+    @media (max-width:560px){ .epGrid{grid-template-columns:repeat(4,1fr)} }
 
-function loginOK(){
-  localStorage.setItem(ADMIN_SESSION,"1");
-  $("loginBox").style.display="none";
-  $("adminBox").style.display="grid";
-  renderList(load());
-}
+    .epBtn{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      padding:10px 0;border-radius:14px;
+      cursor:pointer;font-weight:900;transition:.12s ease;position:relative;
+    }
+    .epBtn.done{border-color:rgba(34,197,94,.55);box-shadow:0 10px 18px rgba(34,197,94,.08)}
+    .epBtn.lock{cursor:not-allowed;opacity:.55}
+    .epBtn small{position:absolute;bottom:6px;left:0;right:0;font-size:10px;color:var(--muted);font-weight:700}
+  </style>
+</head>
 
-document.addEventListener("DOMContentLoaded", ()=>{
-  if (localStorage.getItem(ADMIN_SESSION)==="1") loginOK();
+<body>
+  <header class="siteHeader">
+    <div class="headerInner">
+      <a class="brand" id="homeBrand" href="./index.html" title="Về trang chủ">
+        <div class="logo">▶</div>
+        <div class="brandText">
+          <div class="brandName">XEMPHIMHH3D</div>
+          <div class="brandTag">xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
+        </div>
+      </a>
+      <div class="pill" id="movieInfo">Phim • ...</div>
+    </div>
+  </header>
 
-  $("btnLogin").onclick = ()=>{
-    if ($("pw").value === ADMIN_PASSWORD) loginOK();
-    else alert("Sai mật khẩu");
-  };
+  <div class="container">
+    <section class="panel">
+      <div class="scheduleHeader">
+        <div style="font-weight:900">🎬 <span id="movieTitleTop">Phim</span></div>
+        <div style="color:var(--muted);font-size:12px" id="subInfo">...</div>
+      </div>
 
-  $("btnSave").onclick = ()=>{
-    const items = load();
-    const id = $("id").value.trim();
-    if (!id) return alert("Thiếu id");
+      <div class="movieRow">
+        <div class="posterBox">
+          <div class="poster">
+            <img id="posterImg" src="" alt="Poster">
+            <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
+          </div>
 
-    const m = {
-      id,
-      title: $("title").value.trim() || id,
-      genre: $("genre").value.trim(),
-      poster: $("poster").value.trim(),
-      page: $("page").value.trim() || `./movie.html?id=${encodeURIComponent(id)}`,
-      topRank: $("topRank").value.trim()? parseInt($("topRank").value.trim(),10) : undefined,
-      scheduleDays: parseDays($("scheduleDays").value),
-      updated: $("updated").value.trim(),
-      vietsub: parseEp($("vietsub").value),
-      thuyetminh: parseEp($("thuyetminh").value),
-    };
+          <div class="metaBox">
+            <p class="h1" id="movieTitleLeft">Phim</p>
+            <div class="meta">
+              <div>Thể loại: <b id="genreText">...</b></div>
+              <div id="metaTotal">Tổng tập: <b>...</b></div>
+              <div id="metaHas">Đã có link: <b>...</b></div>
+            </div>
 
-    const idx = items.findIndex(x=>x.id===id);
-    if (idx>=0) items[idx]=m; else items.push(m);
-    saveAll(items);
-    renderList(items);
-    alert("Đã lưu!");
-  };
+            <div class="btnRow">
+              <button class="btn" id="btnHome">← Về trang chủ</button>
+              <button class="btn green" onclick="scrollToEpisodes()">Xem danh sách tập</button>
+            </div>
+          </div>
+        </div>
 
-  $("btnClear").onclick = ()=>{
-    if (!confirm("Xoá toàn bộ dữ liệu?")) return;
-    localStorage.removeItem(STORE_KEY);
-    location.reload();
-  };
+        <div>
+          <div class="modeRow">
+            <button class="modeBtn active" id="btnVietsub" type="button">✅ Vietsub</button>
+            <button class="modeBtn" id="btnThuyetMinh" type="button">🎙️ Thuyết minh</button>
+          </div>
+          <div class="modeHint" id="modeHint">...</div>
 
-  $("btnExport").onclick = ()=>{
-    const data = JSON.stringify(load(), null, 2);
-    navigator.clipboard.writeText(data).then(()=>alert("Đã copy JSON vào clipboard"));
-  };
-});
+          <div class="playerWrap">
+            <div class="playerBox">
+              <div class="playerTop">
+                <div class="nowPlaying" id="nowPlaying">Chưa chọn tập</div>
+                <div class="playerBtns">
+                  <button class="miniBtn" type="button" onclick="openCurrentInNewTab()">Mở tab mới</button>
+                  <button class="miniBtn" type="button" onclick="stopPlayer()">Dừng</button>
+                </div>
+              </div>
+
+              <div class="stage">
+                <video id="video" controls playsinline></video>
+                <iframe id="frame" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
+              </div>
+
+              <div class="stageHint">
+                ✅ Link nhúng được sẽ phát tại đây. Nếu link bị chặn, hệ thống sẽ tự mở tab mới.
+              </div>
+            </div>
+          </div>
+
+          <div class="meta" style="padding:6px 14px 10px">
+            ✅ Tập có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.
+          </div>
+
+          <div class="epTools">
+            <div class="searchWrap">
+              <span>🔎</span>
+              <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric" />
+            </div>
+            <select id="epSort" class="select" title="Sắp xếp">
+              <option value="asc">Tập tăng dần</option>
+              <option value="desc">Tập giảm dần</option>
+              <option value="done">Có link trước</option>
+            </select>
+          </div>
+
+          <div class="epGrid" id="epGrid"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footerNote">
+    <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
+    Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+    Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
+    vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
+    Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
+  </div>
+
+  <script src="./assets/movie.js"></script>
+</body>
+</html>
