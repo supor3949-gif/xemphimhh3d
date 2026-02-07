@@ -349,3 +349,275 @@ document.addEventListener("DOMContentLoaded", ()=>{
   renderSuggest(movies);
   renderContact();
 });
+/* =========================
+   HH3D TEMPLATE - HOME
+   - Lưu dữ liệu phim trong LocalStorage (demo)
+   - Admin sẽ chỉnh dữ liệu trong cùng STORE
+   ========================= */
+
+const STORE_KEY = "HH3D_STORE_V1";
+
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){
+    return null;
+  }
+}
+function saveStore(store){
+  localStorage.setItem(STORE_KEY, JSON.stringify(store));
+}
+
+/* ====== Demo seed (nếu chưa có data) ====== */
+function seedIfEmpty(){
+  const ex = loadStore();
+  if (ex && ex.movies && ex.movies.length) return;
+
+  const demo = {
+    config: {
+      tiktokWeb: "https://vt.tiktok.com/ZS91xpNUw7kcD-nRXjG/",
+      shopeeWeb: "",
+      affRate: 0.5, // 5/5 = 50%
+      facebook: "https://facebook.com/",
+      telegram: "https://t.me/",
+      zalo: "https://zalo.me/"
+    },
+    movies: [
+      {
+        id: "tien-nghich",
+        title: "Tiên Nghịch",
+        genre: "Tiên hiệp",
+        poster: "https://i.imgur.com/7yUevPJ.jpeg",
+        page: "/movie.html?id=tien-nghich",
+        scheduleDays: [2,4,6,7],   // THỨ 2..CN (2=Thứ2 ... 8=CN)
+        topRank: 1,
+        tag: "4K TM-VS",
+        episodes: {
+          vietsub: "",
+          thuyetminh: ""
+        }
+      }
+    ]
+  };
+
+  saveStore(demo);
+}
+
+/* ===== Giờ HCM (UTC+7) ===== */
+function getHCMDateParts(){
+  const fmt = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "long"
+  });
+  const parts = fmt.formatToParts(new Date());
+  const get = (t)=>parts.find(p=>p.type===t)?.value || "";
+  return { dd:get("day"), mm:get("month"), yy:get("year"), wd:get("weekday") };
+}
+
+function $(id){ return document.getElementById(id); }
+
+/* ===== Render Top slider ===== */
+function renderTopSlider(movies){
+  const top = movies
+    .filter(m => Number.isFinite(m.topRank) && m.topRank >= 1 && m.topRank <= 10)
+    .sort((a,b)=>a.topRank-b.topRank)
+    .slice(0,10);
+
+  const slider = $("topSlider");
+  slider.innerHTML = "";
+
+  top.forEach(m=>{
+    const a = document.createElement("a");
+    a.className = "cardMini";
+    a.href = m.page;
+
+    a.innerHTML = `
+      <div class="img">${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : ""}</div>
+      <div class="cBody">
+        <div class="cTitle">TOP ${m.topRank} • ${escapeHtml(m.title)}</div>
+        <div class="cSub">${escapeHtml(m.genre || "")}</div>
+        ${m.tag ? `<div class="badge">✅ ${escapeHtml(m.tag)}</div>` : ""}
+      </div>
+    `;
+    slider.appendChild(a);
+  });
+
+  // nút điều hướng
+  $("topPrev").onclick = () => slider.scrollBy({left:-420, behavior:"smooth"});
+  $("topNext").onclick = () => slider.scrollBy({left: 420, behavior:"smooth"});
+}
+
+/* ===== Render Rank list ===== */
+function renderRank(movies){
+  const rank = movies
+    .filter(m => Number.isFinite(m.topRank) && m.topRank >= 1 && m.topRank <= 10)
+    .sort((a,b)=>a.topRank-b.topRank)
+    .slice(0,10);
+
+  const wrap = $("rankList");
+  wrap.innerHTML = "";
+
+  rank.forEach(m=>{
+    const a = document.createElement("a");
+    a.className = "rankItem";
+    a.href = m.page;
+
+    a.innerHTML = `
+      <div class="rankN">${m.topRank}</div>
+      <div class="rankThumb">${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : ""}</div>
+      <div class="rankMeta">
+        <div class="rankTitle">${escapeHtml(m.title)}</div>
+        <div class="rankSub">${escapeHtml(m.genre || "")}</div>
+      </div>
+    `;
+    wrap.appendChild(a);
+  });
+}
+
+/* ===== Schedule (Thứ 2 → CN) ===== */
+const DAYS = [
+  { id:2, name:"Thứ 2", en:"Monday" },
+  { id:3, name:"Thứ 3", en:"Tuesday" },
+  { id:4, name:"Thứ 4", en:"Wednesday" },
+  { id:5, name:"Thứ 5", en:"Thursday" },
+  { id:6, name:"Thứ 6", en:"Friday" },
+  { id:7, name:"Thứ 7", en:"Saturday" },
+  { id:8, name:"Chủ nhật", en:"Sunday" },
+];
+
+function renderDayTabs(){
+  const tabs = $("dayTabs");
+  tabs.innerHTML = "";
+
+  DAYS.forEach(d=>{
+    const btn = document.createElement("button");
+    btn.className = "dayTab";
+    btn.type = "button";
+    btn.textContent = d.name;
+    btn.onclick = ()=>{
+      // cuộn tới cột ngày tương ứng
+      const el = document.querySelector(`[data-day="${d.id}"]`);
+      if (el) el.scrollIntoView({behavior:"smooth", block:"nearest", inline:"start"});
+      document.querySelectorAll(".dayTab").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+    };
+    tabs.appendChild(btn);
+  });
+
+  // active mặc định Thứ 2
+  const first = tabs.querySelector(".dayTab");
+  if (first) first.classList.add("active");
+}
+
+function renderSchedule(movies, keyword=""){
+  const grid = $("scheduleGrid");
+  grid.innerHTML = "";
+
+  const kw = keyword.trim().toLowerCase();
+
+  DAYS.forEach(d=>{
+    const box = document.createElement("div");
+    box.className = "dayBox";
+    box.dataset.day = String(d.id);
+
+    const list = movies.filter(m=>{
+      const days = Array.isArray(m.scheduleDays) ? m.scheduleDays : [];
+      const okDay = days.includes(d.id);
+      if (!okDay) return false;
+      if (!kw) return true;
+      return (m.title||"").toLowerCase().includes(kw) || (m.genre||"").toLowerCase().includes(kw);
+    });
+
+    box.innerHTML = `
+      <div class="dayBoxHead">
+        <b>${d.name}</b>
+        <span style="color:var(--muted);font-size:11px">${d.en}</span>
+      </div>
+      <div class="dayList" id="day-${d.id}"></div>
+    `;
+
+    const listEl = box.querySelector(`#day-${d.id}`);
+    if (!list.length){
+      const empty = document.createElement("div");
+      empty.style.color = "var(--muted)";
+      empty.style.fontSize = "12px";
+      empty.textContent = "Chưa có phim";
+      listEl.appendChild(empty);
+    }else{
+      // hiện tối đa 6 item / ngày (giống mẫu)
+      list.slice(0,6).forEach(m=>{
+        const a = document.createElement("a");
+        a.className = "itemRow";
+        a.href = m.page;
+        a.innerHTML = `
+          <div class="itemThumb">${m.poster ? `<img src="${m.poster}" alt="${m.title}">` : ""}</div>
+          <div class="itemMeta">
+            <div class="itemTitle">${escapeHtml(m.title)}</div>
+            <div class="itemSub">${escapeHtml(m.genre || "")}</div>
+          </div>
+        `;
+        listEl.appendChild(a);
+      });
+    }
+
+    grid.appendChild(box);
+  });
+}
+
+/* ===== Contact ===== */
+function renderContacts(cfg){
+  const setLink = (id, url)=>{
+    const a = $(id);
+    if (!a) return;
+    if (!url) {
+      a.style.opacity = "0.5";
+      a.href = "#";
+      a.onclick = (e)=>e.preventDefault();
+      return;
+    }
+    a.style.opacity = "1";
+    a.href = url;
+  };
+  setLink("contactFacebook", cfg.facebook);
+  setLink("contactTelegram", cfg.telegram);
+  setLink("contactZalo", cfg.zalo);
+}
+
+/* ===== Utils ===== */
+function escapeHtml(str){
+  return String(str ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* ===== Init ===== */
+function initHome(){
+  seedIfEmpty();
+  const store = loadStore();
+  const movies = (store?.movies || []).slice();
+
+  const {dd,mm,yy} = getHCMDateParts();
+  $("todayText").textContent = `Hôm nay: ${dd}/${mm}/${yy}`;
+
+  renderTopSlider(movies);
+  renderRank(movies);
+  renderDayTabs();
+  renderSchedule(movies);
+
+  // Search
+  const search = $("searchInput");
+  search.addEventListener("input", ()=>{
+    renderSchedule(movies, search.value || "");
+  });
+
+  renderContacts(store.config || {});
+}
+
+document.addEventListener("DOMContentLoaded", initHome);

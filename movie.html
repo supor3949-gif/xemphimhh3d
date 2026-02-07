@@ -1,99 +1,112 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Phim – HH3D</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Xem phim – HH3D</title>
+  <meta name="referrer" content="no-referrer" />
 
-  <!-- HLS để nhúng m3u8 (nếu bị chặn CORS/403 sẽ tự mở tab mới) -->
+  <!-- HLS.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
-  <link rel="stylesheet" href="./assets/style.css">
-  <script defer src="./assets/movie.js"></script>
+  <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="./index.html" title="Trang chủ">
-      <span class="brandIcon">▶</span>
-      <span class="brandText">
-        <b>XEMPHIMHH3D</b>
-        <small>xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</small>
-      </span>
-    </a>
+  <header class="siteHeader">
+    <div class="headerInner">
+      <a class="brand" href="/index.html" title="Về trang chủ">
+        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#22c55e"/>
+              <stop offset="1" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+        <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.22"/>
+        <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
+        <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
+        </svg>
+        <div class="brandText">
+          <div class="brandName">XEMPHIMHH3D</div>
+          <div class="brandTag">xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
+        </div>
+      </a>
 
-    <div class="topbarRight">
-      <div class="todayPill" id="moviePill">...</div>
+      <div class="tools">
+        <div class="pill" id="movieInfo">...</div>
+      </div>
     </div>
   </header>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="cardHead">
-        <div class="headTitle">
-          <span class="dot dotGreen"></span>
-          <b id="movieTitleTop">...</b>
-          <small class="muted" id="movieSubTop">...</small>
-        </div>
+  <main class="container">
+    <section class="panel">
+      <div class="panelHeader">
+        <div class="panelTitle">🎬 <span id="movieTitleTop">...</span></div>
+        <div class="panelSub" id="subInfo">...</div>
       </div>
 
-      <div class="movieLayout">
+      <div class="movieRow">
         <!-- LEFT -->
-        <aside class="movieLeft">
-          <div class="posterBox">
-            <div class="posterFrame">
-              <img id="poster" alt="poster" />
-              <div class="posterFallback" id="posterFallback">NO IMAGE</div>
+        <div class="posterBox">
+          <div class="poster">
+            <img id="posterImg" src="" alt="" onerror="this.remove(); document.getElementById('noimg').style.display='flex';">
+            <div class="noimg" id="noimg" style="display:none">NO IMAGE</div>
+          </div>
+
+          <div class="metaBox">
+            <p class="h1" id="movieTitleLeft">...</p>
+            <div class="meta">
+              <div>Thể loại: <b id="genreText">...</b></div>
+              <div id="metaTotal">Tổng tập: <b>...</b></div>
+              <div id="metaHas">Đã có link: <b>...</b></div>
             </div>
 
-            <div class="movieMeta">
-              <h1 id="movieTitleLeft">...</h1>
-              <div class="metaLine"><span>Thể loại:</span> <b id="genreText">...</b></div>
-              <div class="metaLine"><span>Tổng tập (theo mode):</span> <b id="totalText">...</b></div>
-              <div class="metaLine"><span>Đã có link:</span> <b id="hasText">...</b></div>
-
-              <div class="btnRow">
-                <a class="btn" href="./index.html">← Về trang chủ</a>
-                <button class="btn btnGreen" id="btnScrollEps" type="button">Xem danh sách tập</button>
-              </div>
+            <div class="btnRow">
+              <button class="btn" id="btnHome">← Về trang chủ</button>
+              <button class="btn green" id="btnScroll">Xem danh sách tập</button>
             </div>
           </div>
-        </aside>
+        </div>
 
         <!-- RIGHT -->
-        <div class="movieRight">
+        <div>
           <div class="modeRow">
             <button class="modeBtn active" id="btnVietsub" type="button">✅ Vietsub</button>
             <button class="modeBtn" id="btnThuyetMinh" type="button">🎙️ Thuyết minh</button>
-            <div class="modeHint" id="modeHint">...</div>
           </div>
 
-          <div class="playerBox">
-            <div class="playerTop">
-              <div class="nowPlaying" id="nowPlaying">Chưa chọn tập</div>
-              <div class="playerBtns">
-                <button class="miniBtn" id="btnOpenNew" type="button">Mở tab mới</button>
-                <button class="miniBtn" id="btnStop" type="button">Dừng</button>
+          <div class="modeHint" id="modeHint">...</div>
+
+          <div class="playerWrap">
+            <div class="playerBox">
+              <div class="playerTop">
+                <div class="nowPlaying" id="nowPlaying">Chưa chọn tập</div>
+                <div class="playerBtns">
+                  <button class="miniBtn" type="button" id="btnOpenTab">Mở tab mới</button>
+                  <button class="miniBtn" type="button" id="btnStop">Dừng</button>
+                </div>
+              </div>
+
+              <div class="stage">
+                <video id="video" controls playsinline></video>
+                <iframe id="frame" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
+              </div>
+
+              <div class="stageHint" id="stageHint">
+                ✅ Ưu tiên nhúng trong trang. Nếu link bị chặn / không nhúng được → tự mở tab mới.
               </div>
             </div>
-
-            <div class="stage">
-              <video id="video" controls playsinline></video>
-              <iframe id="frame" allow="autoplay; fullscreen; encrypted-media" referrerpolicy="no-referrer"></iframe>
-            </div>
-
-            <div class="stageHint">
-              ✅ Ưu tiên nhúng trong web. Nếu link bị chặn / không phát được, hệ thống sẽ tự mở tab mới.
-            </div>
           </div>
 
-          <div class="tipLine">✅ Tập có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.</div>
+          <div class="meta" style="padding:6px 4px 10px">
+            ✅ Tập có link sẽ có viền xanh. Tập chưa có link sẽ hiện “đang cập nhật”.
+          </div>
 
           <div class="epTools">
             <div class="searchWrap">
               <span>🔎</span>
-              <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric"/>
+              <input id="epSearch" placeholder="Nhập số tập… (vd: 67)" inputmode="numeric" />
             </div>
-            <select id="epSort" class="select">
+            <select id="epSort" class="select" title="Sắp xếp">
               <option value="asc">Tập tăng dần</option>
               <option value="desc">Tập giảm dần</option>
               <option value="done">Có link trước</option>
@@ -105,22 +118,29 @@
       </div>
     </section>
 
-    <div class="legalBox">
+    <div class="legalNote" style="margin-top:14px">
       <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
-      Tất cả video và dữ liệu tại đây đều được tổng hợp từ Internet và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+      Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
+      Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
+      vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
       Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
     </div>
   </main>
 
-  <!-- modal -->
-  <div class="modalBack" id="modalBack" aria-hidden="true">
+  <!-- MODAL -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modalTop">
         <b id="modalTitle">Thông báo</b>
-        <button class="closeBtn" id="closeModal" type="button">Đóng</button>
+        <button class="closeBtn" id="closeModal">Đóng</button>
       </div>
-      <div class="modalBody" id="modalBody">...</div>
+      <div class="modalBody">
+        <div id="modalMsg">...</div>
+        <div class="muted" id="modalSub"></div>
+      </div>
     </div>
   </div>
+
+  <script src="./assets/movie.js" defer></script>
 </body>
 </html>

@@ -1,60 +1,46 @@
-/* ==========================
+/* =========================
    HH3D TEMPLATE - ADMIN
-   - LocalStorage (không cần DB)
-   - Tự thêm phim, tự sinh ô phim ở Home
-   - Tự dán list tập (RAW) -> movie.html tự nhận số tập
-========================== */
+   - Demo admin local (LocalStorage)
+   - Thêm phim -> tự hiện Home + Lịch + BXH
+   - Dán list tập -> movie page auto nhận số tập
+   - Export/Import JSON
+   ========================= */
 
-const STORE_KEY_MOVIES = "HH3D_MOVIES_V1";
-const STORE_KEY_SETTINGS = "HH3D_SETTINGS_V1";
-const STORE_KEY_CONTACT = "HH3D_CONTACT_V1";
+const STORE_KEY = "HH3D_STORE_V1";
+const PASS_KEY  = "HH3D_ADMIN_PASS";
 
-// ✅ Đổi mật khẩu admin ở đây nếu muốn
-const ADMIN_PASSWORD = "hh3d2026";
-
-const $ = (id) => document.getElementById(id);
-
-function showModal(title, body){
-  const back = $("modalBack");
-  if (!back) return alert(body);
-  $("modalTitle").textContent = title;
-  $("modalBody").textContent = body;
-  back.style.display = "flex";
-  back.setAttribute("aria-hidden","false");
+function loadStore(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); }
+  catch(e){ return null; }
 }
-function hideModal(){
-  const back = $("modalBack");
-  if (!back) return;
-  back.style.display = "none";
-  back.setAttribute("aria-hidden","true");
+function saveStore(store){
+  localStorage.setItem(STORE_KEY, JSON.stringify(store));
 }
-
-function loadMovies(){
-  try{ return JSON.parse(localStorage.getItem(STORE_KEY_MOVIES) || "[]"); }
-  catch{ return []; }
+function seedIfEmpty(){
+  const ex = loadStore();
+  if (ex && ex.movies) return;
+  saveStore({
+    config:{ tiktokWeb:"", shopeeWeb:"", affRate:0.5, facebook:"", telegram:"", zalo:"" },
+    movies:[]
+  });
 }
-function saveMovies(movies){
-  localStorage.setItem(STORE_KEY_MOVIES, JSON.stringify(movies));
+function getPass(){
+  return localStorage.getItem(PASS_KEY) || "123456";
+}
+function setPass(p){
+  localStorage.setItem(PASS_KEY, p);
 }
 
-function loadSettings(){
-  try{ return JSON.parse(localStorage.getItem(STORE_KEY_SETTINGS) || "{}"); }
-  catch{ return {}; }
-}
-function saveSettings(s){
-  localStorage.setItem(STORE_KEY_SETTINGS, JSON.stringify(s));
+function $(id){ return document.getElementById(id); }
+
+function clampRate(x){
+  const n = Number(x);
+  if (!Number.isFinite(n)) return 0.5;
+  return Math.max(0, Math.min(1, n));
 }
 
-function loadContact(){
-  try{ return JSON.parse(localStorage.getItem(STORE_KEY_CONTACT) || "{}"); }
-  catch{ return {}; }
-}
-function saveContact(c){
-  localStorage.setItem(STORE_KEY_CONTACT, JSON.stringify(c));
-}
-
-function escapeHtml(s){
-  return String(s||"")
+function esc(str){
+  return String(str ?? "")
     .replaceAll("&","&amp;")
     .replaceAll("<","&lt;")
     .replaceAll(">","&gt;")
@@ -62,320 +48,239 @@ function escapeHtml(s){
     .replaceAll("'","&#039;");
 }
 
-// ------- Auth -------
-function isLogged(){
-  return localStorage.getItem("HH3D_ADMIN_OK") === "1";
-}
-function setLogged(v){
-  localStorage.setItem("HH3D_ADMIN_OK", v ? "1" : "0");
-}
-function requireLogin(){
-  if (!isLogged()){
-    showModal("Chưa đăng nhập", "Nhập mật khẩu admin để dùng chức năng này.");
+/* ===== Login ===== */
+let LOGGED = false;
+
+function requireLogin(action){
+  if (!LOGGED){
+    alert("Bạn chưa đăng nhập admin.");
     return false;
   }
   return true;
 }
 
-// ------- Day Picker -------
-const DAY_MAP = [
-  {val:2, label:"Th2"},
-  {val:3, label:"Th3"},
-  {val:4, label:"Th4"},
-  {val:5, label:"Th5"},
-  {val:6, label:"Th6"},
-  {val:7, label:"Th7"},
-  {val:8, label:"CN"},
-];
-
-let pickedDays = new Set();
-
-function renderDayPick(){
-  const el = $("m_days");
-  el.innerHTML = "";
-  DAY_MAP.forEach(d=>{
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = d.label;
-    b.className = pickedDays.has(d.val) ? "active" : "";
-    b.onclick = ()=>{
-      if (pickedDays.has(d.val)) pickedDays.delete(d.val);
-      else pickedDays.add(d.val);
-      renderDayPick();
-    };
-    el.appendChild(b);
-  });
+function fillConfig(cfg){
+  $("cfgTikTok").value = cfg.tiktokWeb || "";
+  $("cfgShopee").value = cfg.shopeeWeb || "";
+  $("cfgRate").value = String(cfg.affRate ?? 0.5);
+  $("cfgFb").value = cfg.facebook || "";
+  $("cfgTg").value = cfg.telegram || "";
+  $("cfgZalo").value = cfg.zalo || "";
 }
 
-// ------- Movie List -------
-function renderMovieList(){
-  const el = $("movieList");
-  const movies = loadMovies();
-  el.innerHTML = "";
+function readFormMovie(){
+  const id = ($("m_id").value||"").trim();
+  const title = ($("m_title").value||"").trim();
+  const genre = ($("m_genre").value||"").trim();
+  const poster = ($("m_poster").value||"").trim();
+  const page = ($("m_page").value||"").trim() || `/movie.html?id=${encodeURIComponent(id)}`;
+  const rank = parseInt(($("m_rank").value||"").trim(), 10);
+  const topRank = Number.isFinite(rank) ? rank : null;
 
-  if (!movies.length){
-    el.innerHTML = `<div class="empty">Chưa có phim. Nhập form bên trái và bấm “Lưu phim”.</div>`;
-    return;
-  }
+  const daysRaw = ($("m_days").value||"").trim();
+  const scheduleDays = daysRaw
+    ? daysRaw.split(",").map(x=>parseInt(x.trim(),10)).filter(n=>Number.isFinite(n) && n>=2 && n<=8)
+    : [];
 
-  movies
-    .slice()
-    .sort((a,b)=> String(b.updatedAt||"").localeCompare(String(a.updatedAt||"")))
-    .forEach(m=>{
-      const row = document.createElement("div");
-      row.className = "movieRowAdmin";
-      row.innerHTML = `
-        <div style="min-width:0">
-          <b>${escapeHtml(m.title)} <span class="muted small">(${escapeHtml(m.id)})</span></b>
-          <small>${escapeHtml(m.genre||"")} • topRank: ${m.topRank ?? "-"}</small>
-        </div>
-        <div class="rowBtns">
-          <button type="button" data-act="edit">Sửa</button>
-          <button type="button" data-act="del">Xóa</button>
-        </div>
-      `;
+  const tag = ($("m_tag").value||"").trim();
 
-      row.querySelector('[data-act="edit"]').onclick = ()=>{
-        if (!requireLogin()) return;
-        fillForm(m);
-      };
-      row.querySelector('[data-act="del"]').onclick = ()=>{
-        if (!requireLogin()) return;
-        const ok = confirm(`Xóa phim "${m.title}" ?`);
-        if (!ok) return;
-        const next = loadMovies().filter(x=>x.id!==m.id);
-        saveMovies(next);
-        renderMovieList();
-        $("movieHint").textContent = "Đã xóa.";
-      };
+  const vietsub = $("m_vietsub").value || "";
+  const thuyetminh = $("m_thuyetminh").value || "";
 
-      el.appendChild(row);
-    });
-}
-
-function fillForm(m){
-  $("m_id").value = m.id || "";
-  $("m_title").value = m.title || "";
-  $("m_genre").value = m.genre || "";
-  $("m_poster").value = m.poster || "";
-  $("m_top").value = (m.topRank ?? "") === null ? "" : String(m.topRank ?? "");
-  $("m_vs").value = m.rawVietsub || "";
-  $("m_tm").value = m.rawThuyetminh || "";
-
-  pickedDays = new Set(Array.isArray(m.scheduleDays) ? m.scheduleDays : []);
-  renderDayPick();
-
-  $("movieHint").textContent = "Đã nạp phim vào form. Sửa xong bấm Lưu phim.";
-}
-
-// ------- Save Movie -------
-function saveMovieFromForm(){
-  if (!requireLogin()) return;
-
-  const id = ($("m_id").value || "").trim();
-  const title = ($("m_title").value || "").trim();
-  if (!id || !title){
-    $("movieHint").textContent = "Thiếu ID hoặc Tên phim.";
-    return;
-  }
-
-  const genre = ($("m_genre").value || "").trim();
-  const poster = ($("m_poster").value || "").trim();
-  const topRankRaw = ($("m_top").value || "").trim();
-  const topRank = topRankRaw ? parseInt(topRankRaw,10) : null;
-
-  const rawVietsub = $("m_vs").value || "";
-  const rawThuyetminh = $("m_tm").value || "";
-
-  const scheduleDays = Array.from(pickedDays.values()).sort((a,b)=>a-b);
-
-  const movies = loadMovies();
-  const idx = movies.findIndex(x=>x.id===id);
-
-  const now = new Date().toISOString();
-
-  const obj = {
-    id, title, genre, poster,
-    topRank: (Number.isFinite(topRank) ? topRank : null),
+  return {
+    id, title, genre, poster, page,
     scheduleDays,
-    rawVietsub,
-    rawThuyetminh,
-    updatedAt: now
+    topRank,
+    tag,
+    episodes:{ vietsub, thuyetminh }
   };
-
-  if (idx >= 0) movies[idx] = obj;
-  else movies.push(obj);
-
-  saveMovies(movies);
-  renderMovieList();
-
-  $("movieHint").textContent = "Đã lưu phim. Ra Trang chủ sẽ tự hiện.";
 }
 
-// ------- Settings (AFF) -------
-function loadSettingsToUI(){
-  const s = loadSettings();
-  $("affTiktok").value = s.affTiktok || "";
-  $("affShopee").value = s.affShopee || "";
-  $("affRate").value = String(s.affRate ?? "0.5");
-  $("affSplit").value = String(s.affSplit ?? "50");
-}
-function saveSettingsFromUI(){
-  if (!requireLogin()) return;
-
-  const s = loadSettings();
-  s.affTiktok = ($("affTiktok").value || "").trim();
-  s.affShopee = ($("affShopee").value || "").trim();
-  s.affRate = Number($("affRate").value || 0);
-  s.affSplit = Number($("affSplit").value || 50);
-  saveSettings(s);
-
-  $("settingsHint").textContent = "Đã lưu AFF. Bấm chọn tập sẽ chạy theo tỉ lệ.";
+function clearForm(){
+  ["m_id","m_title","m_genre","m_poster","m_page","m_rank","m_days","m_tag","m_vietsub","m_thuyetminh"]
+    .forEach(x=>$(x).value="");
 }
 
-// ------- Contact -------
-function loadContactToUI(){
-  const c = loadContact();
-  $("c_fb").value = c.facebook || "";
-  $("c_tg").value = c.telegram || "";
-  $("c_zalo").value = c.zalo || "";
-}
-function saveContactFromUI(){
-  if (!requireLogin()) return;
-
-  const c = {
-    facebook: ($("c_fb").value || "").trim(),
-    telegram: ($("c_tg").value || "").trim(),
-    zalo: ($("c_zalo").value || "").trim(),
-  };
-  saveContact(c);
-  $("contactHint").textContent = "Đã lưu liên hệ. Trang chủ sẽ tự cập nhật.";
+function autoFillPage(){
+  const id = ($("m_id").value||"").trim();
+  if (!id) return;
+  $("m_page").value = `/movie.html?id=${encodeURIComponent(id)}`;
 }
 
-// ------- Import/Export -------
-function exportJSON(){
-  if (!requireLogin()) return;
-  const payload = {
-    movies: loadMovies(),
-    settings: loadSettings(),
-    contact: loadContact(),
-  };
-  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "hh3d-export.json";
-  a.click();
-  URL.revokeObjectURL(url);
-}
+function renderAdminList(){
+  const store = loadStore();
+  const list = (store?.movies || []).slice();
 
-function importJSONFile(file){
-  if (!requireLogin()) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const obj = JSON.parse(String(reader.result||"{}"));
-      if (Array.isArray(obj.movies)) saveMovies(obj.movies);
-      if (obj.settings) saveSettings(obj.settings);
-      if (obj.contact) saveContact(obj.contact);
-      renderMovieList();
-      loadSettingsToUI();
-      loadContactToUI();
-      showModal("OK", "Đã nhập dữ liệu.");
-    }catch(e){
-      showModal("Lỗi", "File JSON không hợp lệ.");
-    }
-  };
-  reader.readAsText(file);
-}
+  const wrap = $("movieListAdmin");
+  wrap.innerHTML = "";
 
-// ------- Demo seed -------
-function seedDemo(){
-  if (!requireLogin()) return;
-  const movies = loadMovies();
-  const now = new Date().toISOString();
+  if (!list.length){
+    wrap.innerHTML = `<div style="color:var(--muted);font-size:12px">Chưa có phim. Bạn thêm ở form bên trái.</div>`;
+    return;
+  }
 
-  const demo = [
-    {
-      id:"tien-nghich",
-      title:"Tiên Nghịch",
-      genre:"Tiên hiệp",
-      poster:"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=60",
-      topRank:1,
-      scheduleDays:[2,4,6],
-      rawVietsub:`Tập 01|https://player.phimapi.com/player/?url=https://s6.kkphimplayer6.com/20260202/qltZQ6Tn/index.m3u8`,
-      rawThuyetminh:``,
-      updatedAt: now
-    },
-    {
-      id:"ngich-thien-chi-ton",
-      title:"Nghịch Thiên Chí Tôn",
-      genre:"Huyền huyễn",
-      poster:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=60",
-      topRank:2,
-      scheduleDays:[3,5,7],
-      rawVietsub:``,
-      rawThuyetminh:``,
-      updatedAt: now
-    }
-  ];
+  list.sort((a,b)=> (a.title||"").localeCompare(b.title||""));
 
-  const merged = [...movies];
-  demo.forEach(d=>{
-    const idx = merged.findIndex(x=>x.id===d.id);
-    if (idx>=0) merged[idx]=d; else merged.push(d);
+  list.forEach(m=>{
+    const row = document.createElement("div");
+    row.className = "adminItem";
+    row.innerHTML = `
+      <div style="min-width:0">
+        <b>${esc(m.title || m.id)}</b>
+        <div style="color:var(--muted);font-size:12px;margin-top:2px">
+          ID: ${esc(m.id)} • Lịch: ${(m.scheduleDays||[]).join(",") || "—"} • Rank: ${m.topRank ?? "—"}
+        </div>
+      </div>
+      <div class="aBtns">
+        <button class="btnSmall" data-act="edit">Sửa</button>
+        <button class="btnSmall" data-act="del">Xóa</button>
+      </div>
+    `;
+
+    row.querySelector('[data-act="edit"]').onclick = ()=>{
+      if (!requireLogin()) return;
+      $("m_id").value = m.id || "";
+      $("m_title").value = m.title || "";
+      $("m_genre").value = m.genre || "";
+      $("m_poster").value = m.poster || "";
+      $("m_page").value = m.page || `/movie.html?id=${encodeURIComponent(m.id||"")}`;
+      $("m_rank").value = m.topRank ?? "";
+      $("m_days").value = (m.scheduleDays || []).join(",");
+      $("m_tag").value = m.tag || "";
+      $("m_vietsub").value = m.episodes?.vietsub || "";
+      $("m_thuyetminh").value = m.episodes?.thuyetminh || "";
+      window.scrollTo({top:0, behavior:"smooth"});
+    };
+
+    row.querySelector('[data-act="del"]').onclick = ()=>{
+      if (!requireLogin()) return;
+      if (!confirm(`Xóa phim: ${m.title || m.id} ?`)) return;
+      const s = loadStore();
+      s.movies = (s.movies || []).filter(x=>x.id !== m.id);
+      saveStore(s);
+      renderAdminList();
+    };
+
+    wrap.appendChild(row);
   });
-
-  saveMovies(merged);
-  renderMovieList();
-  showModal("OK", "Đã thêm demo. Ra Trang chủ xem.");
 }
 
-// ------- Init -------
-document.addEventListener("DOMContentLoaded", ()=>{
-  // modal close
-  $("closeModal").onclick = hideModal;
-  $("modalBack").onclick = (e)=>{ if(e.target.id==="modalBack") hideModal(); };
-  document.addEventListener("keydown",(e)=>{ if(e.key==="Escape") hideModal(); });
+function initAdmin(){
+  seedIfEmpty();
+  const store = loadStore();
 
-  renderDayPick();
-  renderMovieList();
-  loadSettingsToUI();
-  loadContactToUI();
+  fillConfig(store.config || {});
+  renderAdminList();
 
-  // login
   $("btnLogin").onclick = ()=>{
-    const pass = ($("adminPass").value || "").trim();
-    if (pass === ADMIN_PASSWORD){
-      setLogged(true);
-      $("loginHint").textContent = "Đăng nhập OK.";
-      showModal("OK", "Bạn đã đăng nhập admin.");
-    } else {
-      setLogged(false);
-      $("loginHint").textContent = "Sai mật khẩu.";
-      showModal("Sai mật khẩu", "Mật khẩu admin không đúng.");
+    const p = $("adminPass").value || "";
+    if (p !== getPass()){
+      alert("Sai mật khẩu.");
+      return;
     }
+    LOGGED = true;
+    alert("Đăng nhập OK. Bạn có thể chỉnh phim.");
   };
 
-  // save settings/contact/movie
-  $("btnSaveSettings").onclick = saveSettingsFromUI;
-  $("btnSaveContact").onclick = saveContactFromUI;
-  $("btnSaveMovie").onclick = saveMovieFromForm;
+  $("btnSetPass").onclick = ()=>{
+    const old = prompt("Nhập pass cũ:", "");
+    if (old === null) return;
+    if (old !== getPass()){
+      alert("Pass cũ sai.");
+      return;
+    }
+    const neu = prompt("Nhập pass mới:", "");
+    if (!neu) return alert("Pass mới không hợp lệ.");
+    setPass(neu);
+    alert("Đã đổi pass.");
+  };
 
-  // export/import
-  $("btnExport").onclick = exportJSON;
-  $("btnImport").onclick = ()=>{
+  $("btnSaveCfg").onclick = ()=>{
     if (!requireLogin()) return;
-    $("importFile").click();
+    const s = loadStore();
+    s.config = {
+      tiktokWeb: ($("cfgTikTok").value||"").trim(),
+      shopeeWeb: ($("cfgShopee").value||"").trim(),
+      affRate: clampRate(($("cfgRate").value||"").trim()),
+      facebook: ($("cfgFb").value||"").trim(),
+      telegram: ($("cfgTg").value||"").trim(),
+      zalo: ($("cfgZalo").value||"").trim()
+    };
+    saveStore(s);
+    alert("Đã lưu cấu hình.");
   };
-  $("importFile").addEventListener("change",(e)=>{
+
+  $("m_id").addEventListener("input", autoFillPage);
+
+  $("btnAdd").onclick = ()=>{
+    if (!requireLogin()) return;
+
+    const item = readFormMovie();
+    if (!item.id || !item.title){
+      alert("Thiếu ID hoặc tên phim.");
+      return;
+    }
+
+    const s = loadStore();
+    const idx = (s.movies||[]).findIndex(x=>x.id === item.id);
+
+    if (idx >= 0) s.movies[idx] = item;
+    else (s.movies = s.movies || []).push(item);
+
+    saveStore(s);
+    renderAdminList();
+    alert("Đã lưu phim.");
+  };
+
+  $("btnClear").onclick = ()=>{
+    if (!requireLogin()) return;
+    clearForm();
+  };
+
+  $("btnExport").onclick = ()=>{
+    if (!requireLogin()) return;
+    const data = JSON.stringify(loadStore(), null, 2);
+    const blob = new Blob([data], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "hh3d_store.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  $("fileImport").addEventListener("change", async (e)=>{
+    if (!requireLogin()) return;
     const f = e.target.files?.[0];
-    if (f) importJSONFile(f);
-    e.target.value = "";
+    if (!f) return;
+    try{
+      const txt = await f.text();
+      const obj = JSON.parse(txt);
+      if (!obj || !Array.isArray(obj.movies)){
+        alert("File JSON không đúng format.");
+        return;
+      }
+      saveStore(obj);
+      fillConfig(obj.config || {});
+      renderAdminList();
+      alert("Import OK.");
+    }catch(err){
+      alert("Import lỗi: " + err.message);
+    }finally{
+      e.target.value = "";
+    }
   });
 
-  $("btnSeedDemo").onclick = seedDemo;
+  $("btnReset").onclick = ()=>{
+    if (!requireLogin()) return;
+    if (!confirm("Reset demo (xóa toàn bộ data phim & config)?")) return;
+    localStorage.removeItem(STORE_KEY);
+    seedIfEmpty();
+    fillConfig(loadStore().config || {});
+    renderAdminList();
+    clearForm();
+    alert("Đã reset.");
+  };
+}
 
-  // hint login state
-  if (isLogged()) $("loginHint").textContent = "Bạn đang đăng nhập.";
-});
+document.addEventListener("DOMContentLoaded", initAdmin);
