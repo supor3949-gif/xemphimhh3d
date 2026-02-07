@@ -4,25 +4,29 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>XEMPHIMHH3D</title>
-  <meta name="referrer" content="no-referrer" />
+  <meta name="description" content="Xem phim giải trí — lịch phim theo ngày (Giờ HCM). Nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức." />
+
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
+
 <body>
-  <!-- HEADER -->
+  <!-- ===== Header ===== -->
   <header class="siteHeader">
     <div class="headerInner">
-      <a class="brand" href="/index.html" title="Về trang chủ">
-        <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#22c55e"/>
-              <stop offset="1" stop-color="#38bdf8"/>
-            </linearGradient>
-          </defs>
-          <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.22"/>
-          <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
-          <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
-        </svg>
+      <a class="brand" href="./index.html" title="Trang chủ">
+        <div class="logoBox" aria-hidden="true">
+          <svg class="logo" viewBox="0 0 64 64">
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#22c55e"/>
+                <stop offset="1" stop-color="#38bdf8"/>
+              </linearGradient>
+            </defs>
+            <rect x="6" y="10" width="52" height="44" rx="12" fill="url(#g)" opacity="0.22"/>
+            <path d="M18 22h28v20H18z" fill="none" stroke="url(#g)" stroke-width="3"/>
+            <path d="M28 27l12 5-12 5z" fill="url(#g)"/>
+          </svg>
+        </div>
         <div class="brandText">
           <div class="brandName">XEMPHIMHH3D</div>
           <div class="brandTag">xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức</div>
@@ -30,81 +34,79 @@
       </a>
 
       <div class="headerRight">
-        <div class="searchBox">
-          <span class="ico">🔎</span>
-          <input id="searchInput" placeholder="Tìm tên phim..." />
+        <div class="searchBar">
+          <span aria-hidden="true">🔎</span>
+          <input id="globalSearch" placeholder="Tìm tên phim / thể loại..." autocomplete="off" />
         </div>
-        <a class="adminLink" href="/admin.html">Admin</a>
+        <a class="adminLink" href="./admin.html" title="Trang Admin">Admin</a>
       </div>
     </div>
   </header>
 
-  <main class="containerHome">
-    <!-- TOP SLIDER + RANK -->
-    <section class="homeGrid">
-      <div class="panel">
-        <div class="panelHeader">
-          <div class="panelTitle">🔥 Top phim</div>
-          <div class="panelSub">Cuộn ngang (Top 1–10)</div>
-        </div>
-
-        <div class="topRow">
-          <button class="navBtn" id="topPrev" aria-label="Prev">‹</button>
-          <div class="topSlider" id="topSlider"></div>
-          <button class="navBtn" id="topNext" aria-label="Next">›</button>
-        </div>
+  <main class="container">
+    <!-- ===== Top slider ===== -->
+    <section class="panel">
+      <div class="panelHeader">
+        <div class="panelTitle">🔥 Top phim</div>
+        <div class="panelSub">Cuộn ngang (Top 1→10)</div>
       </div>
 
-      <aside class="rankPanel panel">
-        <div class="panelHeader">
-          <div class="panelTitle">🏆 Bảng Xếp Hạng</div>
-          <div class="panelSub">Top 10</div>
-        </div>
-        <div class="rankList" id="rankList"></div>
-      </aside>
+      <div class="topRow">
+        <button class="navBtn" id="topPrev" type="button" aria-label="Lùi">‹</button>
+        <div class="topSlider" id="topSlider"></div>
+        <button class="navBtn" id="topNext" type="button" aria-label="Tiến">›</button>
+      </div>
     </section>
 
-    <!-- SCHEDULE FULL WIDTH -->
+    <!-- ===== Schedule (single-day view) ===== -->
     <section class="panel schedulePanel">
       <div class="panelHeader">
         <div class="panelTitle">📅 Lịch Phim</div>
         <div class="panelSub">
-          <span id="todayText">Hôm nay: ...</span>
-          <span class="pillMini">Giờ HCM</span>
+          Hôm nay (Giờ HCM): <b id="todayText">...</b>
+          <span class="chip">Giờ HCM</span>
         </div>
       </div>
 
       <!-- Tabs ngày -->
-      <div class="dayTabs" id="dayTabs"></div>
+      <div class="dayTabs" id="dayTabs" aria-label="Chọn ngày trong tuần"></div>
 
-      <!-- Grid ngày -->
-      <div class="scheduleGrid" id="scheduleGrid"></div>
+      <!-- grid phim theo ngày -->
+      <div class="scheduleWrap">
+        <div class="scheduleHint" id="scheduleHint">
+          Bấm Thứ để lọc. Lia chuột vào phim để hiện “Xem ngay”.
+        </div>
+        <div class="scheduleGrid" id="scheduleGrid" aria-live="polite"></div>
+      </div>
     </section>
 
-    <!-- CONTACT + LEGAL -->
-    <section class="footerBlocks">
-      <div class="panel">
-        <div class="panelHeader">
-          <div class="panelTitle">📩 Liên hệ</div>
-          <div class="panelSub">3 ô liên hệ</div>
-        </div>
-        <div class="contactGrid">
-          <a class="contactCard" id="contactFacebook" href="#" target="_blank" rel="noopener">Facebook</a>
-          <a class="contactCard" id="contactTelegram" href="#" target="_blank" rel="noopener">Telegram</a>
-          <a class="contactCard" id="contactZalo" href="#" target="_blank" rel="noopener">Zalo</a>
-        </div>
+    <!-- ===== Rank ===== -->
+    <section class="panel">
+      <div class="panelHeader">
+        <div class="panelTitle">🏆 Bảng Xếp Hạng</div>
+        <div class="panelSub">Top 1→10</div>
+      </div>
+      <div class="rankList" id="rankList"></div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer">
+      <div class="footerCols">
+        <a class="footerBox" href="#" onclick="return false">Facebook<br><span>Link liên hệ Facebook của bạn</span></a>
+        <a class="footerBox" href="#" onclick="return false">Telegram<br><span>Link liên hệ Telegram của bạn</span></a>
+        <a class="footerBox" href="#" onclick="return false">Zalo<br><span>Link liên hệ Zalo của bạn</span></a>
       </div>
 
-      <div class="legalNote">
+      <div class="legal">
         <b>Lưu ý:</b> Chúng tôi từ chối mọi trách nhiệm liên quan đến nội dung hiển thị/tồn tại trên trang.
         Tất cả video và dữ liệu tại đây đều được tổng hợp từ các nguồn phổ biến trên Internet, và không thuộc quyền sở hữu hay kiểm soát của chúng tôi.
         Chúng tôi không cung cấp dịch vụ phát trực tuyến chính thức. Nếu bạn cho rằng quyền lợi của mình bị ảnh hưởng,
         vui lòng liên hệ ngay cho chúng tôi sẽ xử lý và gỡ bỏ nội dung vi phạm kịp thời. Xin cảm ơn sự thông cảm và hợp tác của bạn.
         Và xem phim giải trí — nghiêm cấm và không khuyến khích cờ bạc online dưới mọi hình thức.
       </div>
-    </section>
+    </footer>
   </main>
 
-  <script src="./assets/app.js" defer></script>
+  <script src="./assets/app.js"></script>
 </body>
 </html>
