@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — HH3D</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script defer src="./assets/admin.js"></script>
+</head>
+
+<body>
+  <header class="siteHeader">
+    <div class="headerInner">
+      <a class="brand" href="./index.html" title="Về trang chủ">
+        <div class="brandLogo" aria-hidden="true"><span class="brandPlay"></span></div>
+        <div class="brandText">
+          <div class="brandName">XEMPHIMHH3D</div>
+          <div class="brandTag">Admin — chỉ bạn dùng (PIN)</div>
+        </div>
+      </a>
+
+      <div class="headerRight">
+        <a class="adminBtn" href="./index.html">Về trang chủ</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="panelHead">
+        <div class="panelTitle">🔒 Đăng nhập Admin</div>
+        <div class="panelHint">PC 24in: full rộng — Mobile nhỏ hơn ~40%</div>
+      </div>
+
+      <div class="adminWrap">
+        <div class="adminCard">
+          <div class="adminField">
+            <label>PIN Admin</label>
+            <input id="pin" type="password" placeholder="Nhập PIN..." />
+            <div class="muted">PIN mặc định: <b>2026</b> (đổi trong <code>assets/admin.js</code>)</div>
+          </div>
+          <button class="btn green" id="loginBtn" type="button">Đăng nhập</button>
+          <div class="muted" id="loginMsg"></div>
+        </div>
+
+        <div class="adminCard">
+          <div class="panelTitle" style="font-size:14px;margin-bottom:10px;">⚙️ Cấu hình Site (Contact + AFF)</div>
+
+          <div class="adminField">
+            <label>Facebook link</label>
+            <input id="cfgFb" placeholder="https://facebook.com/..." />
+          </div>
+
+          <div class="adminField">
+            <label>Telegram link</label>
+            <input id="cfgTg" placeholder="https://t.me/..." />
+          </div>
+
+          <div class="adminField">
+            <label>Zalo link</label>
+            <input id="cfgZalo" placeholder="https://zalo.me/..." />
+          </div>
+
+          <hr class="hr" />
+
+          <div class="adminField">
+            <label>Affiliate TikTok (web/universal link)</label>
+            <input id="cfgTiktok" placeholder="https://vt.tiktok.com/..." />
+          </div>
+
+          <div class="adminField">
+            <label>Affiliate Shopee (web link)</label>
+            <input id="cfgShopeeWeb" placeholder="https://shopee.vn/..." />
+          </div>
+
+          <div class="adminField">
+            <label>Affiliate Shopee (app deep link — nếu có)</label>
+            <input id="cfgShopeeApp" placeholder="shopee://..." />
+          </div>
+
+          <div class="adminField">
+            <label>Tỉ lệ nhảy AFF (0.5 = 5/5, 0.3 = 3/10)</label>
+            <input id="cfgAffRate" type="number" step="0.05" min="0" max="1" placeholder="0.50" />
+          </div>
+
+          <button class="btn" id="saveCfgBtn" type="button">Lưu cấu hình</button>
+          <div class="muted" id="cfgMsg"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="adminArea" style="display:none;margin-top:14px;">
+      <div class="panelHead">
+        <div class="panelTitle">🎞️ Quản lý Phim</div>
+        <div class="panelHint">Thêm phim → index tự có ô mới • Dán list tập → movie tự sinh nút</div>
+      </div>
+
+      <div class="adminGrid2">
+        <div class="adminCard">
+          <div class="panelTitle" style="font-size:14px;margin-bottom:10px;">➕ Thêm / Sửa phim</div>
+
+          <div class="adminField">
+            <label>ID (không dấu, không space)</label>
+            <input id="mId" placeholder="tien-nghich" />
+          </div>
+
+          <div class="adminField">
+            <label>Tên phim</label>
+            <input id="mTitle" placeholder="Tiên Nghịch" />
+          </div>
+
+          <div class="adminField">
+            <label>Thể loại</label>
+            <input id="mGenre" placeholder="Tiên hiệp" />
+          </div>
+
+          <div class="adminField">
+            <label>Poster URL (hoặc ./images/xxx.jpg)</label>
+            <input id="mPoster" placeholder="https://..." />
+          </div>
+
+          <div class="adminField">
+            <label>Top Rank (1-10 nếu muốn lên top)</label>
+            <input id="mTopRank" type="number" min="1" max="10" placeholder="1" />
+          </div>
+
+          <div class="adminField">
+            <label>Lịch chiếu (chọn các Thứ)</label>
+            <div class="dayPick" id="dayPick"></div>
+            <div class="muted">Ví dụ: tick Thứ 6 + CN → phim sẽ hiện trong lịch Thứ 6 và CN.</div>
+          </div>
+
+          <hr class="hr" />
+
+          <div class="adminField">
+            <label>List tập VIETSUB (dán nhiều dòng, auto nhận số tập)</label>
+            <textarea id="mVietsub" placeholder="Tập 01|https://...
+Tập 02|https://..."></textarea>
+          </div>
+
+          <div class="adminField">
+            <label>List tập THUYẾT MINH (dán nhiều dòng, auto nhận số tập)</label>
+            <textarea id="mThuyetminh" placeholder="Tập 01|https://...
+Tập 02|https://..."></textarea>
+          </div>
+
+          <button class="btn green" id="saveMovieBtn" type="button">Lưu phim</button>
+          <div class="muted" id="movieMsg"></div>
+        </div>
+
+        <div class="adminCard">
+          <div class="panelTitle" style="font-size:14px;margin-bottom:10px;">📦 Danh sách phim</div>
+          <div class="muted">Click 1 phim để load lên form sửa. Có nút xem thử.</div>
+          <div class="movieListAdmin" id="movieListAdmin"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
