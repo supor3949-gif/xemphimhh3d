@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import { createClient } from "@supabase/supabase-js"
 
 const sb = createClient(
@@ -8,6 +7,20 @@ const sb = createClient(
 )
 
 export const dynamic = "force-dynamic"
+
+function parseCookieHeader(cookieHeader: string | null) {
+  const out: Record<string, string> = {}
+  if (!cookieHeader) return out
+  const parts = cookieHeader.split(";")
+  for (const p of parts) {
+    const idx = p.indexOf("=")
+    if (idx === -1) continue
+    const k = p.slice(0, idx).trim()
+    const v = p.slice(idx + 1).trim()
+    out[k] = decodeURIComponent(v)
+  }
+  return out
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -25,14 +38,14 @@ export async function GET(req: Request) {
   const cooldownMin = Number(st?.aff_cooldown_minutes ?? 30)
   const maxPerDay = Number(st?.aff_max_per_day ?? 3)
 
-  // cookie state
-  const ck = cookies()
+  // đọc cookie từ header (tránh lỗi cookies() trên turbopack)
+  const c = parseCookieHeader(req.headers.get("cookie"))
   const now = Date.now()
   const today = new Date().toISOString().slice(0, 10)
 
-  const last = Number(ck.get("aff_last")?.value || "0")
-  const day = ck.get("aff_day")?.value || ""
-  let count = Number(ck.get("aff_count")?.value || "0")
+  const last = Number(c["aff_last"] || "0")
+  const day = c["aff_day"] || ""
+  let count = Number(c["aff_count"] || "0")
 
   if (day !== today) count = 0
 
@@ -40,18 +53,21 @@ export async function GET(req: Request) {
   const inCooldown = last && now - last < cooldownMs
   const overDay = count >= maxPerDay
 
-  // helper set cookie
+  const base = {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  } as const
+
+  // helper response go=false
   const resNo = NextResponse.json({ go: false })
-  resNo.cookies.set("aff_day", today, { path: "/", maxAge: 60 * 60 * 24 * 30 })
-  resNo.cookies.set("aff_count", String(count), { path: "/", maxAge: 60 * 60 * 24 * 30 })
+  resNo.cookies.set("aff_day", today, base)
+  resNo.cookies.set("aff_count", String(count), base)
 
   if (inCooldown || overDay) return resNo
 
-  // random
   const goRandom = Math.random() < hitRate
   if (!goRandom) return resNo
 
-  // get enabled links
   const { data: links } = await sb
     .from("aff_links")
     .select("url,key,weight")
@@ -65,7 +81,6 @@ export async function GET(req: Request) {
   const pick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
   if (!pick?.url) return resNo
 
-  // build url
   const affUrl = String(pick.url)
     .replaceAll("{next}", encodeURIComponent(next))
     .replaceAll("{provider}", encodeURIComponent(provider))
@@ -73,8 +88,8 @@ export async function GET(req: Request) {
   count += 1
 
   const res = NextResponse.json({ go: true, url: affUrl, key: pick.key })
-  res.cookies.set("aff_last", String(now), { path: "/", maxAge: 60 * 60 * 24 * 30 })
-  res.cookies.set("aff_day", today, { path: "/", maxAge: 60 * 60 * 24 * 30 })
-  res.cookies.set("aff_count", String(count), { path: "/", maxAge: 60 * 60 * 24 * 30 })
+  res.cookies.set("aff_last", String(now), base)
+  res.cookies.set("aff_day", today, base)
+  res.cookies.set("aff_count", String(count), base)
   return res
 }
