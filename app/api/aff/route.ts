@@ -12,7 +12,9 @@ export const dynamic = "force-dynamic"
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const next = searchParams.get("next") || "/"
+  const provider = searchParams.get("provider") || "default"
 
+  // settings
   const { data: st } = await sb
     .from("site_settings")
     .select("aff_hit_rate, aff_cooldown_minutes, aff_max_per_day")
@@ -23,9 +25,8 @@ export async function GET(req: Request) {
   const cooldownMin = Number(st?.aff_cooldown_minutes ?? 30)
   const maxPerDay = Number(st?.aff_max_per_day ?? 3)
 
-  // ✅ Next 16: cookies() là async -> phải await
-  const ck = await cookies()
-
+  // cookie state
+  const ck = cookies()
   const now = Date.now()
   const today = new Date().toISOString().slice(0, 10)
 
@@ -39,35 +40,39 @@ export async function GET(req: Request) {
   const inCooldown = last && now - last < cooldownMs
   const overDay = count >= maxPerDay
 
-  if (inCooldown || overDay) {
-    const res = NextResponse.json({ go: false })
-    res.cookies.set("aff_day", today, { path: "/", maxAge: 60 * 60 * 24 * 30 })
-    res.cookies.set("aff_count", String(count), { path: "/", maxAge: 60 * 60 * 24 * 30 })
-    return res
-  }
+  // helper set cookie
+  const resNo = NextResponse.json({ go: false })
+  resNo.cookies.set("aff_day", today, { path: "/", maxAge: 60 * 60 * 24 * 30 })
+  resNo.cookies.set("aff_count", String(count), { path: "/", maxAge: 60 * 60 * 24 * 30 })
 
-  const go = Math.random() < hitRate
-  if (!go) {
-    const res = NextResponse.json({ go: false })
-    res.cookies.set("aff_day", today, { path: "/", maxAge: 60 * 60 * 24 * 30 })
-    res.cookies.set("aff_count", String(count), { path: "/", maxAge: 60 * 60 * 24 * 30 })
-    return res
-  }
+  if (inCooldown || overDay) return resNo
 
+  // random
+  const goRandom = Math.random() < hitRate
+  if (!goRandom) return resNo
+
+  // get enabled links
   const { data: links } = await sb
     .from("aff_links")
-    .select("url,key")
+    .select("url,key,weight")
     .eq("enabled", true)
-    .limit(20)
+    .limit(100)
 
-  const pick = (links || [])[Math.floor(Math.random() * (links?.length || 1))]
-  if (!pick?.url) return NextResponse.json({ go: false })
+  const pool = (links || [])
+    .filter((x: any) => x?.url)
+    .flatMap((x: any) => Array(Math.max(1, Number(x.weight || 1))).fill(x))
 
-  const affUrl = String(pick.url).replaceAll("{next}", encodeURIComponent(next))
+  const pick = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null
+  if (!pick?.url) return resNo
+
+  // build url
+  const affUrl = String(pick.url)
+    .replaceAll("{next}", encodeURIComponent(next))
+    .replaceAll("{provider}", encodeURIComponent(provider))
 
   count += 1
 
-  const res = NextResponse.json({ go: true, url: affUrl })
+  const res = NextResponse.json({ go: true, url: affUrl, key: pick.key })
   res.cookies.set("aff_last", String(now), { path: "/", maxAge: 60 * 60 * 24 * 30 })
   res.cookies.set("aff_day", today, { path: "/", maxAge: 60 * 60 * 24 * 30 })
   res.cookies.set("aff_count", String(count), { path: "/", maxAge: 60 * 60 * 24 * 30 })
