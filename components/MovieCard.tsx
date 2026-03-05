@@ -3,9 +3,14 @@
 // components/MovieCard.tsx
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { affWrap } from "@/lib/aff"
 import { Play, Flame } from "lucide-react"
+
+function isMobileUA() {
+  if (typeof navigator === "undefined") return false
+  return /Android|iPhone|iPad|iPod|Mobile|Mobi/i.test(navigator.userAgent)
+}
 
 export default function MovieCard({ movie }: any) {
   const router = useRouter()
@@ -14,40 +19,79 @@ export default function MovieCard({ movie }: any) {
   // ✅ link xem phim chuẩn
   const href = `/xem/${movie.slug}/tap-1`
 
-  // ✅ link AFF (thường là /api/aff?... hoặc 1 url)
-  const go = affWrap(href, "tiktok")
+  // ✅ affWrap của em nên trả ra "endpoint nội bộ" để fetch (vd: /api/aff?next=...)
+  //    Nếu affWrap trả ra URL ngoài thì cũng xử lý được bên dưới.
+  const go = useMemo(() => affWrap(href, "tiktok"), [href])
 
   const onClick = useCallback(
     async (e: React.MouseEvent) => {
-      // để chắc chắn click không bị double
+      e.preventDefault()
       if (busy) return
       setBusy(true)
 
-      try {
-        // ✅ Bọc AFF ẩn nút:
-        // - Mở AFF ở TAB mới (không phá điều hướng)
-        // - Nếu affWrap của em trả về route nội bộ /api/aff... thì mở route đó
-        // - Nếu trả về url ngoài thì cũng ok
-        if (go && typeof window !== "undefined") {
-          window.open(go, "_blank", "noopener,noreferrer")
-        }
-      } catch {}
-
-      // ✅ Luôn điều hướng sang trang xem phim
-      e.preventDefault()
+      // 1) Luôn điều hướng sang trang xem phim (cùng tab)
       router.push(href)
 
-      setBusy(false)
+      // 2) Xử lý AFF (không làm trang xem phim mở tab mới)
+      try {
+        if (!go || typeof window === "undefined") {
+          setBusy(false)
+          return
+        }
+
+        const mobile = isMobileUA()
+
+        // Nếu go là endpoint nội bộ (vd /api/aff?...), ta fetch để nhận url thật
+        const isInternalApi =
+          typeof go === "string" && (go.startsWith("/") || go.includes("/api/"))
+
+        // PC: mở sẵn tab trắng để tránh popup-block
+        let popup: Window | null = null
+        if (!mobile) popup = window.open("about:blank", "_blank", "noopener,noreferrer")
+
+        if (isInternalApi) {
+          const res = await fetch(go, { cache: "no-store" })
+          const data = await res.json()
+
+          if (data?.go && data?.url) {
+            if (mobile) {
+              // Mobile: nhảy app/đổi trang nếu là deeplink
+              window.location.href = data.url
+            } else {
+              if (popup) popup.location.href = data.url
+              else window.open(data.url, "_blank", "noopener,noreferrer")
+            }
+          } else {
+            // không go -> đóng popup trắng (PC)
+            if (popup) popup.close()
+          }
+        } else {
+          // go là URL ngoài luôn
+          if (mobile) {
+            window.location.href = go
+          } else {
+            if (popup) popup.location.href = go
+            else window.open(go, "_blank", "noopener,noreferrer")
+          }
+        }
+      } catch {
+        // lỗi thì đóng popup nếu có
+        // (tránh mở tab trắng bị treo)
+        // eslint-disable-next-line no-empty
+        try {}
+      } finally {
+        setBusy(false)
+      }
     },
     [busy, go, href, router]
   )
 
   return (
-    // ⚠️ quan trọng: Link phải trỏ về href thật (trang xem phim)
     <Link
       href={href}
       onClick={onClick}
       className="group block relative p-[1.5px] rounded-2xl transition-all duration-700 hover:-translate-y-3 hover:scale-[1.03]"
+      prefetch={false}
     >
       {/* 1. Hạt lấp lánh bay lơ lửng (Particles) - Chỉ hiện khi hover */}
       <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
