@@ -24,14 +24,25 @@ export default function MovieCard({ movie }: any) {
   const go = useMemo(() => affWrap(href, "tiktok"), [href])
 
   const onClick = useCallback(
-    async (e: React.MouseEvent) => {
+  async (e: React.MouseEvent) => {
+    if (busy) return
+    setBusy(true)
+
+    try {
+      if (go && typeof window !== "undefined") {
+        window.open(go, "_blank", "noopener,noreferrer")
+      }
+    } catch (err) {
+      // ignore
+    } finally {
+      // ✅ Luôn điều hướng sang trang xem phim (KHÔNG mở tab mới)
       e.preventDefault()
-      if (busy) return
-      setBusy(true)
-
-      // 1) Luôn điều hướng sang trang xem phim (cùng tab)
       router.push(href)
-
+      setBusy(false)
+    }
+  },
+  [busy, go, href, router]
+)
       // 2) Xử lý AFF (không làm trang xem phim mở tab mới)
       try {
         if (!go || typeof window === "undefined") {
