@@ -8,89 +8,47 @@ import { affWrap } from "@/lib/aff"
 import { Play, Flame } from "lucide-react"
 
 function isMobileUA() {
-  if (typeof navigator === "undefined") return false
-  return /Android|iPhone|iPad|iPod|Mobile|Mobi/i.test(navigator.userAgent)
+  if (typeof window === "undefined") return false
+  const ua = navigator.userAgent || ""
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)
 }
 
 export default function MovieCard({ movie }: any) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
 
-  // ✅ link xem phim chuẩn
-  const href = `/xem/${movie.slug}/tap-1`
+  // ✅ link xem phim chuẩn (1 tab)
+  const href = useMemo(() => `/xem/${movie.slug}/tap-1`, [movie.slug])
 
-  // ✅ affWrap của em nên trả ra "endpoint nội bộ" để fetch (vd: /api/aff?next=...)
-  //    Nếu affWrap trả ra URL ngoài thì cũng xử lý được bên dưới.
+  // ✅ link AFF (ví dụ /api/aff?... hoặc url ngoài)
   const go = useMemo(() => affWrap(href, "tiktok"), [href])
 
   const onClick = useCallback(
-  async (e: React.MouseEvent) => {
-    if (busy) return
-    setBusy(true)
+    async (e: React.MouseEvent) => {
+      // Nếu user ctrl/cmd/shift click hoặc click chuột giữa => để trình duyệt tự mở tab
+      // (không can thiệp, tránh “hành vi lạ”)
+      // @ts-ignore
+      const isMiddleClick = e.button === 1
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || isMiddleClick) return
 
-    try {
-      if (go && typeof window !== "undefined") {
-        window.open(go, "_blank", "noopener,noreferrer")
+      if (busy) {
+        e.preventDefault()
+        return
       }
-    } catch (err) {
-      // ignore
-    } finally {
-      // ✅ Luôn điều hướng sang trang xem phim (KHÔNG mở tab mới)
-      e.preventDefault()
-      router.push(href)
-      setBusy(false)
-    }
-  },
-  [busy, go, href, router]
-)
-      // 2) Xử lý AFF (không làm trang xem phim mở tab mới)
+      setBusy(true)
+
       try {
-        if (!go || typeof window === "undefined") {
-          setBusy(false)
-          return
-        }
-
-        const mobile = isMobileUA()
-
-        // Nếu go là endpoint nội bộ (vd /api/aff?...), ta fetch để nhận url thật
-        const isInternalApi =
-          typeof go === "string" && (go.startsWith("/") || go.includes("/api/"))
-
-        // PC: mở sẵn tab trắng để tránh popup-block
-        let popup: Window | null = null
-        if (!mobile) popup = window.open("about:blank", "_blank", "noopener,noreferrer")
-
-        if (isInternalApi) {
-          const res = await fetch(go, { cache: "no-store" })
-          const data = await res.json()
-
-          if (data?.go && data?.url) {
-            if (mobile) {
-              // Mobile: nhảy app/đổi trang nếu là deeplink
-              window.location.href = data.url
-            } else {
-              if (popup) popup.location.href = data.url
-              else window.open(data.url, "_blank", "noopener,noreferrer")
-            }
-          } else {
-            // không go -> đóng popup trắng (PC)
-            if (popup) popup.close()
-          }
-        } else {
-          // go là URL ngoài luôn
-          if (mobile) {
-            window.location.href = go
-          } else {
-            if (popup) popup.location.href = go
-            else window.open(go, "_blank", "noopener,noreferrer")
-          }
+        // ✅ PC: mở AFF tab mới (không phá điều hướng)
+        // ✅ Mobile: KHÔNG mở tab mới (popup hay bị chặn)
+        if (!isMobileUA() && go && typeof window !== "undefined") {
+          window.open(go, "_blank", "noopener,noreferrer")
         }
       } catch {
-        // lỗi thì đóng popup nếu có
-        // (tránh mở tab trắng bị treo)
-        // eslint-disable-next-line no-empty
-        try {}
+        // ignore
       } finally {
+        // ✅ Luôn điều hướng sang trang xem phim trong CÙNG TAB
+        e.preventDefault()
+        router.push(href)
         setBusy(false)
       }
     },
@@ -102,7 +60,6 @@ export default function MovieCard({ movie }: any) {
       href={href}
       onClick={onClick}
       className="group block relative p-[1.5px] rounded-2xl transition-all duration-700 hover:-translate-y-3 hover:scale-[1.03]"
-      prefetch={false}
     >
       {/* 1. Hạt lấp lánh bay lơ lửng (Particles) - Chỉ hiện khi hover */}
       <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
