@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Save, XCircle, PlusCircle, UploadCloud } from 'lucide-react';
+import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Search, UploadCloud } from 'lucide-react';
 
 export default function SuperAdmin() {
   const [session, setSession] = useState<any>(null);
@@ -15,13 +15,15 @@ export default function SuperAdmin() {
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
   const [episodes, setEpisodes] = useState<any[]>([]);
   
+  // 🔥 STATE MỚI CHO THANH TÌM KIẾM
+  const [searchQuery, setSearchQuery] = useState('');
+  
   const [affEnabled, setAffEnabled] = useState(true);
   const [affRatio, setAffRatio] = useState(50);
   const [affLink, setAffLink] = useState('');
   const [affCooldown, setAffCooldown] = useState(15);
   const [affMaxJumps, setAffMaxJumps] = useState(3);
 
-  // 🔥 ĐÃ THÊM 'genre' VÀO FORM
   const [movieForm, setMovieForm] = useState({ title: '', thumbnail_url: '', day_of_week: '', rank: '0', status: '', genre: 'Tiên Hiệp' });
   const [epForm, setEpForm] = useState({ id: '', ep: '', sv1: '', sv2: '', sv3: '' });
   const [editingMovieId, setEditingMovieId] = useState<string | null>(null);
@@ -69,6 +71,11 @@ export default function SuperAdmin() {
     if (error) alert('Lỗi: ' + error.message); else alert('💰 Lưu MMO THÀNH CÔNG!');
   };
 
+  // 🔥 THUẬT TOÁN LỌC PHIM THEO TỪ KHÓA TÌM KIẾM
+  const filteredMovies = movieList.filter(movie => 
+    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (!session) return (<div className="min-h-screen flex items-center justify-center bg-[#0b0c10]"><div className="bg-[#151720] p-8 rounded-2xl border border-cyan-500/30 w-full max-w-md"><h1 className="text-3xl font-black text-center text-cyan-400 mb-8">ADMIN PANEL</h1><form onSubmit={handleLogin} className="space-y-5"><input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-[#0b0c10] text-white border border-gray-700 rounded-lg p-3 outline-none" placeholder="Email" /><input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-[#0b0c10] text-white border border-gray-700 rounded-lg p-3 outline-none" placeholder="Mật Khẩu" />{errorMsg && <div className="text-red-500 text-center text-sm">{errorMsg}</div>}<button type="submit" disabled={loading} className="w-full bg-cyan-600 text-white font-black py-3 rounded-lg">ĐĂNG NHẬP</button></form></div></div>);
 
   return (
@@ -89,7 +96,6 @@ export default function SuperAdmin() {
                   </label>
                 </div>
                 
-                {/* 🔥 Ô CHỌN THỂ LOẠI */}
                 <select required value={movieForm.genre} onChange={e => setMovieForm({...movieForm, genre: e.target.value})} className="bg-[#0b0c10] border border-gray-700 px-3 py-3 rounded-xl w-full text-white font-bold text-cyan-400">
                   <option value="Tiên Hiệp">⛩️ Thể loại: Tiên Hiệp</option><option value="Huyền Huyễn">🐉 Thể loại: Huyền Huyễn</option><option value="Xuyên Không">🌀 Thể loại: Xuyên Không</option><option value="Trùng Sinh">⚡ Thể loại: Trùng Sinh</option><option value="Hài Hước">😂 Thể loại: Hài Hước</option>
                 </select>
@@ -99,11 +105,11 @@ export default function SuperAdmin() {
                 </select>
                 <div className="flex gap-2">
                   <select required value={movieForm.rank} onChange={e => setMovieForm({...movieForm, rank: e.target.value})} className="bg-[#0b0c10] border border-gray-700 px-3 py-3 rounded-xl w-1/2 text-white"><option value="0">Khỏi Top</option>{[1,2,3,4,5,6,7,8,9,10].map(r => (<option key={r} value={r}>Top {r}</option>))}</select>
-                  <input required placeholder="Trạng thái..." value={movieForm.status} onChange={e => setMovieForm({...movieForm, status: e.target.value})} className="bg-[#0b0c10] border border-gray-700 px-3 py-3 rounded-xl w-1/2 text-white" />
+                  <input required placeholder="Trạng thái (VD: Tập 15)..." value={movieForm.status} onChange={e => setMovieForm({...movieForm, status: e.target.value})} className="bg-[#0b0c10] border border-gray-700 px-3 py-3 rounded-xl w-1/2 text-white" />
                 </div>
               </div>
-              <button type="submit" disabled={isUploading} className={`w-full py-3.5 rounded-xl font-black ${editingMovieId ? 'bg-yellow-500 text-black' : 'bg-cyan-600 text-white'} ${isUploading ? 'opacity-50' : ''}`}>{editingMovieId ? 'LƯU CẬP NHẬT' : 'ĐĂNG PHIM MỚI'}</button>
-              {editingMovieId && <button type="button" onClick={() => {setEditingMovieId(null); setMovieForm({title:'', thumbnail_url:'', day_of_week:'', rank:'0', status:'', genre:'Tiên Hiệp'})}} className="w-full text-center text-sm underline mt-2 text-gray-500">Hủy</button>}
+              <button type="submit" disabled={isUploading} className={`w-full py-3.5 rounded-xl font-black ${editingMovieId ? 'bg-yellow-500 text-black' : 'bg-cyan-600 text-white'} ${isUploading ? 'opacity-50' : ''}`}>{editingMovieId ? 'LƯU CẬP NHẬT PHIM' : 'ĐĂNG PHIM MỚI'}</button>
+              {editingMovieId && <button type="button" onClick={() => {setEditingMovieId(null); setMovieForm({title:'', thumbnail_url:'', day_of_week:'', rank:'0', status:'', genre:'Tiên Hiệp'})}} className="w-full text-center text-sm underline mt-2 text-gray-500">Hủy chỉnh sửa</button>}
             </form>
         </div>
 
@@ -122,41 +128,98 @@ export default function SuperAdmin() {
         </div>
       </div>
 
+      {/* KHU VỰC THÊM TẬP PHIM */}
       {selectedMovie && (
         <div className="bg-gradient-to-br from-[#101920] to-[#151720] p-6 rounded-2xl border border-green-500/30">
-          <div className="flex justify-between mb-4"><h2 className="text-xl font-black text-green-400">QUẢN LÝ TẬP: {selectedMovie.title}</h2><button onClick={() => setSelectedMovie(null)} className="text-sm bg-gray-800 px-3 py-1 rounded">ĐÓNG</button></div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-black text-green-400">QUẢN LÝ TẬP: <span className="text-white">{selectedMovie.title}</span></h2>
+            <button onClick={() => setSelectedMovie(null)} className="text-sm bg-gray-800 px-4 py-1.5 rounded-lg hover:bg-gray-700 transition-colors">ĐÓNG X</button>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <form onSubmit={handleSaveEp} className="space-y-3 bg-[#0b0c10] p-4 rounded-xl border border-gray-800"><div className="flex gap-2"><input required placeholder="Tập..." value={epForm.ep} onChange={e => setEpForm({...epForm, ep: e.target.value})} className="w-1/3 bg-[#151720] border border-gray-700 p-2 rounded text-center" /><input required placeholder="Link SV1..." value={epForm.sv1} onChange={e => setEpForm({...epForm, sv1: e.target.value})} className="w-2/3 bg-[#151720] border border-gray-700 p-2 rounded text-sm" /></div><input placeholder="Link SV2" value={epForm.sv2} onChange={e => setEpForm({...epForm, sv2: e.target.value})} className="w-full bg-[#151720] border border-gray-700 p-2 rounded text-sm" /><input placeholder="Link SV3" value={epForm.sv3} onChange={e => setEpForm({...epForm, sv3: e.target.value})} className="w-full bg-[#151720] border border-gray-700 p-2 rounded text-sm" /><button type="submit" className={`w-full py-2.5 rounded font-black ${epForm.id ? 'bg-yellow-600' : 'bg-green-600'}`}>{epForm.id ? 'LƯU TẬP' : 'ĐĂNG TẬP'}</button></form>
+            <form onSubmit={handleSaveEp} className="space-y-3 bg-[#0b0c10] p-4 rounded-xl border border-gray-800">
+              <div className="flex gap-2">
+                <input required placeholder="Tập..." value={epForm.ep} onChange={e => setEpForm({...epForm, ep: e.target.value})} className="w-1/3 bg-[#151720] border border-gray-700 p-2.5 rounded-lg text-center text-white" />
+                <input required placeholder="Link SV1..." value={epForm.sv1} onChange={e => setEpForm({...epForm, sv1: e.target.value})} className="w-2/3 bg-[#151720] border border-gray-700 p-2.5 rounded-lg text-sm text-white" />
+              </div>
+              <input placeholder="Link SV2" value={epForm.sv2} onChange={e => setEpForm({...epForm, sv2: e.target.value})} className="w-full bg-[#151720] border border-gray-700 p-2.5 rounded-lg text-sm text-white" />
+              <input placeholder="Link SV3" value={epForm.sv3} onChange={e => setEpForm({...epForm, sv3: e.target.value})} className="w-full bg-[#151720] border border-gray-700 p-2.5 rounded-lg text-sm text-white" />
+              <button type="submit" className={`w-full py-3 rounded-lg font-black ${epForm.id ? 'bg-yellow-600 text-black' : 'bg-green-600 text-white'}`}>{epForm.id ? 'LƯU CẬP NHẬT TẬP' : 'ĐĂNG TẬP MỚI'}</button>
+              {epForm.id && <button type="button" onClick={() => setEpForm({id: '', ep: '', sv1: '', sv2: '', sv3: ''})} className="w-full text-center text-sm underline mt-2 text-gray-500">Hủy sửa tập</button>}
+            </form>
             <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-               {episodes.map(ep => (<div key={ep.id} className="bg-[#0b0c10] p-3 rounded-xl border border-gray-800"><div className="flex justify-between items-start mb-2"><span className="font-black bg-gray-800 px-2 rounded">Tập {ep.episode_number}</span><div className="flex gap-1"><button onClick={() => setEpForm({id: ep.id, ep: ep.episode_number, sv1: ep.server1_url, sv2: ep.server2_url || '', sv3: ep.server3_url || ''})} className="text-yellow-500"><Edit className="w-4 h-4"/></button><button onClick={async () => { if(confirm("Xóa tập?")) { await supabase.from('episodes').delete().eq('id', ep.id); fetchEps(selectedMovie.id); } }} className="text-red-500"><Trash2 className="w-4 h-4"/></button></div></div></div>))}
+               {episodes.map(ep => (
+                 <div key={ep.id} className="bg-[#0b0c10] p-3 rounded-xl border border-gray-800 hover:border-gray-600 transition-colors">
+                   <div className="flex justify-between items-center mb-2">
+                     <span className="font-black bg-gray-800 text-white px-2 py-1 rounded text-sm">Tập {ep.episode_number}</span>
+                     <div className="flex gap-2">
+                       <button onClick={() => setEpForm({id: ep.id, ep: ep.episode_number, sv1: ep.server1_url, sv2: ep.server2_url || '', sv3: ep.server3_url || ''})} className="text-yellow-500 hover:text-yellow-400 p-1"><Edit className="w-4 h-4"/></button>
+                       <button onClick={async () => { if(confirm("Xóa tập này?")) { await supabase.from('episodes').delete().eq('id', ep.id); fetchEps(selectedMovie.id); } }} className="text-red-500 hover:text-red-400 p-1"><Trash2 className="w-4 h-4"/></button>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+               {episodes.length === 0 && <p className="col-span-full text-gray-500 text-sm text-center py-4">Chưa có tập nào.</p>}
             </div>
           </div>
         </div>
       )}
 
+      {/* KHU VỰC DANH SÁCH PHIM TỔNG HỢP VÀ TÌM KIẾM */}
       <div className="bg-[#151720] rounded-2xl border border-gray-800 overflow-hidden">
-        <div className="bg-gray-900/80 p-5 border-b border-gray-800"><h2 className="text-xl font-black text-white">KHO PHIM TỔNG HỢP</h2></div>
+        
+        {/* 🔥 THANH TÌM KIẾM PHIM VÀ TIÊU ĐỀ */}
+        <div className="bg-gray-900/80 p-5 border-b border-gray-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-xl font-black text-white">KHO PHIM TỔNG HỢP <span className="text-cyan-400 text-sm ml-2">({filteredMovies.length} phim)</span></h2>
+          
+          <div className="relative w-full sm:w-72">
+            <input 
+              type="text" 
+              placeholder="Tìm tên phim nhanh..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#0b0c10] border border-gray-700 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder-gray-500"
+            />
+            <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3" />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-3 text-gray-500 hover:text-gray-300">
+                <XCircle className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
         <table className="w-full text-left">
           <tbody className="divide-y divide-gray-800/50">
-            {movieList.map(m => (
-              <tr key={m.id} className="hover:bg-gray-800/30">
-                <td className="p-4 w-20"><img src={m.thumbnail_url} alt="thumb" className="w-12 h-16 object-cover rounded border border-gray-700" /></td>
+            {filteredMovies.map(m => (
+              <tr key={m.id} className="hover:bg-gray-800/40 transition-colors">
+                <td className="p-4 w-20">
+                  <img src={m.thumbnail_url} alt="thumb" className="w-12 h-16 object-cover rounded-md border border-gray-700" />
+                </td>
                 <td className="p-4">
-                  <p className="font-black text-white text-lg">{m.title}</p>
-                  <div className="flex gap-2 text-xs text-gray-500 mt-1">
-                    <span className="bg-gray-800 px-2 rounded">{m.status}</span>
-                    <span className="bg-cyan-900/30 text-cyan-400 px-2 rounded border border-cyan-800">{m.genre || 'Khác'}</span>
+                  <p className="font-black text-white text-base md:text-lg mb-1 line-clamp-1">{m.title}</p>
+                  <div className="flex flex-wrap gap-2 text-[10px] sm:text-xs text-gray-500">
+                    <span className="bg-gray-800 px-2 py-0.5 rounded font-bold">{m.status}</span>
+                    <span className="bg-cyan-900/30 text-cyan-400 px-2 py-0.5 rounded border border-cyan-800">{m.genre || 'Khác'}</span>
+                    <span className="bg-purple-900/30 text-purple-400 px-2 py-0.5 rounded border border-purple-800">{m.day_of_week || 'Chưa xếp lịch'}</span>
                   </div>
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => {setSelectedMovie(m); fetchEps(m.id)}} className="bg-cyan-600/10 text-cyan-400 px-3 py-1.5 rounded font-bold border border-cyan-500/30">TẬP</button>
-                    <button onClick={() => {setEditingMovieId(m.id); setMovieForm({title: m.title, thumbnail_url: m.thumbnail_url, day_of_week: m.day_of_week || '', rank: m.rank.toString(), status: m.status, genre: m.genre || 'Tiên Hiệp'})}} className="bg-yellow-600/10 text-yellow-500 px-3 py-1.5 rounded border border-yellow-500/30"><Edit className="w-4 h-4"/></button>
-                    <button onClick={async () => { if(confirm("Xóa?")) { await supabase.from('movies').delete().eq('id', m.id); fetchMovies(); } }} className="bg-red-600/10 text-red-500 px-3 py-1.5 rounded border border-red-500/30"><Trash2 className="w-4 h-4"/></button>
+                    <button onClick={() => {setSelectedMovie(m); fetchEps(m.id); window.scrollTo({ top: 0, behavior: 'smooth' });}} className="bg-cyan-600/10 text-cyan-400 px-3 py-1.5 rounded-lg font-bold border border-cyan-500/30 hover:bg-cyan-600 hover:text-white transition-all">THÊM TẬP</button>
+                    <button onClick={() => {setEditingMovieId(m.id); setMovieForm({title: m.title, thumbnail_url: m.thumbnail_url, day_of_week: m.day_of_week || '', rank: m.rank.toString(), status: m.status, genre: m.genre || 'Tiên Hiệp'}); window.scrollTo({ top: 0, behavior: 'smooth' });}} className="bg-yellow-600/10 text-yellow-500 px-3 py-1.5 rounded-lg border border-yellow-500/30 hover:bg-yellow-600 hover:text-black transition-all"><Edit className="w-4 h-4"/></button>
+                    <button onClick={async () => { if(confirm("CẢNH BÁO: Xóa phim sẽ xóa toàn bộ tập phim đi kèm. Bạn có chắc chắn?")) { await supabase.from('movies').delete().eq('id', m.id); fetchMovies(); } }} className="bg-red-600/10 text-red-500 px-3 py-1.5 rounded-lg border border-red-500/30 hover:bg-red-600 hover:text-white transition-all"><Trash2 className="w-4 h-4"/></button>
                   </div>
                 </td>
               </tr>
             ))}
+            {filteredMovies.length === 0 && (
+              <tr>
+                <td colSpan={3} className="p-10 text-center text-gray-500">
+                  <p className="text-4xl mb-2">🔍</p>
+                  <p>Không tìm thấy phim nào khớp với "{searchQuery}"</p>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
