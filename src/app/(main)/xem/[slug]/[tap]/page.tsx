@@ -27,19 +27,13 @@ export default function PlayerPage() {
   const [commentName, setCommentName] = useState('');
   const [commentContent, setCommentContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // 🔥 STATE KIỂM TRA ĐÃ LƯU TÊN TRÊN MÁY CHƯA
   const [isNameLocked, setIsNameLocked] = useState(false);
 
   useEffect(() => {
     if (!slug || !tap) return; 
 
-    // 🔥 KIỂM TRA MÁY NÀY ĐÃ TỪNG BÌNH LUẬN CHƯA
     const savedName = localStorage.getItem('hh3d_username');
-    if (savedName) {
-      setCommentName(savedName);
-      setIsNameLocked(true); // Khóa tên, không cho sửa
-    }
+    if (savedName) { setCommentName(savedName); setIsNameLocked(true); }
 
     const fetchData = async () => {
       try {
@@ -78,6 +72,29 @@ export default function PlayerPage() {
     fetchData();
   }, [slug, tap, router]);
 
+  // 🔥 THUẬT TOÁN SEO ĐỘNG (OPEN GRAPH) - Tự sinh tiêu đề & Ảnh khi Share FB/Zalo
+  useEffect(() => {
+    if (movie) {
+      document.title = `${movie.title} - Tập ${tap} Vietsub | XEMPHIMHH3D`;
+      
+      const setMetaTag = (property: string, content: string) => {
+        let meta = document.querySelector(`meta[property="${property}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('property', property);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      setMetaTag('og:title', `Phim ${movie.title} Tập ${tap} Vietsub`);
+      setMetaTag('og:description', `Xem phim ${movie.title} thuộc thể loại ${movie.genre}. Chất lượng siêu nét không quảng cáo tại XEMPHIMHH3D.`);
+      setMetaTag('og:image', movie.thumbnail_url);
+      setMetaTag('og:url', window.location.href);
+      setMetaTag('og:type', 'video.movie');
+    }
+  }, [movie, tap]);
+
   const handleAction = (callback: () => void) => { runMMO(aff); callback(); };
   
   const handleSaveMovie = () => {
@@ -86,45 +103,44 @@ export default function PlayerPage() {
     else { localStorage.setItem(`saved_${movie.id}`, 'true'); setIsSaved(true); alert("❤️ Đã thêm vào Phim Yêu Thích!"); }
   };
 
-  // 🔥 HÀM XỬ LÝ GỬI BÌNH LUẬN CÓ CHỐNG SPAM
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentName.trim() || !commentContent.trim() || !movie?.id) return;
     
-    // 1. KIỂM TRA COOLDOWN (CHỐNG SPAM)
     const lastCmtTime = localStorage.getItem('hh3d_last_cmt');
-    if (lastCmtTime && Date.now() - parseInt(lastCmtTime) < 30000) { // 30000ms = 30 giây
+    if (lastCmtTime && Date.now() - parseInt(lastCmtTime) < 30000) { 
       alert("⏳ Bạn bình luận quá nhanh! Vui lòng đợi 30 giây để gửi tiếp.");
       return;
     }
 
     setIsSubmitting(true);
     const newComment = { movie_id: movie.id, user_name: commentName.trim(), content: commentContent.trim() };
-    
     const { data, error } = await supabase.from('comments').insert([newComment]).select();
     
     if (!error && data) {
-      setComments([data[0], ...comments]);
-      setCommentContent(''); 
-      
-      // 2. LƯU THỜI GIAN VỪA BÌNH LUẬN (Khóa mõm 30s)
+      setComments([data[0], ...comments]); setCommentContent(''); 
       localStorage.setItem('hh3d_last_cmt', Date.now().toString());
-      
-      // 3. LƯU VÀ KHÓA TÊN KHÁCH (Khóa danh tính vào máy)
-      if (!isNameLocked) {
-        localStorage.setItem('hh3d_username', commentName.trim());
-        setIsNameLocked(true);
-      }
-    } else {
-      alert("Có lỗi xảy ra, không thể gửi bình luận!");
-    }
+      if (!isNameLocked) { localStorage.setItem('hh3d_username', commentName.trim()); setIsNameLocked(true); }
+    } else alert("Có lỗi xảy ra, không thể gửi bình luận!");
     setIsSubmitting(false);
   };
 
   if (loading) return <div className="text-center p-20 text-cyan-400 font-bold animate-pulse text-sm uppercase tracking-widest">🎬 Đang tải phim...</div>;
   if (!movie) return <div className="text-center p-20 text-red-500 font-bold text-lg uppercase">404 - Không tìm thấy phim</div>;
 
-  const videoUrl = activeServer === 1 ? currentEpData?.server1_url : activeServer === 2 ? currentEpData?.server2_url : currentEpData?.server3_url;
+  const rawVideoUrl = activeServer === 1 ? currentEpData?.server1_url : activeServer === 2 ? currentEpData?.server2_url : currentEpData?.server3_url;
+
+  // 🔥 THUẬT TOÁN "KHÓA MÕM" DAILYMOTION
+  const getOptimizedVideoUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('dailymotion.com')) {
+      const separator = url.includes('?') ? '&' : '?';
+      return `${url}${separator}queue-enable=0&queue-autoplay-next=0&endscreen-enable=0&ui-logo=0&ui-start-screen-info=0`;
+    }
+    return url; 
+  };
+
+  const videoUrl = getOptimizedVideoUrl(rawVideoUrl);
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-5 mt-4 pb-12 max-w-[1100px] mx-auto px-2 sm:px-4 lg:px-0">
@@ -213,7 +229,6 @@ export default function PlayerPage() {
 
           <form onSubmit={handleSubmitComment} className="mb-6 bg-[#0b0c10] p-3 rounded-lg border border-gray-800 shadow-inner">
             <div className="flex flex-col sm:flex-row gap-3 mb-3">
-               {/* 🔥 Ô NHẬP TÊN BỊ KHÓA NẾU ĐÃ LƯU TRÊN MÁY */}
                <input 
                  required type="text" placeholder="Tên của bạn..." 
                  value={commentName} 
