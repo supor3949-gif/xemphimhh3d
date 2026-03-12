@@ -1,4 +1,25 @@
 // File: src/app/layout.tsx
+
+// 1. Thêm dòng import này ở đầu file (dưới các dòng import khác)
+import GoogleSchema from '@/components/GoogleSchema';
+
+// ... (code cũ giữ nguyên)
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="vi">
+      <body className={inter.className}>
+        
+        {/* 2. GẮN LÁ BÙA VÀO ĐÂY (Nó tàng hình nên để đâu trong body cũng được) */}
+        <GoogleSchema />
+
+        {children}
+        
+      </body>
+    </html>
+  );
+}
+// File: src/app/layout.tsx
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
