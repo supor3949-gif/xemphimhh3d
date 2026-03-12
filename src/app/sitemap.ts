@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 🔥 LƯU Ý: Sau này mua tên miền .com thì nhớ vào đây đổi lại link nhé
-  const DOMAIN = 'https://xemphimhh3d.vercel.app'; 
+  const DOMAIN = 'https://xemphimhh3d.online'; 
 
   // Tự động mò vào Supabase lấy toàn bộ danh sách 250+ phim của em
   const { data: movies } = await supabase.from('movies').select('slug, created_at');
