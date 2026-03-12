@@ -1,5 +1,13 @@
 // File: src/app/(main)/xem/[slug]/[tap]/page.tsx
 'use client';
+
+// LỚP KHIÊN BẢO VỆ TYPESCRIPT: Báo cho Vercel biết FB là biến an toàn
+declare global {
+  interface Window {
+    FB: any;
+  }
+}
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
