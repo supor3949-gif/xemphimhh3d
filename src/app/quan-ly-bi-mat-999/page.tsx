@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Search, UploadCloud } from 'lucide-react';
+import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Search, UploadCloud, XCircle } from 'lucide-react';
 
 export default function SuperAdmin() {
   const [session, setSession] = useState<any>(null);
