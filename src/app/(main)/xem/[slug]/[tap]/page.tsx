@@ -1,6 +1,8 @@
 // File: src/app/(main)/xem/[slug]/[tap]/page.tsx
 'use client';
 
+declare global { interface Window { FB: any; } }
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
@@ -21,14 +23,24 @@ export default function PlayerPage() {
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
 
-  // 🔥 STATE CHO HỆ THỐNG BÌNH LUẬN MỚI
   const [comments, setComments] = useState<any[]>([]);
   const [commentName, setCommentName] = useState('');
   const [commentContent, setCommentContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // 🔥 STATE KIỂM TRA ĐÃ LƯU TÊN TRÊN MÁY CHƯA
+  const [isNameLocked, setIsNameLocked] = useState(false);
 
   useEffect(() => {
     if (!slug || !tap) return; 
+
+    // 🔥 KIỂM TRA MÁY NÀY ĐÃ TỪNG BÌNH LUẬN CHƯA
+    const savedName = localStorage.getItem('hh3d_username');
+    if (savedName) {
+      setCommentName(savedName);
+      setIsNameLocked(true); // Khóa tên, không cho sửa
+    }
+
     const fetchData = async () => {
       try {
         const { data: setObj } = await supabase.from('settings').select('*').eq('id', 1).single();
@@ -46,7 +58,6 @@ export default function PlayerPage() {
           if (localStorage.getItem(`saved_${mov.id}`)) setIsSaved(true);
         }
 
-        // Lấy danh sách Tập phim
         const { data: eps } = await supabase.from('episodes').select('*').eq('movie_id', mov.id);
         if (eps && eps.length > 0) {
           const sortedEps = eps.sort((a, b) => {
@@ -59,7 +70,6 @@ export default function PlayerPage() {
           setCurrentEpData(sortedEps.find(e => e.episode_number === tap) || sortedEps[0]);
         }
 
-        // 🔥 Lấy danh sách Bình Luận của phim này
         const { data: cmts } = await supabase.from('comments').select('*').eq('movie_id', mov.id).order('created_at', { ascending: false });
         if (cmts) setComments(cmts);
 
@@ -76,21 +86,35 @@ export default function PlayerPage() {
     else { localStorage.setItem(`saved_${movie.id}`, 'true'); setIsSaved(true); alert("❤️ Đã thêm vào Phim Yêu Thích!"); }
   };
 
-  // 🔥 HÀM XỬ LÝ GỬI BÌNH LUẬN
+  // 🔥 HÀM XỬ LÝ GỬI BÌNH LUẬN CÓ CHỐNG SPAM
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentName.trim() || !commentContent.trim() || !movie?.id) return;
+    
+    // 1. KIỂM TRA COOLDOWN (CHỐNG SPAM)
+    const lastCmtTime = localStorage.getItem('hh3d_last_cmt');
+    if (lastCmtTime && Date.now() - parseInt(lastCmtTime) < 30000) { // 30000ms = 30 giây
+      alert("⏳ Bạn bình luận quá nhanh! Vui lòng đợi 30 giây để gửi tiếp.");
+      return;
+    }
+
     setIsSubmitting(true);
+    const newComment = { movie_id: movie.id, user_name: commentName.trim(), content: commentContent.trim() };
     
-    const newComment = { movie_id: movie.id, user_name: commentName, content: commentContent };
-    
-    // Gửi lên Supabase
     const { data, error } = await supabase.from('comments').insert([newComment]).select();
     
     if (!error && data) {
-      // Ép bình luận mới lên đầu danh sách hiển thị
       setComments([data[0], ...comments]);
-      setCommentContent(''); // Xóa khung nhập cảm nghĩ, giữ lại Tên
+      setCommentContent(''); 
+      
+      // 2. LƯU THỜI GIAN VỪA BÌNH LUẬN (Khóa mõm 30s)
+      localStorage.setItem('hh3d_last_cmt', Date.now().toString());
+      
+      // 3. LƯU VÀ KHÓA TÊN KHÁCH (Khóa danh tính vào máy)
+      if (!isNameLocked) {
+        localStorage.setItem('hh3d_username', commentName.trim());
+        setIsNameLocked(true);
+      }
     } else {
       alert("Có lỗi xảy ra, không thể gửi bình luận!");
     }
@@ -176,7 +200,7 @@ export default function PlayerPage() {
         </div>
       </div>
 
-      {/* 💬 KHỐI 4: BÌNH LUẬN NATIVE CỰC XỊN (Tự code, không xài FB) */}
+      {/* 💬 KHỐI 4: BÌNH LUẬN */}
       <div className="lg:col-span-9">
         <div className="bg-[#151720] p-4 lg:p-5 rounded-lg border border-gray-800 shadow-lg">
           <div className="flex items-center justify-between mb-5 border-b border-gray-800 pb-3">
@@ -187,10 +211,16 @@ export default function PlayerPage() {
             <div className="text-gray-400 text-[10px] md:text-xs flex items-center gap-1"><Eye className="w-3.5 h-3.5 text-cyan-500"/> {movie?.views || 0} lượt xem</div>
           </div>
 
-          {/* Form nhập bình luận */}
           <form onSubmit={handleSubmitComment} className="mb-6 bg-[#0b0c10] p-3 rounded-lg border border-gray-800 shadow-inner">
             <div className="flex flex-col sm:flex-row gap-3 mb-3">
-               <input required type="text" placeholder="Tên của bạn..." value={commentName} onChange={e => setCommentName(e.target.value)} className="w-full sm:w-1/3 bg-[#151720] text-white border border-gray-700 rounded-md px-3 py-2 text-xs md:text-sm outline-none focus:border-cyan-500 transition-colors" />
+               {/* 🔥 Ô NHẬP TÊN BỊ KHÓA NẾU ĐÃ LƯU TRÊN MÁY */}
+               <input 
+                 required type="text" placeholder="Tên của bạn..." 
+                 value={commentName} 
+                 onChange={e => setCommentName(e.target.value)} 
+                 disabled={isNameLocked}
+                 className={`w-full sm:w-1/3 text-white border border-gray-700 rounded-md px-3 py-2 text-xs md:text-sm outline-none transition-colors ${isNameLocked ? 'bg-gray-800 cursor-not-allowed text-gray-400' : 'bg-[#151720] focus:border-cyan-500'}`} 
+               />
                <input required type="text" placeholder="Cảm nghĩ của bạn về tập này..." value={commentContent} onChange={e => setCommentContent(e.target.value)} className="w-full sm:w-2/3 bg-[#151720] text-white border border-gray-700 rounded-md px-3 py-2 text-xs md:text-sm outline-none focus:border-cyan-500 transition-colors" />
             </div>
             <div className="flex justify-end">
@@ -200,11 +230,9 @@ export default function PlayerPage() {
             </div>
           </form>
 
-          {/* Danh sách bình luận */}
           <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
              {comments.map((cmt) => (
                <div key={cmt.id} className="flex gap-3 bg-[#0b0c10]/60 p-3 rounded-lg border border-gray-800/50 hover:border-gray-700 transition-colors">
-                  {/* Tạo Avatar ngẫu nhiên từ chữ cái đầu của Tên */}
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-600 to-blue-800 flex items-center justify-center text-white font-black shrink-0 text-lg shadow-inner">
                     {cmt.user_name.charAt(0).toUpperCase()}
                   </div>
