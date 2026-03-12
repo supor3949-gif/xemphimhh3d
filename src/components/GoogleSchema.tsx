@@ -3,7 +3,7 @@ import React from 'react';
 
 export default function GoogleSchema() {
   // 🔥 CHỖ GẮN TÊN MIỀN: Hiện tại xài Vercel, sau này mua tên miền .com thì đổi ở đúng dòng này!
-  const DOMAIN = "https://xemphimhh3d.vercel.app"; 
+  const DOMAIN = "xemphimhh3d.online"; 
 
   const jsonLd = {
     "@context": "https://schema.org",
