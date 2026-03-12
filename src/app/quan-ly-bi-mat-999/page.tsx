@@ -2,7 +2,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Search, UploadCloud, XCircle } from 'lucide-react';
+// 🔥 Anh đã thêm Eye, MessageCircle, TrendingUp vào đây để làm icon Thống kê
+import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Search, UploadCloud, XCircle, Eye, MessageCircle, TrendingUp } from 'lucide-react';
 
 export default function SuperAdmin() {
   const [session, setSession] = useState<any>(null);
@@ -15,9 +16,11 @@ export default function SuperAdmin() {
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
   const [episodes, setEpisodes] = useState<any[]>([]);
   
-  // 🔥 STATE MỚI CHO THANH TÌM KIẾM
   const [searchQuery, setSearchQuery] = useState('');
   
+  // 🔥 STATE LƯU TỔNG BÌNH LUẬN
+  const [commentCount, setCommentCount] = useState(0);
+
   const [affEnabled, setAffEnabled] = useState(true);
   const [affRatio, setAffRatio] = useState(50);
   const [affLink, setAffLink] = useState('');
@@ -32,12 +35,15 @@ export default function SuperAdmin() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     supabase.auth.onAuthStateChange((_event, session) => setSession(session));
-    fetchMovies(); fetchSettings();
+    fetchMovies(); fetchSettings(); fetchCommentsCount();
   }, []);
 
   const fetchMovies = async () => { const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false }); if (data) setMovieList(data); };
   const fetchSettings = async () => { const { data } = await supabase.from('settings').select('*').eq('id', 1).single(); if (data) { setAffEnabled(data.is_enabled); setAffRatio(data.ratio); setAffLink(data.affiliate_link); setAffCooldown(data.cooldown || 0); setAffMaxJumps(data.max_jumps || 0); } };
   const fetchEps = async (mId: string) => { const { data } = await supabase.from('episodes').select('*').eq('movie_id', mId); if (data) setEpisodes(data.sort((a, b) => Number(b.episode_number) - Number(a.episode_number))); };
+  
+  // 🔥 HÀM ĐẾM TỔNG SỐ BÌNH LUẬN
+  const fetchCommentsCount = async () => { const { count } = await supabase.from('comments').select('*', { count: 'exact', head: true }); if (count !== null) setCommentCount(count); };
 
   const handleLogin = async (e: any) => { e.preventDefault(); setLoading(true); setErrorMsg(''); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) setErrorMsg('Sai Email hoặc Mật khẩu!'); setLoading(false); };
 
@@ -71,17 +77,61 @@ export default function SuperAdmin() {
     if (error) alert('Lỗi: ' + error.message); else alert('💰 Lưu MMO THÀNH CÔNG!');
   };
 
-  // 🔥 THUẬT TOÁN LỌC PHIM THEO TỪ KHÓA TÌM KIẾM
-  const filteredMovies = movieList.filter(movie => 
-    movie.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMovies = movieList.filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  // 🔥 TÍNH TOÁN DỮ LIỆU THỐNG KÊ (Realtime từ kho phim)
+  const totalViews = movieList.reduce((sum, movie) => sum + (movie.views || 0), 0);
+  const top5Movies = [...movieList].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
 
   if (!session) return (<div className="min-h-screen flex items-center justify-center bg-[#0b0c10]"><div className="bg-[#151720] p-8 rounded-2xl border border-cyan-500/30 w-full max-w-md"><h1 className="text-3xl font-black text-center text-cyan-400 mb-8">ADMIN PANEL</h1><form onSubmit={handleLogin} className="space-y-5"><input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-[#0b0c10] text-white border border-gray-700 rounded-lg p-3 outline-none" placeholder="Email" /><input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-[#0b0c10] text-white border border-gray-700 rounded-lg p-3 outline-none" placeholder="Mật Khẩu" />{errorMsg && <div className="text-red-500 text-center text-sm">{errorMsg}</div>}<button type="submit" disabled={loading} className="w-full bg-cyan-600 text-white font-black py-3 rounded-lg">ĐĂNG NHẬP</button></form></div></div>);
 
   return (
     <div className="max-w-[1400px] mx-auto p-4 md:p-6 space-y-6 bg-[#0b0c10] min-h-screen text-gray-200">
+      
+      {/* HEADER */}
       <div className="flex justify-between items-center bg-[#151720] p-6 rounded-2xl border border-gray-800"><h1 className="text-2xl font-black text-cyan-400 flex items-center gap-2"><Tv/> TRUNG TÂM ĐIỀU HÀNH</h1><button onClick={() => supabase.auth.signOut()} className="bg-red-600 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2"><LogOut className="w-4 h-4" /> Thoát</button></div>
 
+      {/* 🔥 BẢNG ĐIỀU KHIỂN THỐNG KÊ (DASHBOARD) - MỚI THÊM VÀO */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        
+        {/* 3 Thẻ Thông số (Bên trái) */}
+        <div className="xl:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-[#151720] p-5 rounded-2xl border border-gray-800 shadow-lg flex items-center justify-between group hover:border-cyan-500 transition-colors">
+            <div><p className="text-gray-400 text-xs font-bold uppercase mb-1">Tổng Số Phim</p><h3 className="text-3xl font-black text-white">{movieList.length}</h3></div>
+            <div className="w-12 h-12 bg-blue-600/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><Film className="w-6 h-6 text-blue-500" /></div>
+          </div>
+          <div className="bg-[#151720] p-5 rounded-2xl border border-gray-800 shadow-lg flex items-center justify-between group hover:border-cyan-500 transition-colors">
+            <div><p className="text-gray-400 text-xs font-bold uppercase mb-1">Tổng Lượt Xem</p><h3 className="text-3xl font-black text-cyan-400">{totalViews.toLocaleString('vi-VN')}</h3></div>
+            <div className="w-12 h-12 bg-cyan-600/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><Eye className="w-6 h-6 text-cyan-400" /></div>
+          </div>
+          <div className="bg-[#151720] p-5 rounded-2xl border border-gray-800 shadow-lg flex items-center justify-between group hover:border-cyan-500 transition-colors">
+            <div><p className="text-gray-400 text-xs font-bold uppercase mb-1">Tổng Bình Luận</p><h3 className="text-3xl font-black text-green-400">{commentCount}</h3></div>
+            <div className="w-12 h-12 bg-green-600/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"><MessageCircle className="w-6 h-6 text-green-400" /></div>
+          </div>
+        </div>
+
+        {/* Bảng Top 5 Phim (Bên phải) */}
+        <div className="xl:col-span-4 bg-[#151720] rounded-2xl border border-gray-800 shadow-lg overflow-hidden flex flex-col">
+          <div className="p-3.5 border-b border-gray-800 flex items-center gap-2 bg-[#0b0c10]/50">
+            <TrendingUp className="w-5 h-5 text-red-500" /><h2 className="text-sm font-bold text-white uppercase tracking-wider">Top 5 Thịnh Hành</h2>
+          </div>
+          <div className="p-3 flex flex-col gap-2 overflow-y-auto max-h-[120px] custom-scrollbar">
+            {top5Movies.map((movie, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <span className={`text-base font-black w-4 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-orange-500' : 'text-gray-600'}`}>{index + 1}</span>
+                <img src={movie.thumbnail_url} alt={movie.title} className="w-8 h-10 object-cover rounded border border-gray-700 shrink-0" />
+                <div className="flex-1">
+                  <h4 className="text-white font-bold text-xs line-clamp-1">{movie.title}</h4>
+                  <p className="text-cyan-400 text-[10px] flex items-center gap-1 mt-0.5"><Eye className="w-3 h-3"/> {movie.views} view</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      {/* TẠO PHIM & CÀI ĐẶT MMO */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-[#151720] p-6 rounded-2xl border border-gray-800">
             <h2 className="text-xl font-black text-cyan-400 mb-6 flex items-center gap-2"><Film/> {editingMovieId ? 'CHỈNH SỬA PHIM' : 'THÊM PHIM MỚI'}</h2>
@@ -130,10 +180,10 @@ export default function SuperAdmin() {
 
       {/* KHU VỰC THÊM TẬP PHIM */}
       {selectedMovie && (
-        <div className="bg-gradient-to-br from-[#101920] to-[#151720] p-6 rounded-2xl border border-green-500/30">
+        <div className="bg-gradient-to-br from-[#101920] to-[#151720] p-6 rounded-2xl border border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.1)]">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-black text-green-400">QUẢN LÝ TẬP: <span className="text-white">{selectedMovie.title}</span></h2>
-            <button onClick={() => setSelectedMovie(null)} className="text-sm bg-gray-800 px-4 py-1.5 rounded-lg hover:bg-gray-700 transition-colors">ĐÓNG X</button>
+            <button onClick={() => setSelectedMovie(null)} className="text-sm bg-gray-800 px-4 py-1.5 rounded-lg hover:bg-red-600 hover:text-white transition-colors">ĐÓNG X</button>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <form onSubmit={handleSaveEp} className="space-y-3 bg-[#0b0c10] p-4 rounded-xl border border-gray-800">
@@ -167,7 +217,6 @@ export default function SuperAdmin() {
       {/* KHU VỰC DANH SÁCH PHIM TỔNG HỢP VÀ TÌM KIẾM */}
       <div className="bg-[#151720] rounded-2xl border border-gray-800 overflow-hidden">
         
-        {/* 🔥 THANH TÌM KIẾM PHIM VÀ TIÊU ĐỀ */}
         <div className="bg-gray-900/80 p-5 border-b border-gray-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h2 className="text-xl font-black text-white">KHO PHIM TỔNG HỢP <span className="text-cyan-400 text-sm ml-2">({filteredMovies.length} phim)</span></h2>
           
