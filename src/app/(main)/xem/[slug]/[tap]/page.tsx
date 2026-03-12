@@ -1,13 +1,14 @@
 // File: src/app/(main)/xem/[slug]/[tap]/page.tsx
 'use client';
 
+// Lớp khiên bảo vệ TypeScript cho Facebook Comment
 declare global { interface Window { FB: any; } }
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
 import { runMMO } from '@/lib/mmo';
-import { Share2, MessageCircle, Heart, Eye } from 'lucide-react';
+import { Share2, MessageCircle, Heart, Eye, Info } from 'lucide-react';
 
 export default function PlayerPage() {
   const router = useRouter();
@@ -31,10 +32,10 @@ export default function PlayerPage() {
         if (setObj) setAff({ enabled: setObj.is_enabled, ratio: setObj.ratio, link: setObj.affiliate_link, cooldown: setObj.cooldown || 0, maxJumps: setObj.max_jumps || 0 });
 
         const { data: mov } = await supabase.from('movies').select('*').eq('slug', slug).single();
-        if (!mov) { setLoading(false); return; }
+        if (!mov) { setLoading(false); return; } // Bảo vệ chống lỗi Null
         setMovie(mov);
 
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && mov?.id) {
           if (!sessionStorage.getItem(`viewed_${mov.id}`)) {
             await supabase.from('movies').update({ views: (mov.views || 0) + 1 }).eq('id', mov.id);
             sessionStorage.setItem(`viewed_${mov.id}`, 'true');
@@ -57,6 +58,7 @@ export default function PlayerPage() {
     };
     fetchData();
 
+    // Thuật toán nhúng Facebook Comment chống trắng trang
     if (typeof window !== 'undefined') {
       const initFacebook = () => {
         if (window.FB) window.FB.XFBML.parse();
@@ -89,18 +91,18 @@ export default function PlayerPage() {
   const currentUrl = typeof window !== 'undefined' ? window.location.href : `https://xemphimhh3d.com/xem/${slug}`;
 
   return (
-    // 🔥 SỬ DỤNG CSS GRID ĐỂ TỰ ĐỘNG ĐẢO VỊ TRÍ TRÊN MOBILE
-    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-5 mt-4 pb-10">
+    // 🔥 CSS GRID MA THUẬT: TỰ ĐỘNG XẾP CHỖ (Mobile dọc, PC chia 2 cột)
+    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-5 mt-4 pb-12 max-w-[1100px] mx-auto px-2 sm:px-4 lg:px-0">
       
-      {/* KHỐI 1: PLAYER & SERVER (Nằm trên cùng) */}
-      <div className="order-1 lg:col-span-9 space-y-3">
-        {/* Tiêu đề thu nhỏ lại */}
-        <div className="flex items-center gap-2 mb-2">
+      {/* 🎬 KHỐI 1: KHUNG PLAYER & SERVER (Luôn nằm trên cùng) */}
+      <div className="lg:col-span-9 space-y-3">
+        {/* Tiêu đề gọn gàng */}
+        <div className="flex items-center gap-2 mb-1">
           <h1 className="text-lg lg:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 uppercase tracking-tighter">{movie?.title}</h1>
           <span className="bg-red-600 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold text-white shadow-[0_0_10px_rgba(239,68,68,0.5)] whitespace-nowrap">Tập {tap}</span>
         </div>
 
-        {/* Khung Player */}
+        {/* Màn hình chiếu phim */}
         <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border border-gray-800">
            {videoUrl ? (
              <iframe src={videoUrl} allowFullScreen className="absolute inset-0 w-full h-full border-0" scrolling="no"></iframe>
@@ -109,7 +111,7 @@ export default function PlayerPage() {
            )}
         </div>
 
-        {/* Khung Server & Tool (Thu nhỏ nút và padding) */}
+        {/* Thanh công cụ Server & Lưu phim */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#151720] p-2.5 rounded-lg border border-gray-800 shadow-lg">
           <div className="flex flex-wrap gap-1.5">
             {[1, 2, 3].map((n) => (
@@ -118,10 +120,9 @@ export default function PlayerPage() {
               </button>
             ))}
           </div>
-          
           <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
             <button onClick={handleSaveMovie} className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all border ${isSaved ? 'bg-pink-600/20 text-pink-500 border-pink-500/30 hover:bg-pink-600 hover:text-white' : 'bg-gray-800 text-gray-400 border-gray-700 hover:bg-pink-600/20 hover:text-pink-500'}`}>
-              <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} /> {isSaved ? 'Đã Lưu' : 'Lưu Phim'}
+              <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} /> {isSaved ? 'Đã Lưu' : 'Lưu'}
             </button>
             <button onClick={() => {navigator.clipboard.writeText(window.location.href); alert('Đã copy Link phim!')}} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all border border-blue-600/30">
               <Share2 className="w-3.5 h-3.5" /> Chia sẻ
@@ -130,13 +131,13 @@ export default function PlayerPage() {
         </div>
       </div>
       
-      {/* KHỐI 2: CHỌN TẬP PHIM (Mobile: Ở GIỮA | PC: Ở BÊN PHẢI) */}
-      <div className="order-2 lg:col-span-3 lg:row-span-2">
-        <div className="bg-[#151720] p-3 lg:p-4 rounded-lg border border-gray-800 shadow-xl sticky top-20">
+      {/* 📺 KHỐI 2: CHỌN TẬP PHIM (Mobile: Nằm ngay dưới Server | PC: Nằm bên phải kéo dài) */}
+      <div className="lg:col-span-3 lg:row-span-3">
+        <div className="bg-[#151720] p-3 lg:p-4 rounded-lg border border-gray-800 shadow-xl lg:sticky lg:top-20">
           <div className="flex items-center gap-2 mb-3 border-b border-gray-800 pb-2">
             <div className="w-1 h-4 bg-cyan-500"></div><h2 className="text-base font-bold text-white uppercase italic">Chọn Tập</h2>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 max-h-[250px] lg:max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
             {episodes.map(ep => (
               <button key={ep?.id} onClick={() => handleAction(() => router.push(`/xem/${slug}/${ep?.episode_number}`))} className={`py-1.5 rounded font-black text-[10px] md:text-xs transition-all ${tap === ep?.episode_number ? 'bg-cyan-500 text-white shadow-[0_0_10px_rgba(34,211,238,0.5)] scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'}`}>
                 {ep?.episode_number}
@@ -146,11 +147,40 @@ export default function PlayerPage() {
         </div>
       </div>
 
-      {/* KHỐI 3: BÌNH LUẬN (Nằm dưới cùng bên trái) */}
-      <div className="order-3 lg:col-span-9">
-        <div className="bg-[#151720] p-3 lg:p-4 rounded-lg border border-gray-800 shadow-lg mt-2 lg:mt-0">
+      {/* ℹ️ KHỐI 3: THÔNG TIN PHIM MỚI THÊM VÀO */}
+      <div className="lg:col-span-9">
+        <div className="bg-[#151720] p-3 lg:p-4 rounded-lg border border-gray-800 shadow-lg flex flex-col sm:flex-row gap-4">
+          {/* Ảnh bìa */}
+          <div className="w-24 h-32 sm:w-28 sm:h-40 shrink-0 rounded-lg overflow-hidden border border-gray-700 shadow-md mx-auto sm:mx-0">
+            <img src={movie?.thumbnail_url} alt={movie?.title} className="w-full h-full object-cover" />
+          </div>
+          
+          {/* Nội dung thông tin */}
+          <div className="flex-1 space-y-2.5 text-center sm:text-left">
+            <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight">{movie?.title}</h2>
+            
+            {/* Các thẻ Tag */}
+            <div className="flex flex-wrap justify-center sm:justify-start gap-2 text-[10px] sm:text-xs font-bold">
+              <span className="bg-red-600/20 text-red-500 px-2 py-1 rounded border border-red-500/30">🔥 {movie?.status || 'Đang cập nhật'}</span>
+              <span className="bg-cyan-600/20 text-cyan-400 px-2 py-1 rounded border border-cyan-500/30">🎬 {movie?.genre || 'Chưa phân loại'}</span>
+              <span className="bg-green-600/20 text-green-400 px-2 py-1 rounded border border-green-500/30">📅 {movie?.day_of_week || 'Chưa xếp lịch'}</span>
+            </div>
+            
+            {/* Tóm tắt */}
+            <p className="text-gray-400 text-[11px] sm:text-xs leading-relaxed mt-2">
+              Phim <strong className="text-gray-200">{movie?.title}</strong> thuộc thể loại <strong className="text-cyan-400">{movie?.genre}</strong>. 
+              Tác phẩm hiện đang ở trạng thái <strong>{movie?.status}</strong> và được hệ thống XEMPHIMHH3D cập nhật tập mới vào <strong>{movie?.day_of_week}</strong> hàng tuần. 
+              Mời quý đạo hữu cùng thưởng thức!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* 💬 KHỐI 4: BÌNH LUẬN (Luôn nằm dưới cùng) */}
+      <div className="lg:col-span-9">
+        <div className="bg-[#151720] p-3 lg:p-4 rounded-lg border border-gray-800 shadow-lg">
           <div className="flex items-center justify-between mb-4 border-b border-gray-800 pb-2">
-            <div className="flex items-center gap-2"><MessageCircle className="w-5 h-5 text-cyan-400" /><h2 className="text-base font-bold text-white uppercase">Bình luận</h2></div>
+            <div className="flex items-center gap-2"><MessageCircle className="w-4 h-4 text-cyan-400" /><h2 className="text-sm font-bold text-white uppercase">Bình luận</h2></div>
             <div className="text-gray-400 text-[10px] md:text-xs flex items-center gap-1"><Eye className="w-3.5 h-3.5 text-cyan-500"/> {movie?.views || 0} lượt xem</div>
           </div>
           <div className="bg-white rounded p-1.5 min-h-[100px] flex items-center justify-center relative">
