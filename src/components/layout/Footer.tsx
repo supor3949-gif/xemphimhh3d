@@ -28,7 +28,7 @@ export default function Footer() {
         <div>
           <h3 className="text-white font-black mb-4 uppercase text-sm border-l-2 border-cyan-500 pl-2">DMCA & Bản Quyền</h3>
           <p className="text-gray-500 text-[11px] leading-relaxed text-justify">
-            Trang web này cung cấp nội dung giải trí và KHÔNG lưu trữ bất kỳ tệp tin video nào trên máy chủ của chúng tôi. Mọi nội dung đều được thu thập từ các nguồn công khai chia sẻ trên internet. Nếu có vấn đề về bản quyền, vui lòng liên hệ email: contact@xemphimhh3d.com để được gỡ bỏ ngay lập tức.
+            Trang web này cung cấp nội dung giải trí và KHÔNG lưu trữ bất kỳ tệp tin video nào trên máy chủ của chúng tôi. Mọi nội dung đều được thu thập từ các nguồn công khai chia sẻ trên internet. Nếu có vấn đề về bản quyền, vui lòng liên hệ qua Telegram: <a href="https://t.me/phimhh3d" target="_blank" rel="noopener noreferrer" className="text-cyan-400 font-bold hover:text-cyan-300 hover:underline">@phimhh3d</a> để được xử lý ngay lập tức..
           </p>
         </div>
       </div>
