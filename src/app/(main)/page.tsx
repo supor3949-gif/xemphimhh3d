@@ -4,23 +4,29 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import MovieCard from "@/components/ui/MovieCard";
 import { Calendar, TrendingUp, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { runMMO } from '@/lib/mmo';
 
 export default function HomePage() {
+  const router = useRouter();
   const [movieList, setMovieList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [aff, setAff] = useState({ enabled: false, ratio: 0, link: '' });
 
-  // Biến cho phần Lịch Chiếu
-  const [activeDay, setActiveDay] = useState('Thứ 2');
-  const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+  // Danh sách ngày kèm tiếng Anh cho giống ảnh mẫu của em
+  const daysOfWeek = [
+    { vi: 'Thứ 2', en: 'Monday' }, { vi: 'Thứ 3', en: 'Tuesday' },
+    { vi: 'Thứ 4', en: 'Wednesday' }, { vi: 'Thứ 5', en: 'Thursday' },
+    { vi: 'Thứ 6', en: 'Friday' }, { vi: 'Thứ 7', en: 'Saturday' },
+    { vi: 'Chủ nhật', en: 'Sunday' }
+  ];
+  const [activeDay, setActiveDay] = useState('Thứ 7'); // Mặc định chọn Thứ 7
 
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Lấy cấu hình MMO
       const { data: setObj } = await supabase.from('settings').select('*').eq('id', 1).single();
       if (setObj) setAff({ enabled: setObj.is_enabled, ratio: setObj.ratio, link: setObj.affiliate_link });
 
-      // 2. Lấy danh sách phim
       const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
       if (data) setMovieList(data);
       setLoading(false);
@@ -31,96 +37,115 @@ export default function HomePage() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center p-20 text-cyan-400">
       <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="font-bold animate-pulse uppercase tracking-widest">Đang tải kho phim...</p>
+      <p className="font-bold animate-pulse uppercase tracking-widest">Đang tải giao diện...</p>
     </div>
   );
 
-  // Lọc dữ liệu cho các khu vực
+  // Phân loại Phim
   const topMovies = [...movieList].filter(m => m.rank && m.rank > 0).sort((a, b) => a.rank - b.rank);
   const scheduleMovies = movieList.filter(m => m.day_of_week === activeDay);
 
+  // Hàm click cho Bảng Xếp Hạng
+  const handleClickRank = (slug: string) => {
+    runMMO(aff);
+    router.push(`/xem/${slug}/moi-nhat`);
+  };
+
   return (
-    <div className="space-y-12 pb-20 mt-8">
-
-      {/* KHU VỰC 1: PHIM MỚI CẬP NHẬT */}
-      <section>
-        <div className="flex items-center gap-3 mb-6 border-b border-gray-800 pb-4">
-          <Sparkles className="w-6 h-6 text-cyan-400" />
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Phim Mới Cập Nhật</h2>
-          <span className="bg-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full text-[10px] font-black border border-cyan-500/30 ml-2 uppercase hidden sm:block">
-            {movieList.length} Tác phẩm
-          </span>
-        </div>
+    <div className="flex flex-col lg:flex-row gap-6 mt-8 pb-20">
+      
+      {/* ========================================================
+          CỘT TRÁI: NỘI DUNG CHÍNH (Chiếm 75% màn hình máy tính) 
+          ======================================================== */}
+      <div className="w-full lg:w-[72%] space-y-10">
         
-        {/* Lưới 8 cột Desktop, 3 cột Mobile siêu nhỏ gọn */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
-          {movieList.map((movie) => (
-            <MovieCard 
-              key={movie.id} title={movie.title} image={movie.thumbnail_url} 
-              slug={movie.slug} aff={aff} status={movie.status} views={movie.views}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* KHU VỰC 2: BẢNG XẾP HẠNG (TOP PHIM) */}
-      {topMovies.length > 0 && (
-         <section>
-          <div className="flex items-center gap-3 mb-6 border-b border-gray-800 pb-4">
-            <TrendingUp className="w-6 h-6 text-red-500" />
-            <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Bảng Xếp Hạng</h2>
+        {/* KHU VỰC 1: PHIM MỚI */}
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-black text-white uppercase tracking-tighter border-l-4 border-cyan-500 pl-3">Phim Mới Cập Nhật</h2>
           </div>
-          
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
-            {topMovies.map((movie) => (
-              <div key={movie.id} className="relative mt-3">
-                {/* Con số Top nổi bật */}
-                <div className="absolute -top-3 -left-3 w-8 h-8 bg-red-600 text-white font-black flex items-center justify-center rounded-full z-10 shadow-[0_0_15px_rgba(220,38,38,0.6)] border-2 border-[#0b0c10]">
-                  {movie.rank}
-                </div>
-                <MovieCard 
-                  title={movie.title} image={movie.thumbnail_url} 
-                  slug={movie.slug} aff={aff} status={movie.status} views={movie.views} 
-                />
-              </div>
+          {/* Lưới phim nhỏ gọn: 3 cột Mobile, 4-5 cột Desktop */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+            {movieList.map((movie) => (
+              <MovieCard key={movie.id} title={movie.title} image={movie.thumbnail_url} slug={movie.slug} aff={aff} status={movie.status} views={movie.views} />
             ))}
           </div>
         </section>
-      )}
 
-      {/* KHU VỰC 3: LỊCH CHIẾU PHIM */}
-      <section className="bg-[#151720] p-4 md:p-6 rounded-2xl border border-gray-800 shadow-lg">
-        <div className="flex items-center gap-3 mb-6">
-          <Calendar className="w-6 h-6 text-cyan-400" />
-          <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Lịch Chiếu Trong Tuần</h2>
-        </div>
-        
-        {/* Các nút chọn ngày */}
-        <div className="flex overflow-x-auto pb-4 gap-2 custom-scrollbar mb-6">
-          {days.map(day => (
-            <button 
-              key={day} 
-              onClick={() => setActiveDay(day)}
-              className={`whitespace-nowrap px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${activeDay === day ? 'bg-cyan-600 text-white shadow-[0_0_15px_rgba(34,211,238,0.4)]' : 'bg-[#0b0c10] text-gray-400 hover:text-white border border-gray-800'}`}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
+        {/* KHU VỰC 2: LỊCH PHIM THEO NGÀY */}
+        <section className="bg-[#151720]/50 p-4 rounded-xl border border-gray-800">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-black text-green-400 uppercase tracking-tighter border-l-4 border-green-500 pl-3">Lịch Phim</h2>
+            <span className="bg-gray-800 text-white px-3 py-1 rounded text-xs ml-2">Hôm nay: {activeDay}</span>
+          </div>
+          
+          {/* Thanh Menu Chọn Ngày (Thiết kế giống ảnh) */}
+          <div className="grid grid-cols-4 md:grid-cols-7 gap-2 mb-6">
+            {daysOfWeek.map((dayObj) => (
+              <button 
+                key={dayObj.vi} onClick={() => setActiveDay(dayObj.vi)}
+                className={`flex flex-col items-center justify-center py-2 rounded-lg transition-all ${activeDay === dayObj.vi ? 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(34,211,238,0.4)]' : 'bg-[#0b0c10] text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-800'}`}
+              >
+                <span className="font-bold text-sm">{dayObj.vi}</span>
+                <span className="text-[10px] opacity-70">{dayObj.en}</span>
+              </button>
+            ))}
+          </div>
 
-        {/* Phim theo ngày */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
-          {scheduleMovies.map(movie => (
-            <MovieCard 
-              key={movie.id} title={movie.title} image={movie.thumbnail_url} 
-              slug={movie.slug} aff={aff} status={movie.status} views={movie.views} 
-            />
-          ))}
-          {scheduleMovies.length === 0 && (
-            <div className="col-span-full text-center py-10 text-gray-500 font-medium">Không có phim chiếu {activeDay}</div>
-          )}
-        </div>
-      </section>
+          {/* Lưới phim chiếu trong ngày được chọn */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4">
+            {scheduleMovies.map(movie => (
+              <MovieCard key={movie.id} title={movie.title} image={movie.thumbnail_url} slug={movie.slug} aff={aff} status={movie.status} views={movie.views} />
+            ))}
+            {scheduleMovies.length === 0 && (
+              <div className="col-span-full text-center py-10 text-gray-500 font-medium bg-[#0b0c10] rounded-xl border border-gray-800">
+                Chưa có lịch chiếu cho {activeDay}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* ========================================================
+          CỘT PHẢI: BẢNG XẾP HẠNG (Chiếm 25% màn hình máy tính) 
+          ======================================================== */}
+      <div className="w-full lg:w-[28%]">
+        <section className="bg-[#151720] rounded-xl border border-gray-800 p-4 sticky top-20">
+          <div className="flex items-center mb-6">
+            <h2 className="text-xl font-black text-cyan-400 uppercase tracking-tighter">Bảng Xếp Hạng</h2>
+          </div>
+          
+          {/* Danh sách List dọc chuẩn chỉ */}
+          <div className="flex flex-col gap-3">
+            {topMovies.map((movie, index) => (
+              <div 
+                key={movie.id} 
+                onClick={() => handleClickRank(movie.slug)}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800/80 cursor-pointer transition-colors group"
+              >
+                {/* Số thứ tự (Top 1, 2, 3 đổi màu) */}
+                <span className={`text-2xl font-black w-6 text-center ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-orange-500' : 'text-gray-600'}`}>
+                  {movie.rank}
+                </span>
+                
+                {/* Ảnh thumbnail mini */}
+                <div className="w-12 h-16 shrink-0 overflow-hidden rounded relative border border-gray-700">
+                  <img src={movie.thumbnail_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" alt={movie.title} />
+                </div>
+                
+                {/* Tên phim và Trạng thái */}
+                <div className="flex flex-col flex-1">
+                  <h4 className="text-white text-sm font-bold line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                    {movie.title}
+                  </h4>
+                  <span className="text-[10px] text-gray-500 mt-1">{movie.status}</span>
+                </div>
+              </div>
+            ))}
+            {topMovies.length === 0 && <p className="text-gray-500 text-sm text-center">Đang cập nhật...</p>}
+          </div>
+        </section>
+      </div>
 
     </div>
   );
