@@ -2,50 +2,54 @@
 'use client';
 import Link from 'next/link';
 import { runMMO } from '@/lib/mmo';
-import { Eye } from 'lucide-react';
+import { Eye, PlayCircle } from 'lucide-react';
 
 export default function MovieCard({ title, image, slug, aff, status, views }: any) {
   return (
-    <div 
-      onClick={() => runMMO(aff)} 
-      // Gắn thuộc tính title để khi rê chuột vào sẽ hiện full tên phim (Tooltip mặc định siêu an toàn)
-      title={title} 
-      className="relative group overflow-hidden rounded-lg cursor-pointer bg-[#151720] border border-transparent hover:border-cyan-500/50 transition-all duration-300 shadow-lg"
-    >
+    <div onClick={() => runMMO(aff)} title={title} className="cursor-pointer group">
       <Link href={`/xem/${slug}/moi-nhat`} className="block">
-        {/* Khung ảnh tỷ lệ dọc (Poster chuẩn) */}
-        <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-900">
+        
+        {/* ==================== KHUNG ẢNH POSTER ==================== */}
+        {/* Khi hover: Viền sáng lên + Đổ bóng cyan rực rỡ (Đèn nháy) */}
+        <div className="relative aspect-[2/3] w-full rounded-xl overflow-hidden bg-gray-900 border-2 border-transparent group-hover:border-cyan-400 transition-all duration-300 group-hover:shadow-[0_0_25px_rgba(34,211,238,0.7)]">
           <img 
             src={image} 
             alt={title} 
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             loading="lazy"
           />
           
-          {/* Lớp phủ đen Gradient từ dưới lên (Dày hơn một chút để chữ nổi bật) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c10] via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300"></div>
+          {/* Lớp phủ đen mờ nhẹ ở góc để làm nổi tag */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/30"></div>
 
-          {/* 🏷️ Tag Trạng Thái (VD: Tập 15) - Góc trái trên */}
+          {/* 🏷️ Tag Trạng Thái - Góc trái trên */}
           {status && (
-            <div className="absolute top-1.5 left-1.5 bg-red-600 text-white text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded shadow-[0_0_10px_rgba(220,38,38,0.8)] z-10 tracking-wider">
+            <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded shadow-lg z-20 tracking-wider">
               {status}
             </div>
           )}
 
           {/* 👁️ Tag Lượt Xem - Góc phải trên */}
-          <div className="absolute top-1.5 right-1.5 bg-black/60 backdrop-blur-md text-cyan-400 text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded flex items-center gap-1 z-10 border border-cyan-500/20">
+          <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-cyan-400 text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded flex items-center gap-1 z-20 border border-cyan-500/20">
             <Eye className="w-3 h-3" />
             {views || 0}
           </div>
 
-          {/* 📝 Tên Phim (Đã xóa dòng Vietsub) */}
-          <div className="absolute bottom-0 left-0 w-full p-2 sm:p-2.5 z-10">
-            <h3 className="text-white font-bold text-[11px] sm:text-xs leading-snug line-clamp-2 group-hover:text-cyan-400 transition-colors drop-shadow-md">
-              {title}
-            </h3>
-            {/* Đã tháo gỡ hoàn toàn đoạn <p> chứa dòng chữ Vietsub thừa thãi */}
+          {/* 🔥🔥🔥 LỚP PHỦ "XEM NGAY" KHI HOVER 🔥🔥🔥 */}
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-30 backdrop-blur-[1px]">
+             <div className="bg-red-600 text-white font-black uppercase px-4 py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(220,38,38,0.8)] transform scale-90 group-hover:scale-100 transition-transform duration-300 tracking-widest text-xs sm:text-sm">
+               <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5" /> XEM NGAY
+             </div>
           </div>
         </div>
+
+        {/* ==================== TÊN PHIM (NẰM NGOÀI ẢNH) ==================== */}
+        <div className="mt-2.5 text-center sm:text-left px-0.5">
+          <h3 className="text-gray-200 font-bold text-[11px] sm:text-xs leading-tight line-clamp-2 group-hover:text-cyan-400 transition-colors duration-300">
+            {title}
+          </h3>
+        </div>
+
       </Link>
     </div>
   );
