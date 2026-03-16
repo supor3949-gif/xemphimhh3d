@@ -1,4 +1,3 @@
-// File: src/app/quan-ly-bi-mat-999/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -36,8 +35,8 @@ export default function SuperAdmin() {
     fetchMovies(); fetchSettings(); fetchCommentsCount();
   }, []);
 
-  // Sắp xếp mặc định trên Admin theo updated_at cho dễ quản lý
-  const fetchMovies = async () => { const { data } = await supabase.from('movies').select('*').order('updated_at', { ascending: false }); if (data) setMovieList(data); };
+  // Đã trả lại created_at để không bị lỗi ẩn phim
+  const fetchMovies = async () => { const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false }); if (data) setMovieList(data); };
   const fetchSettings = async () => { const { data } = await supabase.from('settings').select('*').eq('id', 1).single(); if (data) { setAffEnabled(data.is_enabled); setAffRatio(data.ratio); setAffLink(data.affiliate_link); setAffCooldown(data.cooldown || 0); setAffMaxJumps(data.max_jumps || 0); } };
   const fetchEps = async (mId: string) => { const { data } = await supabase.from('episodes').select('*').eq('movie_id', mId); if (data) setEpisodes(data.sort((a, b) => Number(b.episode_number) - Number(a.episode_number))); };
   
@@ -58,8 +57,8 @@ export default function SuperAdmin() {
     e.preventDefault();
     const slug = movieForm.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/ /g, '-').replace(/[^\w-]+/g, '');
     
-    // Tự động set updated_at khi lưu phim
-    const payload = { ...movieForm, slug, rank: parseInt(movieForm.rank), updated_at: new Date().toISOString() };
+    // Đã xóa updated_at để tránh lỗi Supabase
+    const payload = { ...movieForm, slug, rank: parseInt(movieForm.rank) };
     
     if (editingMovieId) { await supabase.from('movies').update(payload).eq('id', editingMovieId); alert("✅ Đã cập nhật!"); } 
     else { await supabase.from('movies').insert([payload]); alert("🎉 Thêm mới thành công!"); }
@@ -73,12 +72,8 @@ export default function SuperAdmin() {
     if (epForm.id) { await supabase.from('episodes').update(payload).eq('id', epForm.id); alert("✅ Cập nhật xong!"); } 
     else { await supabase.from('episodes').insert([payload]); alert("🎉 Thêm tập xong!"); }
     
-    // 🔥 AUTO BUMP: Tự động cập nhật 'updated_at' của Phim để nhảy lên Top 1 trang chủ
-    await supabase.from('movies').update({ updated_at: new Date().toISOString() }).eq('id', selectedMovie.id);
-    
     setEpForm({ id: '', ep: '', sv1: '', sv2: '', sv3: '' }); 
     fetchEps(selectedMovie.id);
-    fetchMovies(); // Refresh lại list phim để thấy nó lên top
   };
 
   const handleSaveAffiliate = async () => {
@@ -174,7 +169,6 @@ export default function SuperAdmin() {
             <div className="space-y-4">
               <div className="flex justify-between bg-[#0b0c10] p-3 rounded-xl border border-gray-800"><span>Trạng thái:</span><button onClick={() => setAffEnabled(!affEnabled)} className={`px-3 py-1 rounded font-bold text-xs ${affEnabled ? 'bg-green-500' : 'bg-red-500'}`}>{affEnabled ? 'BẬT' : 'TẮT'}</button></div>
               
-              {/* 🔥 ĐỔI THÀNH TEXTAREA ĐỂ NHẬP NHIỀU LINK */}
               <textarea 
                 rows={4}
                 value={affLink} 

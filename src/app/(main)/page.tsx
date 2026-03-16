@@ -1,4 +1,3 @@
-// File: src/app/(main)/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -30,8 +29,8 @@ export default function HomePage() {
       const { data: setObj } = await supabase.from('settings').select('*').eq('id', 1).single();
       if (setObj) setAff({ enabled: setObj.is_enabled, ratio: setObj.ratio, link: setObj.affiliate_link });
       
-      // 🔥 ĐỔI SANG XẾP THEO UPDATED_AT ĐỂ PHIM NÀO VỪA THÊM TẬP SẼ LÊN ĐẦU
-      const { data } = await supabase.from('movies').select('*').order('updated_at', { ascending: false });
+      // Đã trả lại created_at để phim hiện ra bình thường
+      const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
       
       if (data) setMovieList(data);
       setLoading(false);
