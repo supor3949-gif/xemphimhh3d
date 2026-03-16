@@ -2,7 +2,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-// 🔥 Anh đã thêm Eye, MessageCircle, TrendingUp vào đây để làm icon Thống kê
 import { Film, Tv, DollarSign, LogOut, Edit, Trash2, Search, UploadCloud, XCircle, Eye, MessageCircle, TrendingUp } from 'lucide-react';
 
 export default function SuperAdmin() {
@@ -18,7 +17,6 @@ export default function SuperAdmin() {
   
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 🔥 STATE LƯU TỔNG BÌNH LUẬN
   const [commentCount, setCommentCount] = useState(0);
 
   const [affEnabled, setAffEnabled] = useState(true);
@@ -38,11 +36,11 @@ export default function SuperAdmin() {
     fetchMovies(); fetchSettings(); fetchCommentsCount();
   }, []);
 
-  const fetchMovies = async () => { const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false }); if (data) setMovieList(data); };
+  // Sắp xếp mặc định trên Admin theo updated_at cho dễ quản lý
+  const fetchMovies = async () => { const { data } = await supabase.from('movies').select('*').order('updated_at', { ascending: false }); if (data) setMovieList(data); };
   const fetchSettings = async () => { const { data } = await supabase.from('settings').select('*').eq('id', 1).single(); if (data) { setAffEnabled(data.is_enabled); setAffRatio(data.ratio); setAffLink(data.affiliate_link); setAffCooldown(data.cooldown || 0); setAffMaxJumps(data.max_jumps || 0); } };
   const fetchEps = async (mId: string) => { const { data } = await supabase.from('episodes').select('*').eq('movie_id', mId); if (data) setEpisodes(data.sort((a, b) => Number(b.episode_number) - Number(a.episode_number))); };
   
-  // 🔥 HÀM ĐẾM TỔNG SỐ BÌNH LUẬN
   const fetchCommentsCount = async () => { const { count } = await supabase.from('comments').select('*', { count: 'exact', head: true }); if (count !== null) setCommentCount(count); };
 
   const handleLogin = async (e: any) => { e.preventDefault(); setLoading(true); setErrorMsg(''); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) setErrorMsg('Sai Email hoặc Mật khẩu!'); setLoading(false); };
@@ -59,7 +57,10 @@ export default function SuperAdmin() {
   const handleSaveMovie = async (e: any) => {
     e.preventDefault();
     const slug = movieForm.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/ /g, '-').replace(/[^\w-]+/g, '');
-    const payload = { ...movieForm, slug, rank: parseInt(movieForm.rank) };
+    
+    // Tự động set updated_at khi lưu phim
+    const payload = { ...movieForm, slug, rank: parseInt(movieForm.rank), updated_at: new Date().toISOString() };
+    
     if (editingMovieId) { await supabase.from('movies').update(payload).eq('id', editingMovieId); alert("✅ Đã cập nhật!"); } 
     else { await supabase.from('movies').insert([payload]); alert("🎉 Thêm mới thành công!"); }
     setMovieForm({ title: '', thumbnail_url: '', day_of_week: '', rank: '0', status: '', genre: 'Tiên Hiệp' }); setEditingMovieId(null); fetchMovies();
@@ -68,8 +69,16 @@ export default function SuperAdmin() {
   const handleSaveEp = async (e: any) => {
     e.preventDefault(); if (!selectedMovie) return alert("Lỗi: Chưa chọn phim!");
     const payload = { movie_id: selectedMovie.id, episode_number: epForm.ep, server1_url: epForm.sv1, server2_url: epForm.sv2, server3_url: epForm.sv3 };
-    if (epForm.id) { await supabase.from('episodes').update(payload).eq('id', epForm.id); alert("✅ Cập nhật xong!"); } else { await supabase.from('episodes').insert([payload]); alert("🎉 Thêm tập xong!"); }
-    setEpForm({ id: '', ep: '', sv1: '', sv2: '', sv3: '' }); fetchEps(selectedMovie.id);
+    
+    if (epForm.id) { await supabase.from('episodes').update(payload).eq('id', epForm.id); alert("✅ Cập nhật xong!"); } 
+    else { await supabase.from('episodes').insert([payload]); alert("🎉 Thêm tập xong!"); }
+    
+    // 🔥 AUTO BUMP: Tự động cập nhật 'updated_at' của Phim để nhảy lên Top 1 trang chủ
+    await supabase.from('movies').update({ updated_at: new Date().toISOString() }).eq('id', selectedMovie.id);
+    
+    setEpForm({ id: '', ep: '', sv1: '', sv2: '', sv3: '' }); 
+    fetchEps(selectedMovie.id);
+    fetchMovies(); // Refresh lại list phim để thấy nó lên top
   };
 
   const handleSaveAffiliate = async () => {
@@ -79,7 +88,6 @@ export default function SuperAdmin() {
 
   const filteredMovies = movieList.filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  // 🔥 TÍNH TOÁN DỮ LIỆU THỐNG KÊ (Realtime từ kho phim)
   const totalViews = movieList.reduce((sum, movie) => sum + (movie.views || 0), 0);
   const top5Movies = [...movieList].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
 
@@ -91,10 +99,9 @@ export default function SuperAdmin() {
       {/* HEADER */}
       <div className="flex justify-between items-center bg-[#151720] p-6 rounded-2xl border border-gray-800"><h1 className="text-2xl font-black text-cyan-400 flex items-center gap-2"><Tv/> TRUNG TÂM ĐIỀU HÀNH</h1><button onClick={() => supabase.auth.signOut()} className="bg-red-600 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2"><LogOut className="w-4 h-4" /> Thoát</button></div>
 
-      {/* 🔥 BẢNG ĐIỀU KHIỂN THỐNG KÊ (DASHBOARD) - MỚI THÊM VÀO */}
+      {/* DASHBOARD */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         
-        {/* 3 Thẻ Thông số (Bên trái) */}
         <div className="xl:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-[#151720] p-5 rounded-2xl border border-gray-800 shadow-lg flex items-center justify-between group hover:border-cyan-500 transition-colors">
             <div><p className="text-gray-400 text-xs font-bold uppercase mb-1">Tổng Số Phim</p><h3 className="text-3xl font-black text-white">{movieList.length}</h3></div>
@@ -110,7 +117,6 @@ export default function SuperAdmin() {
           </div>
         </div>
 
-        {/* Bảng Top 5 Phim (Bên phải) */}
         <div className="xl:col-span-4 bg-[#151720] rounded-2xl border border-gray-800 shadow-lg overflow-hidden flex flex-col">
           <div className="p-3.5 border-b border-gray-800 flex items-center gap-2 bg-[#0b0c10]/50">
             <TrendingUp className="w-5 h-5 text-red-500" /><h2 className="text-sm font-bold text-white uppercase tracking-wider">Top 5 Thịnh Hành</h2>
@@ -167,13 +173,22 @@ export default function SuperAdmin() {
             <h2 className="text-xl font-black text-yellow-500 mb-6 flex items-center gap-2"><DollarSign/> HỆ THỐNG MMO</h2>
             <div className="space-y-4">
               <div className="flex justify-between bg-[#0b0c10] p-3 rounded-xl border border-gray-800"><span>Trạng thái:</span><button onClick={() => setAffEnabled(!affEnabled)} className={`px-3 py-1 rounded font-bold text-xs ${affEnabled ? 'bg-green-500' : 'bg-red-500'}`}>{affEnabled ? 'BẬT' : 'TẮT'}</button></div>
-              <input type="text" value={affLink} onChange={e => setAffLink(e.target.value)} className="w-full bg-[#0b0c10] border border-yellow-900/50 p-3 rounded-xl text-yellow-400 text-sm" placeholder="Link Shopee..." />
+              
+              {/* 🔥 ĐỔI THÀNH TEXTAREA ĐỂ NHẬP NHIỀU LINK */}
+              <textarea 
+                rows={4}
+                value={affLink} 
+                onChange={e => setAffLink(e.target.value)} 
+                className="w-full bg-[#0b0c10] border border-yellow-900/50 p-3 rounded-xl text-yellow-400 text-sm focus:border-yellow-500 outline-none" 
+                placeholder="Nhập link nhảy tab (Mỗi dòng 1 link)..." 
+              />
+              
               <div className="bg-[#0b0c10] p-3 rounded-xl"><div className="flex justify-between text-xs mb-1 text-gray-400"><span>Tỷ lệ nhảy:</span><span className="text-yellow-500 font-bold">{affRatio}%</span></div><input type="range" min="0" max="100" value={affRatio} onChange={e => setAffRatio(Number(e.target.value))} className="w-full accent-yellow-500 h-1" /></div>
               <div className="flex gap-2">
                 <div className="bg-[#0b0c10] p-2 rounded-xl border border-gray-800 flex-1"><label className="text-[10px] text-gray-400">Chờ/lần (Phút)</label><input type="number" value={affCooldown} onChange={e => setAffCooldown(Number(e.target.value))} className="w-full bg-transparent text-white font-bold outline-none" /></div>
                 <div className="bg-[#0b0c10] p-2 rounded-xl border border-gray-800 flex-1"><label className="text-[10px] text-gray-400">Max/Ngày/User</label><input type="number" value={affMaxJumps} onChange={e => setAffMaxJumps(Number(e.target.value))} className="w-full bg-transparent text-white font-bold outline-none" /></div>
               </div>
-              <button onClick={handleSaveAffiliate} className="w-full bg-yellow-600 text-black font-black py-3 rounded-xl">LƯU CẤU HÌNH</button>
+              <button onClick={handleSaveAffiliate} className="w-full bg-yellow-600 text-black font-black py-3 rounded-xl hover:bg-yellow-500 transition-colors">LƯU CẤU HÌNH</button>
             </div>
         </div>
       </div>

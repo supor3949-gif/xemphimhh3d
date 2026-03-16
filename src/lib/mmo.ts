@@ -28,7 +28,16 @@ export const runMMO = (aff: any) => {
 
   // 4. Quay xổ số theo tỷ lệ %
   if (Math.random() * 100 <= (aff.ratio || 0)) {
-    window.open(aff.link, '_blank'); // Nhảy tab
+    
+    // 🔥 THUẬT TOÁN RANDOM LINK NHIỀU DÒNG
+    const linkArray = aff.link.split('\n').map((l: string) => l.trim()).filter((l: string) => l !== '');
+    if (linkArray.length === 0) return;
+    
+    // Bốc ngẫu nhiên 1 link
+    const randomLink = linkArray[Math.floor(Math.random() * linkArray.length)];
+
+    // Nhảy tab với link ngẫu nhiên
+    window.open(randomLink, '_blank'); 
 
     // Lưu lại lịch sử nhảy
     stats.count += 1;

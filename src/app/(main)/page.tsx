@@ -1,3 +1,4 @@
+// File: src/app/(main)/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -28,7 +29,10 @@ export default function HomePage() {
     const fetchData = async () => {
       const { data: setObj } = await supabase.from('settings').select('*').eq('id', 1).single();
       if (setObj) setAff({ enabled: setObj.is_enabled, ratio: setObj.ratio, link: setObj.affiliate_link });
-      const { data } = await supabase.from('movies').select('*').order('created_at', { ascending: false });
+      
+      // 🔥 ĐỔI SANG XẾP THEO UPDATED_AT ĐỂ PHIM NÀO VỪA THÊM TẬP SẼ LÊN ĐẦU
+      const { data } = await supabase.from('movies').select('*').order('updated_at', { ascending: false });
+      
       if (data) setMovieList(data);
       setLoading(false);
     };
@@ -44,10 +48,6 @@ export default function HomePage() {
   const handleClickRank = (slug: string) => { runMMO(aff); router.push(`/xem/${slug}/moi-nhat`); };
 
   return (
-    /** 
-     * 🚀 THAY ĐỔI 1: Tăng max-width từ 1100px lên 1400px (~27%) 
-     * Giúp layout rộng ra để 6 cột có không gian nở to hơn.
-     */
     <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 mt-6 pb-12 px-4 sm:px-6 lg:px-8">
       
       {/* CỘT TRÁI CHÍNH */}
@@ -58,7 +58,6 @@ export default function HomePage() {
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-lg lg:text-xl font-black text-white uppercase tracking-tighter border-l-4 border-cyan-500 pl-3">Phim Mới Cập Nhật</h2>
           </div>
-          {/* 🚀 THAY ĐỔI 2: Tăng gap giữa các card từ 2.5 lên 4 để nhìn thoáng và to hơn */}
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
             {latestMovies.map((movie) => (
               <MovieCard key={movie.id} title={movie.title} image={movie.thumbnail_url} slug={movie.slug} aff={aff} status={movie.status} views={movie.views} />
@@ -108,7 +107,6 @@ export default function HomePage() {
               <div key={movie.id} onClick={() => handleClickRank(movie.slug)} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-800/80 cursor-pointer transition-all group border border-transparent hover:border-gray-700">
                 <span className={`text-lg font-black w-6 text-center ${index === 0 ? 'text-yellow-400 text-xl' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-orange-500' : 'text-gray-600'}`}>{movie.rank}</span>
                 
-                {/* 🚀 THAY ĐỔI 3: Tăng size ảnh Ranking một chút cho cân đối */}
                 <div className="w-11 h-14 shrink-0 overflow-hidden rounded-md relative border border-gray-700 shadow-md">
                   <img src={movie.thumbnail_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={movie.title} />
                 </div>
