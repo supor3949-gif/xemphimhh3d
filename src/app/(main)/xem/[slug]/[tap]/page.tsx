@@ -250,7 +250,7 @@ export default function PlayerPage() {
               <MessageCircle className="w-5 h-5 text-cyan-400" />
               <h2 className="text-sm md:text-base font-bold text-white uppercase tracking-wider">Bình luận ({comments.length})</h2>
             </div>
-            <div className="text-gray-400 text-[10px] md:text-xs flex items-center gap-1"><Eye className="w-3.5 h-3.5 text-cyan-500"/> {movie?.views || 0} lượt xem</div>
+            
           </div>
 
           <form onSubmit={handleSubmitComment} className="mb-6 bg-[#0b0c10] p-3 rounded-lg border border-gray-800 shadow-inner">
