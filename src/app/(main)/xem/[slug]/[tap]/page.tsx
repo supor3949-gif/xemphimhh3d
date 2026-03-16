@@ -13,12 +13,15 @@ export default function PlayerPage() {
   const router = useRouter();
   const params = useParams();
   const slug = params?.slug as string;
-  const tap = params?.tap as string;
+  const initialTap = params?.tap as string;
+
+  // 🔥 THÊM STATE ĐỂ GIỮ TẬP ĐANG XEM MÀ KHÔNG CẦN RELOAD TRANG
+  const [activeTap, setActiveTap] = useState(initialTap);
+  const [currentEpData, setCurrentEpData] = useState<any>(null);
 
   const [activeServer, setActiveServer] = useState(1);
   const [movie, setMovie] = useState<any>(null);
   const [episodes, setEpisodes] = useState<any[]>([]);
-  const [currentEpData, setCurrentEpData] = useState<any>(null);
   const [aff, setAff] = useState({ enabled: true, ratio: 50, link: '', cooldown: 0, maxJumps: 0 });
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
@@ -30,7 +33,7 @@ export default function PlayerPage() {
   const [isNameLocked, setIsNameLocked] = useState(false);
 
   useEffect(() => {
-    if (!slug || !tap) return; 
+    if (!slug || !initialTap) return; 
 
     const savedName = localStorage.getItem('hh3d_username');
     if (savedName) { setCommentName(savedName); setIsNameLocked(true); }
@@ -60,8 +63,14 @@ export default function PlayerPage() {
              return numB - numA; 
           });
           setEpisodes(sortedEps);
-          if (tap === 'moi-nhat') { router.replace(`/xem/${slug}/${sortedEps[0]?.episode_number}`); return; }
-          setCurrentEpData(sortedEps.find(e => e.episode_number === tap) || sortedEps[0]);
+          if (initialTap === 'moi-nhat') { 
+            router.replace(`/xem/${slug}/${sortedEps[0]?.episode_number}`); 
+            return; 
+          }
+          // Set dữ liệu tập lần đầu tải trang
+          const firstEp = sortedEps.find(e => e.episode_number === initialTap) || sortedEps[0];
+          setCurrentEpData(firstEp);
+          setActiveTap(firstEp.episode_number);
         }
 
         const { data: cmts } = await supabase.from('comments').select('*').eq('movie_id', mov.id).order('created_at', { ascending: false });
@@ -70,12 +79,12 @@ export default function PlayerPage() {
       } catch (error) { console.error("Lỗi:", error); } finally { setLoading(false); }
     };
     fetchData();
-  }, [slug, tap, router]);
+  }, [slug, initialTap, router]);
 
-  // 🔥 THUẬT TOÁN SEO ĐỘNG (OPEN GRAPH) - Tự sinh tiêu đề & Ảnh khi Share FB/Zalo
+  // 🔥 THUẬT TOÁN SEO ĐỘNG (Cập nhật dùng activeTap thay vì tap ban đầu)
   useEffect(() => {
-    if (movie) {
-      document.title = `${movie.title} - Tập ${tap} Vietsub | XEMPHIMHH3D`;
+    if (movie && activeTap) {
+      document.title = `${movie.title} - Tập ${activeTap} Vietsub | XEMPHIMHH3D`;
       
       const setMetaTag = (property: string, content: string) => {
         let meta = document.querySelector(`meta[property="${property}"]`);
@@ -87,13 +96,13 @@ export default function PlayerPage() {
         meta.setAttribute('content', content);
       };
 
-      setMetaTag('og:title', `Phim ${movie.title} Tập ${tap} Vietsub`);
+      setMetaTag('og:title', `Phim ${movie.title} Tập ${activeTap} Vietsub`);
       setMetaTag('og:description', `Xem phim ${movie.title} thuộc thể loại ${movie.genre}. Chất lượng siêu nét không quảng cáo tại XEMPHIMHH3D.`);
       setMetaTag('og:image', movie.thumbnail_url);
       setMetaTag('og:url', window.location.href);
       setMetaTag('og:type', 'video.movie');
     }
-  }, [movie, tap]);
+  }, [movie, activeTap]);
 
   const handleAction = (callback: () => void) => { runMMO(aff); callback(); };
   
@@ -125,6 +134,19 @@ export default function PlayerPage() {
     setIsSubmitting(false);
   };
 
+  // 🔥 HÀM ĐỔI TẬP PHIM SIÊU TỐC KHÔNG RELOAD TRANG
+  const handleChangeEpisode = (ep: any) => {
+    handleAction(() => {
+      // 1. Chỉ đổi đúng cục dữ liệu video đang phát
+      setCurrentEpData(ep);
+      setActiveTap(ep.episode_number);
+      setActiveServer(1); // Ưu tiên trả về Server 1 khi đổi tập mới
+
+      // 2. Đổi URL trên trình duyệt ngầm (Giúp khách copy link chia sẻ vẫn chuẩn)
+      window.history.pushState(null, '', `/xem/${slug}/${ep.episode_number}`);
+    });
+  };
+
   if (loading) return <div className="text-center p-20 text-cyan-400 font-bold animate-pulse text-sm uppercase tracking-widest">🎬 Đang tải phim...</div>;
   if (!movie) return <div className="text-center p-20 text-red-500 font-bold text-lg uppercase">404 - Không tìm thấy phim</div>;
 
@@ -149,7 +171,7 @@ export default function PlayerPage() {
       <div className="lg:col-span-9 space-y-3">
         <div className="flex items-center gap-2 mb-1">
           <h1 className="text-lg lg:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 uppercase tracking-tighter">{movie?.title}</h1>
-          <span className="bg-red-600 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold text-white shadow-[0_0_10px_rgba(239,68,68,0.5)] whitespace-nowrap">Tập {tap}</span>
+          <span className="bg-red-600 px-2 py-0.5 rounded text-[10px] md:text-xs font-bold text-white shadow-[0_0_10px_rgba(239,68,68,0.5)] whitespace-nowrap">Tập {activeTap}</span>
         </div>
 
         <div className="relative aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border border-gray-800">
@@ -187,7 +209,11 @@ export default function PlayerPage() {
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 max-h-[250px] lg:max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
             {episodes.map(ep => (
-              <button key={ep?.id} onClick={() => handleAction(() => router.push(`/xem/${slug}/${ep?.episode_number}`))} className={`py-1.5 rounded font-black text-[10px] md:text-xs transition-all ${tap === ep?.episode_number ? 'bg-cyan-500 text-white shadow-[0_0_10px_rgba(34,211,238,0.5)] scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'}`}>
+              <button 
+                key={ep?.id} 
+                onClick={() => handleChangeEpisode(ep)} 
+                className={`py-1.5 rounded font-black text-[10px] md:text-xs transition-all ${activeTap === ep?.episode_number ? 'bg-cyan-500 text-white shadow-[0_0_10px_rgba(34,211,238,0.5)] scale-105' : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700'}`}
+              >
                 {ep?.episode_number}
               </button>
             ))}
@@ -216,7 +242,7 @@ export default function PlayerPage() {
         </div>
       </div>
 
-      {/* 💬 KHỐI 4: BÌNH LUẬN */}
+      {/* 💬 KHỐI 4: BÌNH LUẬN (GIỮ NGUYÊN) */}
       <div className="lg:col-span-9">
         <div className="bg-[#151720] p-4 lg:p-5 rounded-lg border border-gray-800 shadow-lg">
           <div className="flex items-center justify-between mb-5 border-b border-gray-800 pb-3">
